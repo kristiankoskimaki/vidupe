@@ -1,0 +1,289 @@
+#include "video.h"
+#include <QTextEdit>
+#include <QProcess>
+#include <QApplication>
+#include <QBuffer>
+
+ushort _jpegQuality = _okJpegQuality;
+
+Video::Video(QWidget &parent, const QString &userFilename, const int &numberOfVideos, const short &userThumbnails)
+{
+    mainWindow = &parent;
+    filename = userFilename;
+    videoAmount = numberOfVideos;
+    thumbnails = userThumbnails;
+
+    if(videoAmount > _hugeAmountVideos)       //save memory to avoid crash due to 32 bit limit
+        _jpegQuality = _lowJpegQuality;
+
+    QObject::connect(this, SIGNAL(rejectVideo(Video*)), mainWindow, SLOT(removeVideo(Video*)));
+    QObject::connect(this, SIGNAL(acceptVideo(QString)), mainWindow, SLOT(addVideo(QString)));
+    QObject::connect(this, SIGNAL(sendStatusMessage(QString)), mainWindow, SLOT(addStatusMessage(QString)));
+}
+
+void Video::run()
+{
+    if(!QFileInfo::exists(filename))
+    {
+        emit rejectVideo(this);
+        return;
+    }
+
+    getMetadata(filename);
+    if(width == 0 || height == 0)
+    {
+        emit rejectVideo(this);
+        return;
+    }
+
+    const ushort ret = takeScreenCaptures();
+    if(ret == _outOfMemory)
+        emit sendStatusMessage("ERROR: Out of memory");
+    else if(ret == _failure)
+        emit rejectVideo(this);
+    else if(hash == 0)                 //all screen captures black
+        emit rejectVideo(this);
+    else
+        emit acceptVideo(QString("[%1] %2").arg(QTime::currentTime().toString(), QDir::toNativeSeparators(filename)));
+}
+
+void Video::getMetadata(const QString &filename)
+{
+    QProcess probe;
+    probe.setProcessChannelMode(QProcess::MergedChannels);
+    probe.start(QString("ffmpeg -hide_banner -i \"%1\"").arg(QDir::toNativeSeparators(filename)));
+    probe.waitForFinished();
+    QApplication::processEvents();
+
+    bool rotatedOnce = false;
+    const QString analysis(probe.readAllStandardOutput());
+    const QStringList analysisLines = analysis.split("\r\n");
+    for(int i=0; i<analysisLines.length(); i++)
+    {
+        QString line = analysisLines.value(i);
+        if(line.contains(" Duration:"))
+        {
+            const QString time = line.split(" ").value(3);
+            if(time == "N/A,")
+                duration = 0;
+            else
+            {
+                const int h  = time.midRef(0,2).toInt();
+                const int m  = time.midRef(3,2).toInt();
+                const int s  = time.midRef(6,2).toInt();
+                const int ms = time.midRef(9,2).toInt();
+                duration = h*60*60*1000 + m*60*1000 + s*1000 + ms*10;
+            }
+            bitrate = line.split("bitrate: ").value(1).split(" ").value(0).toUInt();
+        }
+        if(line.contains(" Video:"))
+        {
+            line = line.replace(QRegExp("\\([^\\)]+\\)"), "");
+            const QString streamName = line.split(" ").value(7).replace(",", "");
+
+            bool isVideoStream = true;            //check whether video stream or cover image
+            if(streamName == "png" || streamName == "mjpeg")
+            {
+                isVideoStream = false;
+                if(line.contains("kb/s") || line.contains(" fps"))
+                    isVideoStream = true;
+            }
+            if(isVideoStream)
+            {
+                codec = streamName;
+                const QString resolution = line.split(",").value(2);
+                width = static_cast<ushort>(resolution.split("x").value(0).toInt());
+                height = static_cast<ushort>(resolution.split("x").value(1).split(" ").value(0).toInt());
+            }
+            const QStringList fields = line.split(",");
+            for(int j=0; j<fields.length(); j++)
+            {
+                if(fields.at(j).contains("fps"))
+                {
+                    QString fps = fields.at(j);
+                    framerate = fps.remove("fps").toDouble();
+                    framerate = round(framerate * 10) / 10;     //round to one decimal point
+                }
+            }
+        }
+        if(line.contains(" Audio:"))
+        {
+            const QString audioCodec = line.split(" ").value(7);
+            const QString rate = line.split(",").value(1);
+            QString channels = line.split(",").value(2);
+            if(channels == " 1 channels")
+                channels = " mono";
+            else if(channels == " 2 channels")
+                channels = " stereo";
+            audio = QString("%1%2%3").arg(audioCodec, rate, channels);
+            const QString kbps = line.split(",").value(4).split("kb/s").value(0);
+            if(kbps != "")
+                audio = QString("%1%2kb/s").arg(audio, kbps);
+        }
+        if(line.contains("rotate") && !rotatedOnce)
+        {
+            const int rotate = line.split(":").value(1).toInt();
+            if(rotate == 90 || rotate == 270)
+            {
+                const ushort temp = width;
+                width = height;
+                height = temp;
+            }
+            rotatedOnce = true;     //rotate only once (AUDIO metadata can contain rotate keyword)
+        }
+    }
+
+    const QFileInfo videoFile(filename);
+    size = videoFile.size();
+    modified = videoFile.lastModified();
+}
+
+QString Video::reencodeVideo(const QTemporaryDir &tempDir, int &reencodeStatus)
+{
+    const QString filenameReencoded = QString("%1/reencoded%2").arg(tempDir.path(),
+                  filename.split(filename.left(filename.lastIndexOf("."))).value(1));
+
+    QProcess encode;
+    encode.setProcessChannelMode(QProcess::MergedChannels);
+    encode.start(QString("ffmpeg -i \"%1\" -acodec copy -vcodec copy -map_metadata -1 \"%2\"").
+                 arg(QDir::toNativeSeparators(filename), QDir::toNativeSeparators(filenameReencoded)));
+    encode.waitForFinished();
+    QApplication::processEvents();
+
+    if(!QFileInfo::exists(filenameReencoded))
+    {
+        reencodeStatus = _reencodingFailed;
+        return filenameReencoded;
+    }
+    const QFileInfo newFile(filenameReencoded);
+    const QFileInfo oldFile(filename);
+    if(static_cast<double>(newFile.size()) / static_cast<double>(oldFile.size()) > _smallestReencoded)
+        getMetadata(filenameReencoded);          //hopefully metadata is correct now
+
+    reencodeStatus = _reencoded;
+    return filenameReencoded;
+}
+
+ushort Video::takeScreenCaptures()
+{
+    const int mergedScreenSize = width * height * _BPP * thumbnails;
+    uchar *mergedScreenCapture;
+    try {
+        mergedScreenCapture = new uchar[mergedScreenSize];
+    }
+    catch (std::bad_alloc &ex) {
+        Q_UNUSED (ex);
+        return _outOfMemory;
+    }
+    ushort mergedWidth, mergedHeight;
+    setMergedWidthAndHeight(mergedWidth, mergedHeight);
+
+    const QTemporaryDir tempDir;
+    if(!tempDir.isValid())
+        return _failure;
+
+    int reencodeStatus = _notReencoded;
+    QString filenameReencoded;
+    if(bitrate > _ridiculousBitrate && size < _reencodeMaxSize)      //impossible bitrate: video is damaged
+        filenameReencoded = reencodeVideo(tempDir, reencodeStatus);
+
+    double ofDuration = 1.0;
+    const ushort skipPercent = getSkipPercent();
+    //screen captures are taken starting at the end (any errors are likely there)
+    for(short percent=100-static_cast<short>(skipPercent); percent>0; percent-=skipPercent)
+    {
+        const QString videoFilename = reencodeStatus == _reencoded? filenameReencoded : filename;
+
+        const QImage img = captureAt(videoFilename, tempDir, percent, ofDuration);
+        //taking a screen capture may fail if video is broken (botched encoding, failed download)
+        if(img.isNull())
+        {
+            if(reencodeStatus == _notReencoded && size < _reencodeMaxSize)      //try re-encoding first
+            {
+                filenameReencoded = reencodeVideo(tempDir, reencodeStatus);
+                percent = 100;
+                continue;
+            }
+            if(ofDuration >= _videoStillUsable)     //retry a few times, always starting closer to beginning
+            {
+                ofDuration = ofDuration - _goBackwardsPercent;
+                percent = 100;
+                continue;
+            }
+
+            delete[] mergedScreenCapture;       //video is mostly garbage or seeking impossible, skip it
+            return _failure;
+        }
+
+        const int mergedOrigin = calculateOrigin(percent);
+        for(int line=0; line<img.height(); line++)
+        {
+            const int writeLineTo = mergedOrigin + line * mergedWidth * _BPP;
+            const int lineBytes = img.width() * _BPP;
+            if(writeLineTo + lineBytes > mergedScreenSize)      //any crash is likely to happen here
+            {                                                   //due to reading wrong width/height values
+                emit sendStatusMessage(QString("ERROR: Buffer overflow prevented in %1 (%2x%3, expected %4x%5)").
+                                       arg(QDir::toNativeSeparators(filename)).
+                                       arg(img.width(), img.height()).arg(width, height));
+                delete[] mergedScreenCapture;
+                return _failure;
+            }
+            memcpy(mergedScreenCapture + writeLineTo, img.constScanLine(line), static_cast<size_t>(img.width()) * _BPP);
+        }
+    }
+
+    //the thumbnail is saved in the video object so it can be instantly loaded in GUI,
+    //but resized small to save memory (there may be thousands of files)
+    QImage smallImage = QImage(mergedScreenCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
+
+    if(mergedWidth >= mergedHeight)
+    {
+        if(mergedWidth > _thumbnailMaxWidth)
+            smallImage = smallImage.scaledToWidth(_thumbnailMaxWidth, Qt::SmoothTransformation);
+    }
+    else if(mergedHeight > _thumbnailMaxHeight)
+        smallImage = smallImage.scaledToHeight(_thumbnailMaxHeight, Qt::SmoothTransformation);
+
+    QBuffer buffer(&thumbnail);
+    smallImage.save(&buffer, "JPG", _jpegQuality);
+    thumbnail = qCompress(thumbnail, _zlibCompression);
+
+    calculateHash(mergedScreenCapture, mergedWidth, mergedHeight);
+
+    using namespace cv;
+    QImage ssim = QImage(mergedScreenCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
+    ssim = ssim.rgbSwapped();   //OpenCV uses BGR instead of RGB
+    Mat mat = Mat( ssim.height(), ssim.width(), CV_8UC3, const_cast<uchar *>(ssim.bits()),
+                   static_cast<size_t>(ssim.bytesPerLine()) ).clone();
+    resize(mat, mat, Size(16, 16), 0, 0, INTER_AREA);   //16x16 seems to suffice, larger size has slower comparison
+    cvtColor(mat, grayThumb, CV_BGR2GRAY);
+    grayThumb.convertTo(grayThumb, CV_64F);
+
+    if(reencodeStatus != _notReencoded)
+        needsReencoding = true;
+    delete[] mergedScreenCapture;
+    return _success;
+}
+
+QImage Video::captureAt(const QString &filename, const QTemporaryDir &tempDir, const short &percent, const double &ofDuration)
+{
+    const QString screenshot = QString("%1/vidupe%2.png").arg(tempDir.path()).arg(percent);
+    QFile::remove(screenshot);      //should not happen, but if capture fails, make sure an old one is not used
+
+    int voidStatus;     //need a parameter but don't care about status if takeCaptureAt called as public method
+    const QString videoFilename = needsReencoding? reencodeVideo(tempDir, voidStatus) : filename;
+
+    QProcess ffmpeg;
+    ffmpeg.setProcessChannelMode(QProcess::MergedChannels);
+    const QString ffmpegCommand = QString("ffmpeg.exe -ss %1 -i \"%2\" -an -vframes 1 -c:v png -pix_fmt rgb24 %3").
+            arg(msToHHMSS(static_cast<qint64>( percent * ofDuration * duration / 100) ),
+                QDir::toNativeSeparators(videoFilename), QDir::toNativeSeparators(screenshot));
+    ffmpeg.start(ffmpegCommand);
+    ffmpeg.waitForFinished();
+    QApplication::processEvents();
+
+    QImage img(screenshot, "PNG");
+    img = img.convertToFormat(QImage::Format_RGB888);
+    QFile::remove(screenshot);
+    return img;
+}
