@@ -68,3 +68,6 @@ Trust your eyes, watch both videos in a video player before deleting.
 Vidupe Copyright (C) 2018, 2019 Kristian Koskimäki
 Vidupe is a free software distributed under the GNU GPL.
 Read LICENSE.txt for more information.
+
+![](http://i68.tinypic.com/ei8jza.jpg)
+![](http://i64.tinypic.com/fy1ycw.jpg)
