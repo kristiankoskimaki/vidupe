@@ -216,18 +216,18 @@ ushort Video::takeScreenCaptures()
         }
 
         const int mergedOrigin = calculateOrigin(percent);
-        for(int line=0; line<img.height(); line++)
+        if(mergedOrigin + (img.height()-1) * mergedWidth * _BPP + img.width() * _BPP > mergedScreenSize)
+        {   //prevent crash if screen capture has larger dimensions than buffer size
+            emit sendStatusMessage(QString("ERROR: Buffer overflow prevented in %1 (%2x%3, expected %4x%5)").
+                                   arg(QDir::toNativeSeparators(filename)).
+                                   arg(img.width()).arg(img.height()).arg(width).arg(height));
+            delete[] mergedScreenCapture;
+            return _failure;
+        }
+
+        for(int line=0; line<img.height(); line++)  //write screen capture line by line into thumbnail
         {
             const int writeLineTo = mergedOrigin + line * mergedWidth * _BPP;
-            const int lineBytes = img.width() * _BPP;
-            if(writeLineTo + lineBytes > mergedScreenSize)      //any crash is likely to happen here
-            {                                                   //due to reading wrong width/height values
-                emit sendStatusMessage(QString("ERROR: Buffer overflow prevented in %1 (%2x%3, expected %4x%5)").
-                                       arg(QDir::toNativeSeparators(filename)).
-                                       arg(img.width(), img.height()).arg(width, height));
-                delete[] mergedScreenCapture;
-                return _failure;
-            }
             memcpy(mergedScreenCapture + writeLineTo, img.constScanLine(line), static_cast<size_t>(img.width()) * _BPP);
         }
     }
