@@ -2,7 +2,6 @@
 #include "ui_comparison.h"
 #include <QBuffer>
 #include <QProcess>
-#include <QDesktopServices>
 #include <QMessageBox>
 #include <QTextEdit>
 #include <QWheelEvent>
@@ -409,18 +408,6 @@ void Comparison::updateProgressbar(bool alsoReport) const
         emit sendStatusMessage(results);
     }
     QApplication::restoreOverrideCursor();
-}
-
-//clicking on image launches video in associated media player
-void Comparison::on_leftImage_clicked() const
-{
-    const QString filename = QString("file:/%1").arg(_videos[_leftVideo]->filename);
-    QDesktopServices::openUrl(QUrl(filename, QUrl::TolerantMode));
-}
-void Comparison::on_rightImage_clicked() const
-{
-    const QString filename = QString("file:/%1").arg(_videos[_rightVideo]->filename);
-    QDesktopServices::openUrl(QUrl(filename, QUrl::TolerantMode));
 }
 
 //clicking on filename opens folder with file selected

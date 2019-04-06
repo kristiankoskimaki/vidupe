@@ -2,6 +2,8 @@
 #define COMPARISON_H
 
 #include <QDialog>
+#include <QDesktopServices>
+#include <QUrl>
 #include "video.h"
 #include "prefs.h"
 
@@ -50,8 +52,8 @@ private slots:
 
     void on_selectPhash_clicked(const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._PHASH; }
     void on_selectSSIM_clicked(const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._SSIM; }
-    void on_leftImage_clicked() const;
-    void on_rightImage_clicked() const;
+    void on_leftImage_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(_videos[_leftVideo]->filename)); }
+    void on_rightImage_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(_videos[_rightVideo]->filename)); }
     void on_leftFileName_clicked() const;
     void on_rightFileName_clicked() const;
     void on_leftDelete_clicked();
