@@ -23,8 +23,7 @@ Comparison::Comparison(QVector<Video *> &userVideos, Prefs &userPrefs, QWidget &
     ui->thresholdSlider->setValue(64 - _prefs._thresholdPhash);
 
     updateProgressbar(true);
-
-    ui->nextVideo->click();
+    on_nextVideo_clicked();
 }
 
 Comparison::~Comparison()
@@ -37,6 +36,7 @@ Comparison::~Comparison()
 
 void Comparison::on_prevVideo_clicked()
 {
+    _seekForwards = false;
     const int numberOfVideos = _videos.count();
     int right = _rightVideo - 1;                //click prev button: start at current videos,
     for(int left=_leftVideo; left>=0; left--)   //go backwards and compare each combination
@@ -65,6 +65,7 @@ void Comparison::on_prevVideo_clicked()
 
 void Comparison::on_nextVideo_clicked()
 {
+    _seekForwards = true;
     const int oldLeft = _leftVideo;
     const int oldRight = _rightVideo;
 
@@ -455,7 +456,7 @@ void Comparison::on_leftDelete_clicked()
     {
         _leftVideo++;
         _rightVideo = _leftVideo;
-        ui->nextVideo->click();
+        _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
         return;
     }
 
@@ -481,7 +482,7 @@ void Comparison::on_leftDelete_clicked()
 
             _leftVideo++;
             _rightVideo = _leftVideo;
-            ui->nextVideo->click();
+            _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
             updateProgressbar();
         }
     }
@@ -492,7 +493,7 @@ void Comparison::on_rightDelete_clicked()
     //right side video was already manually deleted, skip to next
     if(!QFileInfo::exists(_videos[_rightVideo]->filename))
     {
-        ui->nextVideo->click();
+        _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
         return;
     }
 
@@ -514,7 +515,7 @@ void Comparison::on_rightDelete_clicked()
             _videosDeleted++;
             _spaceSaved = _spaceSaved + _videos[_rightVideo]->size;
             emit sendStatusMessage(QString("Deleted %1").arg(QDir::toNativeSeparators(_videos[_rightVideo]->filename)));
-            ui->nextVideo->click();
+            _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
             updateProgressbar();
         }
     }
@@ -527,7 +528,7 @@ void Comparison::on_leftMove_clicked()
     {
         _leftVideo++;
         _rightVideo = _leftVideo;
-        ui->nextVideo->click();
+        _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
         return;
     }
 
@@ -551,7 +552,7 @@ void Comparison::on_leftMove_clicked()
                                                                  ui->rightPathName->text()));
             _leftVideo++;
             _rightVideo = _leftVideo;
-            ui->nextVideo->click();
+            _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
             updateProgressbar();
         }
     }
@@ -562,7 +563,7 @@ void Comparison::on_rightMove_clicked()
     //right side video was already manually deleted, skip to next
     if(!QFileInfo::exists(_videos[_rightVideo]->filename))
     {
-        ui->nextVideo->click();
+        _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
         return;
     }
 
@@ -584,7 +585,7 @@ void Comparison::on_rightMove_clicked()
         {
             emit sendStatusMessage(QString("Moved %1 to %2").arg(QDir::toNativeSeparators(_videos[_rightVideo]->filename),
                                                                  ui->leftPathName->text()));
-            ui->nextVideo->click();
+            _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
             updateProgressbar();
         }
     }

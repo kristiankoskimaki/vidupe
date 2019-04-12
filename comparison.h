@@ -27,6 +27,7 @@ public:
     int _rightVideo = 0;
     uint _videosDeleted = 0;
     qint64 _spaceSaved = 0;
+    bool _seekForwards = true;
 
     int _zoomLevel = 0;
     QPixmap _leftZoomed;
