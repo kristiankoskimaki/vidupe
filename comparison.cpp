@@ -647,8 +647,8 @@ void Comparison::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
 
-    if(_leftVideo >= _videos.count() || _rightVideo >= _videos.count())     //automatic initial resize event can happen
-        return;                                                             //before closing when values went over limit
+    if(ui->leftFileName->text() == "" || _leftVideo >= _videos.count() || _rightVideo >= _videos.count())
+        return;     //automatic initial resize event can happen before closing when values went over limit
 
     QByteArray uncompressed;
     QImage image;
