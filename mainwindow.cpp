@@ -54,7 +54,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->processedFiles->setVisible(false);
     ui->progressBar->setVisible(false);
-    ui->statusBar->setVisible(false);
     ui->mainToolBar->setVisible(false);
 }
 
@@ -244,6 +243,7 @@ void MainWindow::findVideos(QDir &dir, QStringList &everyVideo) const
         }
         if(!alreadyAdded)
             everyVideo << filename;
+        ui->statusBar->showMessage(QString("%1").arg(QDir::toNativeSeparators(filename)), 10);
         QApplication::processEvents();
     }
 }
