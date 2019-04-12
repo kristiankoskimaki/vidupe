@@ -94,13 +94,14 @@ void Comparison::on_nextVideo_clicked()
     _leftVideo = oldLeft;       //went over limit, go back
     _rightVideo = oldRight;
 
+    this->show();   //no results: just close window if only a few videos, otherwise ask first
     QMessageBox::StandardButton confirm = QMessageBox::Yes;
-    if(ui->leftFileName->text() != "")  //no results, close window automatically
+    if(ui->leftFileName->text() != "" || numberOfVideos > 500)
     {
         const QString askEnd = QString("Close window?\n(comparison results will be discarded)");
         confirm = QMessageBox::question(this, "Out of videos to compare", askEnd, QMessageBox::Yes|QMessageBox::No);
     }
-    if(confirm == QMessageBox::Yes)
+    if(confirm == QMessageBox::Yes || numberOfVideos < 500)
     {
         QKeyEvent *closeEvent = new QKeyEvent(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
         QApplication::postEvent(this, dynamic_cast<QEvent *>(closeEvent));  //"pressing" ESC closes dialog
