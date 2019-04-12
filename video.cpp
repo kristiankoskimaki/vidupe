@@ -184,9 +184,6 @@ ushort Video::takeScreenCaptures()
 
     int reencodeStatus = _notReencoded;
     QString filenameReencoded;
-    if(bitrate > _ridiculousBitrate && size < _reencodeMaxSize)      //impossible bitrate: video is damaged
-        filenameReencoded = reencodeVideo(tempDir, reencodeStatus);
-
     double ofDuration = 1.0;
     const ushort skipPercent = getSkipPercent();
     //screen captures are taken starting at the end (any errors are likely there)

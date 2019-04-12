@@ -16,7 +16,6 @@ const ushort _failure     = 1;
 const ushort _retry       = 2;
 const ushort _outOfMemory = 3;
 
-const uint   _ridiculousBitrate  = 25000;       //no video could be this big
 const uint   _reencodeMaxSize    = 50000000;    //broken videos (50 Mb or less) will be re-encoded
 const double _smallestReencoded  = 0.10;        //re-encoded file cannot be <10% of original size
 const double _goBackwardsPercent = 0.07;        //if capture fails, retry but omit this much from ending...
