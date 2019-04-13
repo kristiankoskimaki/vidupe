@@ -101,7 +101,7 @@ void Comparison::on_nextVideo_clicked()
         const QString askEnd = QString("Close window?\n(comparison results will be discarded)");
         confirm = QMessageBox::question(this, "Out of videos to compare", askEnd, QMessageBox::Yes|QMessageBox::No);
     }
-    if(confirm == QMessageBox::Yes || numberOfVideos < 500)
+    if((ui->leftFileName->text() == "" && numberOfVideos < 500) || confirm == QMessageBox::Yes)
     {
         QKeyEvent *closeEvent = new QKeyEvent(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
         QApplication::postEvent(this, dynamic_cast<QEvent *>(closeEvent));  //"pressing" ESC closes dialog
