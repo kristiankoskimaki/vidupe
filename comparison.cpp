@@ -670,8 +670,18 @@ void Comparison::resizeEvent(QResizeEvent *event)
 void Comparison::wheelEvent(QWheelEvent *event)
 {
     const QPoint pos = QCursor::pos();
-    if(QApplication::widgetAt(pos)->objectName() != "leftImage" && QApplication::widgetAt(pos)->objectName() != "rightImage")
+    ClickableLabel *imagePtr;
+    if(QApplication::widgetAt(pos)->objectName() == "leftImage")
+        imagePtr = ui->leftImage;
+    else if(QApplication::widgetAt(pos)->objectName() == "rightImage")
+        imagePtr = ui->rightImage;
+    else
         return;
+
+    const int wmax = imagePtr->mapToGlobal(QPoint(0, 0)).x() + imagePtr->width();     //image right edge pixel on screen
+    const int hmax = imagePtr->mapToGlobal(QPoint(0, 0)).y() + imagePtr->height();    //image bottom edge pixel on screen
+    const double ratiox = 1-static_cast<double>(wmax-pos.x()) / imagePtr->width();    //cursor relative to image [0,0]-[w,h]
+    const double ratioy = 1-static_cast<double>(hmax-pos.y()) / imagePtr->height();   //eg. 0.8x/0.15y is close to top right corner
 
     if(_zoomLevel == 0)     //first mouse wheel movement: retrieve actual screen captures in full resolution
     {
@@ -704,11 +714,15 @@ void Comparison::wheelEvent(QWheelEvent *event)
         _zoomLevel = _zoomLevel / 2;
 
     QPixmap pix;
-    pix = _leftZoomed.copy(_leftW/_zoomLevel, _leftH/_zoomLevel, _leftW/_zoomLevel, _leftH/_zoomLevel);
+    pix = _leftZoomed.copy(static_cast<int>(_leftW*ratiox-_leftW*ratiox/_zoomLevel),
+                           static_cast<int>(_leftH*ratioy-_leftH*ratioy/_zoomLevel),
+                           _leftW/_zoomLevel, _leftH/_zoomLevel);
     ui->leftImage->setPixmap(pix.scaled(ui->leftImage->width(), ui->leftImage->height(),
-                                        Qt::IgnoreAspectRatio, Qt::FastTransformation));
+                                        Qt::KeepAspectRatio, Qt::FastTransformation));
 
-    pix = _rightZoomed.copy(_rightW/_zoomLevel, _rightH/_zoomLevel, _rightW/_zoomLevel, _rightH/_zoomLevel);
+    pix = _rightZoomed.copy(static_cast<int>(_rightW*ratiox-_rightW*ratiox/_zoomLevel),
+                           static_cast<int>(_rightH*ratioy-_rightH*ratioy/_zoomLevel),
+                           _rightW/_zoomLevel, _rightH/_zoomLevel);
     ui->rightImage->setPixmap(pix.scaled(ui->rightImage->width(), ui->rightImage->height(),
-                                         Qt::IgnoreAspectRatio, Qt::FastTransformation));
+                                         Qt::KeepAspectRatio, Qt::FastTransformation));
 }
