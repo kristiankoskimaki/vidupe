@@ -678,10 +678,13 @@ void Comparison::wheelEvent(QWheelEvent *event)
     else
         return;
 
-    const int wmax = imagePtr->mapToGlobal(QPoint(0, 0)).x() + imagePtr->width();     //image right edge pixel on screen
-    const int hmax = imagePtr->mapToGlobal(QPoint(0, 0)).y() + imagePtr->height();    //image bottom edge pixel on screen
-    const double ratiox = 1-static_cast<double>(wmax-pos.x()) / imagePtr->width();    //cursor relative to image [0,0]-[w,h]
-    const double ratioy = 1-static_cast<double>(hmax-pos.y()) / imagePtr->height();   //eg. 0.8x/0.15y is close to top right corner
+    const int wmax = imagePtr->mapToGlobal(QPoint(imagePtr->pixmap()->width(), 0)).x();         //image right edge
+    const int hmax = imagePtr->mapToGlobal(QPoint(0, imagePtr->pixmap()->height())).y();        //image bottom edge
+    const double ratiox = 1-static_cast<double>(wmax-pos.x()) / imagePtr->pixmap()->width();    //mouse pos inside image
+    const double ratioy = 1-static_cast<double>(hmax-pos.y()) / imagePtr->pixmap()->height();
+
+    if(pos.x() > wmax || pos.y() > hmax)    //mouse is on label, but image is smaller than that
+        return;
 
     if(_zoomLevel == 0)     //first mouse wheel movement: retrieve actual screen captures in full resolution
     {
