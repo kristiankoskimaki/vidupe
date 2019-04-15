@@ -95,11 +95,16 @@ void Comparison::on_nextVideo_clicked()
     _rightVideo = oldRight;
 
     this->show();   //no results: just close window if only a few videos, otherwise ask first
-    QMessageBox::StandardButton confirm = QMessageBox::Yes;
+    int confirm = QMessageBox::Yes;
     if(ui->leftFileName->text() != "" || numberOfVideos > 500)
     {
-        const QString askEnd = QString("Close window?\n(comparison results will be discarded)");
-        confirm = QMessageBox::question(this, "Out of videos to compare", askEnd, QMessageBox::Yes|QMessageBox::No);
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Out of videos to compare");
+        msgBox.setText("Close window?\n(comparison results will be discarded)");
+        msgBox.setIcon(QMessageBox::QMessageBox::Question);
+        msgBox.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        confirm = msgBox.exec();
     }
     if((ui->leftFileName->text() == "" && numberOfVideos < 500) || confirm == QMessageBox::Yes)
     {
