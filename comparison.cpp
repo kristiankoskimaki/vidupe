@@ -22,7 +22,7 @@ Comparison::Comparison(QVector<Video *> &userVideos, Prefs &userPrefs, QWidget &
     _prefs._thresholdPhashOriginal = _prefs._thresholdPhash;
     ui->thresholdSlider->setValue(64 - _prefs._thresholdPhash);
 
-    updateProgressbar(true);
+    ui->progressBar->setMaximum(_videos.count() * (_videos.count() - 1) / 2);
     on_nextVideo_clicked();
 }
 
@@ -44,7 +44,6 @@ void Comparison::on_prevVideo_clicked()
         {
             if(bothVideosMatch(_leftVideo, _rightVideo))
             {
-                ui->progressBar->setValue(ui->progressBar->value() - 1);
                 if(QFileInfo::exists(_videos[_leftVideo]->filename) &&
                    QFileInfo::exists(_videos[_rightVideo]->filename))
                 {
@@ -60,7 +59,6 @@ void Comparison::on_prevVideo_clicked()
     }
 
     on_nextVideo_clicked();     //went over limit, go forwards until first match
-    ui->progressBar->setValue(ui->progressBar->value() - 1);    //since nextVideo increased it
 }
 
 void Comparison::on_nextVideo_clicked()
@@ -76,7 +74,6 @@ void Comparison::on_nextVideo_clicked()
         {
             if(bothVideosMatch(_leftVideo, _rightVideo))
             {
-                ui->progressBar->setValue(ui->progressBar->value() + 1);
                 if(QFileInfo::exists(_videos[_leftVideo]->filename) &&
                    QFileInfo::exists(_videos[_rightVideo]->filename))
                 {
@@ -349,6 +346,7 @@ void Comparison::updateUI()
     }
 
     _zoomLevel = 0;
+    ui->progressBar->setValue(comparisonsSoFar());
 }
 
 void Comparison::updateProgressbar(bool alsoReport) const
@@ -415,6 +413,15 @@ void Comparison::updateProgressbar(bool alsoReport) const
         emit sendStatusMessage(results);
     }
     QApplication::restoreOverrideCursor();
+}
+
+int Comparison::comparisonsSoFar() const
+{
+    const int cmpFirst = _videos.count();                           //comparisons done for first video
+    const int cmpThis = cmpFirst - _leftVideo;                      //comparisons done for current video
+    const int remaining = cmpThis * (cmpThis - 1) / 2;              //comparisons for remaining videos
+    const int maxComparisons = cmpFirst * (cmpFirst - 1) / 2;       //comparing all videos with each other
+    return maxComparisons - remaining + _rightVideo - _leftVideo;
 }
 
 //clicking on filename opens folder with file selected
@@ -489,7 +496,6 @@ void Comparison::on_leftDelete_clicked()
             _leftVideo++;
             _rightVideo = _leftVideo;
             _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
-            updateProgressbar();
         }
     }
 }
@@ -522,7 +528,6 @@ void Comparison::on_rightDelete_clicked()
             _spaceSaved = _spaceSaved + _videos[_rightVideo]->size;
             emit sendStatusMessage(QString("Deleted %1").arg(QDir::toNativeSeparators(_videos[_rightVideo]->filename)));
             _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
-            updateProgressbar();
         }
     }
 }
@@ -559,7 +564,6 @@ void Comparison::on_leftMove_clicked()
             _leftVideo++;
             _rightVideo = _leftVideo;
             _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
-            updateProgressbar();
         }
     }
 }
@@ -592,7 +596,6 @@ void Comparison::on_rightMove_clicked()
             emit sendStatusMessage(QString("Moved %1 to %2").arg(QDir::toNativeSeparators(_videos[_rightVideo]->filename),
                                                                  ui->leftPathName->text()));
             _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
-            updateProgressbar();
         }
     }
 }
@@ -645,7 +648,6 @@ void Comparison::on_thresholdSlider_valueChanged(const int &value)
     {
         _prefs._thresholdPhash = static_cast<short>(64 - value);
         _prefs._thresholdSSIM = static_cast<double>(value) / 64;
-        updateProgressbar();
     }
 }
 

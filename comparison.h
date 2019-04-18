@@ -50,6 +50,7 @@ private slots:
     void highlightBetterProperties() const;
     void updateUI();
     void updateProgressbar(bool alsoReport = false) const;
+    int comparisonsSoFar() const;
 
     void on_selectPhash_clicked(const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._PHASH; }
     void on_selectSSIM_clicked(const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._SSIM; }
