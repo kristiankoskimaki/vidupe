@@ -24,6 +24,8 @@ public:
     QStringList _extensionList;
     Prefs _prefs;
     bool _userPressedStop = false;
+    QString _previousRunFolders = "";
+    short _previousRunThumbnails = 0;
 
 private slots:
     void deleteTemporaryFiles() const;

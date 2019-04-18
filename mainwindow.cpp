@@ -190,39 +190,48 @@ void MainWindow::on_findDuplicates_clicked()
         _userPressedStop = false;
     }
 
-    ui->statusBox->append("\nStarting file search...");
-    ui->processedFiles->setVisible(false);
-    ui->progressBar->setVisible(false);
-
-    QStringList directories = ui->directoryBox->text().split(";");
-
-    //add all video files from entered paths to list
-    QStringList everyVideo;
-    for(int i=0; i<directories.length(); i++)
+    //search for new videos only if folder or thumbnail settings have changed
+    const QString foldersToSearch = ui->directoryBox->text();
+    if(foldersToSearch != _previousRunFolders || _prefs._thumbnails != _previousRunThumbnails)
     {
-        if(directories.value(i) != "")
+        for(int i=0; i<_videoList.count(); i++)     //new search: delete videos from previous search
+            delete _videoList[i];
+        _videoList.clear();
+
+        ui->statusBox->append("\nStarting file search...");
+        ui->processedFiles->setVisible(false);
+        ui->progressBar->setVisible(false);
+
+        //QStringList directories = ui->directoryBox->text().split(";");
+        QStringList directories = foldersToSearch.split(";");
+
+        //add all video files from entered paths to list
+        QStringList everyVideo;
+        for(int i=0; i<directories.length(); i++)
         {
-            QDir dir = directories.value(i).remove('"');
-            if(dir.exists())
-                findVideos(dir, everyVideo);
-            else
-                addStatusMessage(QString("Cannot find directory: %1").arg(QDir::toNativeSeparators(dir.path())));
+            if(directories.value(i) != "")
+            {
+                QDir dir = directories.value(i).remove('"');
+                if(dir.exists())
+                    findVideos(dir, everyVideo);
+                else
+                    addStatusMessage(QString("Cannot find directory: %1").arg(QDir::toNativeSeparators(dir.path())));
+            }
         }
+
+        ui->statusBox->append(QString("Found %1 video file(s):").arg(everyVideo.count()));
+        everyVideo.sort();
+        processVideos(everyVideo);
     }
 
-    ui->statusBox->append(QString("Found %1 video file(s):").arg(everyVideo.count()));
-    everyVideo.sort();
-
-    processVideos(everyVideo);
     if(_videoList.count() > 0)      //very last thing to do in this file: start the comparison
     {
         Comparison comparisonWnd(_videoList, _prefs, *this);
         comparisonWnd.exec();
     }
 
-    for(int i=0; i<_videoList.count(); i++)
-        delete _videoList[i];
-    _videoList.clear();
+    _previousRunFolders = foldersToSearch;
+    _previousRunThumbnails = _prefs._thumbnails;
     ui->findDuplicates->setText("Find duplicates");
 }
 
