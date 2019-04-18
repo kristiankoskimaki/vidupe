@@ -106,6 +106,9 @@ void Comparison::on_nextVideo_clicked()
     }
     if((ui->leftFileName->text() == "" && numberOfVideos < 500) || confirm == QMessageBox::Yes)
     {
+        if(ui->leftFileName->text() == "" && numberOfVideos < 500)
+            emit sendStatusMessage(QString("\nComparison window closed because no matching videos found "
+                                           "(a lower threshold may help to find more matches)"));
         QKeyEvent *closeEvent = new QKeyEvent(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
         QApplication::postEvent(this, dynamic_cast<QEvent *>(closeEvent));  //"pressing" ESC closes dialog
     }
