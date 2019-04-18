@@ -23,6 +23,7 @@ Comparison::Comparison(QVector<Video *> &userVideos, Prefs &userPrefs, QWidget &
     ui->thresholdSlider->setValue(64 - _prefs._thresholdPhash);
 
     ui->progressBar->setMaximum(_videos.count() * (_videos.count() - 1) / 2);
+    reportMatchingVideos();
     on_nextVideo_clicked();
 }
 
@@ -349,42 +350,30 @@ void Comparison::updateUI()
     ui->progressBar->setValue(comparisonsSoFar());
 }
 
-void Comparison::updateProgressbar(bool alsoReport) const
+void Comparison::reportMatchingVideos() const
 {
     const int numberOfVideos = _videos.count();
-    ui->progressBar->setMaximum(-1);
     if( (_prefs._ComparisonMode == _prefs._PHASH && numberOfVideos > 15000) ||
-        (_prefs._ComparisonMode == _prefs._SSIM && numberOfVideos > 7500) )
+        (_prefs._ComparisonMode == _prefs._SSIM && numberOfVideos > 6000) )
     {
-        emit sendStatusMessage("Progress bar disabled to avoid slowdown (too many videos to calculate)");
+        emit sendStatusMessage("Skipped counting number of matches (too many videos to calculate)");
         return;
     }
-    QApplication::setOverrideCursor(Qt::WaitCursor);
 
-    int permutations = 0;
-    int currentPosition = 0;
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    emit sendStatusMessage(QString("\n[%1] Counting match combinations (may take long time for many videos)")
+                           .arg(QTime::currentTime().toString()));
+
     QVector<int> knownMatches;
     qint64 combinedFilesize = 0;
-
-    if(alsoReport)
-    {
-        const QString str = QString("\n[%1] Counting match combinations (may take long time with many videos)")
-                            .arg(QTime::currentTime().toString());
-        emit sendStatusMessage(str);
-    }
-
     for(int left=0; left<numberOfVideos; left++)
     {
         int videosMatchingLeft = 0;
         for(int right=left+1; right<numberOfVideos; right++)
             if(bothVideosMatch(left, right))
             {
-                permutations++;
-                if(left == _leftVideo && right == _rightVideo)
-                    currentPosition = permutations;
-
                 videosMatchingLeft++;
-                if(alsoReport && videosMatchingLeft <= 1)
+                if(videosMatchingLeft <= 1)
                 {
                     bool alreadyFound = false;
                     for(int i=0; i<knownMatches.count(); i++)
@@ -400,18 +389,9 @@ void Comparison::updateProgressbar(bool alsoReport) const
             }
     }
 
-    if(permutations == 0)   //annoying flashing progress bar when slider dragged to minimum
-        ui->progressBar->setMaximum(-1);
-    else
-        ui->progressBar->setMaximum(permutations);
-    ui->progressBar->setValue(currentPosition);
-
-    if(alsoReport)
-    {
-        const QString results = QString("[%1] Found %2 video(s) (%3) with matches").arg(
-                      QTime::currentTime().toString()).arg(knownMatches.count()).arg(readableFileSize(combinedFilesize));
-        emit sendStatusMessage(results);
-    }
+    emit sendStatusMessage(QString("[%1] Found %2 video(s) (%3) with matches").
+                           arg(QTime::currentTime().toString()).arg(knownMatches.count()).
+                           arg(readableFileSize(combinedFilesize)));
     QApplication::restoreOverrideCursor();
 }
 
