@@ -37,20 +37,17 @@ Comparison::~Comparison()
 void Comparison::on_prevVideo_clicked()
 {
     _seekForwards = false;
-    const int numberOfVideos = _videos.count();
-    int right = _rightVideo - 1;                //click prev button: start at current videos,
-    for(int left=_leftVideo; left>=0; left--)   //go backwards and compare each combination
-    {                                           //until a match is found
-        for(; right>left; right--)
+    const int lastVideo = _videos.count() - 1;
+    for(_rightVideo--; _leftVideo>=0; _leftVideo--)     //rightVideo subtracted = start with previous video
+    {
+        for(; _rightVideo>_leftVideo; _rightVideo--)
         {
-            if(bothVideosMatch(left, right))
+            if(bothVideosMatch(_leftVideo, _rightVideo))
             {
                 ui->progressBar->setValue(ui->progressBar->value() - 1);
-                if(QFileInfo::exists(_videos[left]->filename) &&
-                   QFileInfo::exists(_videos[right]->filename))
+                if(QFileInfo::exists(_videos[_leftVideo]->filename) &&
+                   QFileInfo::exists(_videos[_rightVideo]->filename))
                 {
-                    _leftVideo = left;
-                    _rightVideo = right;
                     showVideo("left");
                     showVideo("right");
                     highlightBetterProperties();
@@ -59,8 +56,11 @@ void Comparison::on_prevVideo_clicked()
                 }
             }
         }
-        right = numberOfVideos - 1;
+        _rightVideo = lastVideo;
     }
+
+    on_nextVideo_clicked();     //went over limit, go forwards until first match
+    ui->progressBar->setValue(ui->progressBar->value() - 1);    //since nextVideo increased it
 }
 
 void Comparison::on_nextVideo_clicked()
