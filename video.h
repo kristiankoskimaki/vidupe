@@ -1,10 +1,7 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-#if defined(QT_DEBUG)
-    #include <QDebug>
-#endif
-
+#include <QDebug>
 #include <QRunnable>
 #include <QDateTime>
 #include <QImage>
