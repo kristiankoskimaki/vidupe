@@ -11,11 +11,10 @@ Comparison::Comparison(QVector<Video *> &userVideos, Prefs &userPrefs, QWidget &
 {
     _videos = userVideos;
     _prefs = userPrefs;
-    _mainWindow = &parent;
 
     ui->setupUi(this);
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
-    connect(this, SIGNAL(sendStatusMessage(QString)), _mainWindow, SLOT(addStatusMessage(QString)));
+    connect(this, SIGNAL(sendStatusMessage(QString)), &parent, SLOT(addStatusMessage(QString)));
 
     if(_prefs._ComparisonMode == _prefs._SSIM)
         ui->selectSSIM->setChecked(true);

@@ -22,7 +22,6 @@ public:
     ~Comparison();
     QVector<Video *> _videos;
     Prefs _prefs;
-    QWidget *_mainWindow = nullptr;
     int _leftVideo = 0;
     int _rightVideo = 0;
     uint _videosDeleted = 0;

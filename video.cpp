@@ -8,7 +8,6 @@ ushort _jpegQuality = _okJpegQuality;
 
 Video::Video(QWidget &parent, const QString &userFilename, const int &numberOfVideos, const short &userThumbnails)
 {
-    mainWindow = &parent;
     filename = userFilename;
     videoAmount = numberOfVideos;
     thumbnails = userThumbnails;
@@ -16,9 +15,9 @@ Video::Video(QWidget &parent, const QString &userFilename, const int &numberOfVi
     if(videoAmount > _hugeAmountVideos)       //save memory to avoid crash due to 32 bit limit
         _jpegQuality = _lowJpegQuality;
 
-    QObject::connect(this, SIGNAL(rejectVideo(Video*)), mainWindow, SLOT(removeVideo(Video*)));
-    QObject::connect(this, SIGNAL(acceptVideo(QString)), mainWindow, SLOT(addVideo(QString)));
-    QObject::connect(this, SIGNAL(sendStatusMessage(QString)), mainWindow, SLOT(addStatusMessage(QString)));
+    QObject::connect(this, SIGNAL(rejectVideo(Video*)), &parent, SLOT(removeVideo(Video*)));
+    QObject::connect(this, SIGNAL(acceptVideo(QString)), &parent, SLOT(addVideo(QString)));
+    QObject::connect(this, SIGNAL(sendStatusMessage(QString)), &parent, SLOT(addStatusMessage(QString)));
 }
 
 void Video::run()
