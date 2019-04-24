@@ -10,10 +10,9 @@ ushort _jpegQuality = _okJpegQuality;
 Video::Video(QWidget &parent, const QString &userFilename, const int &numberOfVideos, const short &userThumbnails)
 {
     filename = userFilename;
-    videoAmount = numberOfVideos;
     thumbnails = userThumbnails;
 
-    if(videoAmount > _hugeAmountVideos)       //save memory to avoid crash due to 32 bit limit
+    if(numberOfVideos > _hugeAmountVideos)       //save memory to avoid crash due to 32 bit limit
         _jpegQuality = _lowJpegQuality;
 
     QObject::connect(this, SIGNAL(rejectVideo(Video*)), &parent, SLOT(removeVideo(Video*)));

@@ -42,7 +42,6 @@ public:
     Video(QWidget &parent, const QString &userFilename, const int &numberOfVideos, const short &userThumbnails=2*2);
     void run() override;
 
-    int videoAmount = 0;
     short thumbnails = 2*2;
 
     QString filename = "";
