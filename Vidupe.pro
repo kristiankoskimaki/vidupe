@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui
+QT += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -29,6 +29,7 @@ SOURCES += \
     video.cpp \
     thumbnail.cpp \
     phash.cpp \
+    db.cpp \
     comparison.cpp \
     ssim.cpp
 
@@ -36,6 +37,7 @@ HEADERS += \
     mainwindow.h \
     prefs.h \
     video.h \
+    db.h \
     comparison.h \
     clickablelabel.h
 

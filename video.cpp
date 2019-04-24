@@ -1,4 +1,6 @@
 #include "video.h"
+#include "db.h"
+#include <QCryptographicHash>
 #include <QTextEdit>
 #include <QProcess>
 #include <QApplication>
@@ -28,11 +30,23 @@ void Video::run()
         return;
     }
 
-    getMetadata(filename);
-    if(width == 0 || height == 0)
+    const QFileInfo videoFile(filename);
+    modified = videoFile.lastModified();        //unique video id = md5 hash of filename+last modified time
+    const QString name_date = QString("%1_%2").arg(videoFile.fileName().toLower())
+                                              .arg(modified.toString("yyyy-MM-dd hh:mm:ss.zzz"));
+    const QString id = QString(QCryptographicHash::hash(name_date.toLatin1(), QCryptographicHash::Md5).toHex());
+
+    Db db(id);
+    if(!db.read(*this))                 //check first if video properties are cached
     {
-        emit rejectVideo(this);
-        return;
+        getMetadata(filename);          //if not, read them with ffmpeg
+        db.write(*this);
+
+        if(width == 0 || height == 0)
+        {
+            emit rejectVideo(this);
+            return;
+        }
     }
 
     const ushort ret = takeScreenCaptures();
