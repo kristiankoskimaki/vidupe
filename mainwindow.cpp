@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "comparison.h"
-#include <QApplication>
 #include <QTextStream>
 #include <QFileDialog>
 #include <QDirIterator>
@@ -280,8 +279,7 @@ void MainWindow::processVideos(const QStringList &everyVideo)
         }
         if(threadPool.activeThreadCount() == threadPool.maxThreadCount())
         {
-            QThread::msleep(10);        //avoid blocking signals in event loop, also responsive UI
-            QApplication::processEvents();
+            QApplication::processEvents();      //avoid blocking signals in event loop
             i--;
             continue;
         }

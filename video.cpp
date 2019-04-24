@@ -3,7 +3,6 @@
 #include <QCryptographicHash>
 #include <QTextEdit>
 #include <QProcess>
-#include <QApplication>
 #include <QBuffer>
 
 ushort _jpegQuality = _okJpegQuality;
@@ -66,7 +65,6 @@ void Video::getMetadata(const QString &filename)
     probe.setProcessChannelMode(QProcess::MergedChannels);
     probe.start(QString("ffmpeg -hide_banner -i \"%1\"").arg(QDir::toNativeSeparators(filename)));
     probe.waitForFinished();
-    QApplication::processEvents();
 
     bool rotatedOnce = false;
     const QString analysis(probe.readAllStandardOutput());
@@ -161,7 +159,6 @@ QString Video::reencodeVideo(const QTemporaryDir &tempDir, int &reencodeStatus)
     encode.start(QString("ffmpeg -i \"%1\" -acodec copy -vcodec copy -map_metadata -1 \"%2\"").
                  arg(QDir::toNativeSeparators(filename), QDir::toNativeSeparators(filenameReencoded)));
     encode.waitForFinished();
-    QApplication::processEvents();
 
     if(!QFileInfo::exists(filenameReencoded))
     {
@@ -290,7 +287,6 @@ QImage Video::captureAt(const QString &filename, const QTemporaryDir &tempDir, c
                 QDir::toNativeSeparators(videoFilename), QDir::toNativeSeparators(screenshot));
     ffmpeg.start(ffmpegCommand);
     ffmpeg.waitForFinished();
-    QApplication::processEvents();
 
     QImage img(screenshot, "PNG");
     img = img.convertToFormat(QImage::Format_RGB888);
