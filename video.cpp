@@ -39,12 +39,12 @@ void Video::run()
     {
         getMetadata(filename);          //if not, read them with ffmpeg
         db.write(*this);
+    }
 
-        if(width == 0 || height == 0)
-        {
-            emit rejectVideo(this);
-            return;
-        }
+    if(width == 0 || height == 0 || duration == 0)
+    {
+        emit rejectVideo(this);
+        return;
     }
 
     const ushort ret = takeScreenCaptures();
