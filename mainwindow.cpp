@@ -86,7 +86,7 @@ void MainWindow::dropEvent(QDropEvent *event)
 
 void MainWindow::loadExtensions()
 {
-    QFile file(QString("%1/extensions.ini").arg(QCoreApplication::applicationDirPath()));
+    QFile file(QString("%1/extensions.ini").arg(QApplication::applicationDirPath()));
     if(file.open(QIODevice::ReadOnly))
     {
         addStatusMessage("Supported file extensions:");
