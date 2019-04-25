@@ -70,7 +70,7 @@ private slots:
     int calculateOrigin(const short &percent) const;
 
     void calculateHash(uchar *mergedScreenCapture, ushort &mergedWidth, ushort &mergedHeight);
-    void convertGrayscale(QImage &image) const;
+    bool convertGrayscale(QImage &image) const;
     void discreteCosineTransform(QImage &image, double *transform) const;
 
 public slots:

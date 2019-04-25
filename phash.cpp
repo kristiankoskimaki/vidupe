@@ -7,7 +7,8 @@ void Video::calculateHash(uchar *mergedScreenCapture, ushort &mergedWidth, ushor
 
     QImage image = QImage(mergedScreenCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
     image = image.scaled(_blockSize, _blockSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    convertGrayscale(image);
+    if(convertGrayscale(image) == true)                 //also reject video if happened to capture monochrome image
+        return;
     discreteCosineTransform(image, transform);
 
     double reducedTransform[smallBlock*smallBlock];      //only use upper left 8*8 transforms (most significant ones)
@@ -26,15 +27,23 @@ void Video::calculateHash(uchar *mergedScreenCapture, ushort &mergedWidth, ushor
             hash |= 1ULL << i;
 }
 
-void Video::convertGrayscale(QImage &image) const
+bool Video::convertGrayscale(QImage &image) const
 {
+    const QRgb firstPixel = image.pixel(0, 0);
+    bool arePixelsIdentical = true;
+
     for(ushort i=0; i<_blockSize; i++)
         for(ushort j=0; j<_blockSize; j++)
         {
             const QRgb pixel = image.pixel(i, j);
             const int gray = qGray(qRed(pixel), qGreen(pixel), qBlue(pixel));
             image.setPixel(i, j, static_cast<uchar>(gray));
+
+            if(pixel != firstPixel)
+                arePixelsIdentical = false;
         }
+
+    return(arePixelsIdentical);
 }
 
 void Video::discreteCosineTransform(QImage &image, double *transform) const
