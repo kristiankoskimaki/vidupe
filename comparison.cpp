@@ -40,6 +40,7 @@ void Comparison::on_prevVideo_clicked()
     const int lastVideo = _videos.count() - 1;
     for(_rightVideo--; _leftVideo>=0; _leftVideo--)     //rightVideo subtracted = start with previous video
     {
+        ui->progressBar->setValue(comparisonsSoFar());
         for(; _rightVideo>_leftVideo; _rightVideo--)
         {
             if(bothVideosMatch(_leftVideo, _rightVideo))
@@ -70,6 +71,7 @@ void Comparison::on_nextVideo_clicked()
     const int numberOfVideos = _videos.count();
     for(; _leftVideo<=numberOfVideos; _leftVideo++)
     {
+        ui->progressBar->setValue(comparisonsSoFar());
         for(_rightVideo++; _rightVideo<numberOfVideos; _rightVideo++)
         {
             if(bothVideosMatch(_leftVideo, _rightVideo))
