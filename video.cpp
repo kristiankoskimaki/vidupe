@@ -86,35 +86,20 @@ void Video::getMetadata(const QString &filename)
             }
             bitrate = line.split("bitrate: ").value(1).split(" ").value(0).toUInt();
         }
-        if(line.contains(" Video:"))
+        if(line.contains(" Video:") && (line.contains("kb/s") || line.contains(" fps")))
         {
             line = line.replace(QRegExp("\\([^\\)]+\\)"), "");
-            const QString streamName = line.split(" ").value(7).replace(",", "");
-
-            bool isVideoStream = true;            //check whether video stream or cover image
-            if(streamName == "png" || streamName == "mjpeg")
-            {
-                isVideoStream = false;
-                if(line.contains("kb/s") || line.contains(" fps"))
-                    isVideoStream = true;
-            }
-            if(isVideoStream)
-            {
-                codec = streamName;
-                const QString resolution = line.split(",").value(2);
-                width = static_cast<ushort>(resolution.split("x").value(0).toInt());
-                height = static_cast<ushort>(resolution.split("x").value(1).split(" ").value(0).toInt());
-            }
+            codec = line.split(" ").value(7).replace(",", "");
+            const QString resolution = line.split(",").value(2);
+            width = static_cast<ushort>(resolution.split("x").value(0).toInt());
+            height = static_cast<ushort>(resolution.split("x").value(1).split(" ").value(0).toInt());
             const QStringList fields = line.split(",");
-            for(int j=0; j<fields.length(); j++)
-            {
+            for(ushort j=0; j<fields.length(); j++)
                 if(fields.at(j).contains("fps"))
                 {
-                    QString fps = fields.at(j);
-                    framerate = fps.remove("fps").toDouble();
+                    framerate = QString("%1").arg(fields.at(j)).remove("fps").toDouble();
                     framerate = round(framerate * 10) / 10;     //round to one decimal point
                 }
-            }
         }
         if(line.contains(" Audio:"))
         {
