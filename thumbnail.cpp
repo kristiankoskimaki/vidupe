@@ -55,7 +55,7 @@ void Video::setMergedWidthAndHeight(ushort &mergedWidth, ushort &mergedHeight) c
     }
 }
 
-ushort Video::getSkipPercent() const
+short Video::getSkipPercent() const
 {
     if(thumbnails == 1*1)
         return 51;                      //51%

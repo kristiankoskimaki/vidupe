@@ -65,7 +65,7 @@ private slots:
     ushort takeScreenCaptures();
 
     void setMergedWidthAndHeight(ushort &mergedWidth, ushort &mergedHeight) const;
-    ushort getSkipPercent() const;
+    short getSkipPercent() const;
     QString msToHHMSS(const qint64 &time) const;
     int calculateOrigin(const short &percent) const;
 

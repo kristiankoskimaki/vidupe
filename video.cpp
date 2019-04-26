@@ -179,9 +179,9 @@ ushort Video::takeScreenCaptures()
     int reencodeStatus = _notReencoded;
     QString filenameReencoded;
     double ofDuration = 1.0;
-    const ushort skipPercent = getSkipPercent();
+    const short skipPercent = getSkipPercent();
     //screen captures are taken starting at the end (any errors are likely there)
-    for(short percent=100-static_cast<short>(skipPercent); percent>0; percent-=skipPercent)
+    for(short percent=100-skipPercent; percent>0; percent-=skipPercent)
     {
         const QString videoFilename = reencodeStatus == _reencoded? filenameReencoded : filename;
 
