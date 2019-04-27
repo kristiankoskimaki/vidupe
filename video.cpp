@@ -258,21 +258,19 @@ ushort Video::takeScreenCaptures()
 
 QImage Video::captureAt(const QString &filename, const QTemporaryDir &tempDir, const short &percent, const double &ofDuration)
 {
-    const QString screenshot = QString("%1/vidupe%2.png").arg(tempDir.path()).arg(percent);
-    QFile::remove(screenshot);      //should not happen, but if capture fails, make sure an old one is not used
-
-    int voidStatus;     //need a parameter but don't care about status if takeCaptureAt called as public method
-    const QString videoFilename = needsReencoding? reencodeVideo(tempDir, voidStatus) : filename;
+    int reencodeStatus;
+    const QString videoFilename = needsReencoding? reencodeVideo(tempDir, reencodeStatus) : filename;
+    const QString screenshot = QString("%1/vidupe%2.bmp").arg(tempDir.path()).arg(percent);
 
     QProcess ffmpeg;
     ffmpeg.setProcessChannelMode(QProcess::MergedChannels);
-    const QString ffmpegCommand = QString("ffmpeg.exe -ss %1 -i \"%2\" -an -vframes 1 -c:v png -pix_fmt rgb24 %3").
-            arg(msToHHMSS(static_cast<qint64>( percent * ofDuration * duration / 100) ),
-                QDir::toNativeSeparators(videoFilename), QDir::toNativeSeparators(screenshot));
+    const QString ffmpegCommand = QString("ffmpeg -ss %1 -i \"%2\" -an -frames:v 1 -pix_fmt rgb24 %3")
+                                  .arg(msToHHMSS(static_cast<qint64>( percent * ofDuration * duration / 100) ),
+                                  QDir::toNativeSeparators(videoFilename), QDir::toNativeSeparators(screenshot));
     ffmpeg.start(ffmpegCommand);
     ffmpeg.waitForFinished();
 
-    QImage img(screenshot, "PNG");
+    QImage img(screenshot, "BMP");
     img = img.convertToFormat(QImage::Format_RGB888);
     QFile::remove(screenshot);
     return img;
