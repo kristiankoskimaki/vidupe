@@ -1,4 +1,5 @@
 #include "comparison.h"
+#include "db.h"
 #include "ui_comparison.h"
 #include <QBuffer>
 #include <QProcess>
@@ -457,6 +458,9 @@ void Comparison::on_leftDelete_clicked()
         return;
     }
 
+    const Db cache(_videos[_leftVideo]->filename);    //generate unique id before file has been deleted
+    const QString id = cache.uniqueId();
+
     const QString askDelete = QString("Are you sure you want to delete this file?\n\n%1").
             arg(ui->leftFileName->text());
     QMessageBox::StandardButton confirm;
@@ -475,6 +479,7 @@ void Comparison::on_leftDelete_clicked()
         {
             _videosDeleted++;
             _spaceSaved = _spaceSaved + _videos[_leftVideo]->size;
+            cache.removeVideo(id);
             emit sendStatusMessage(QString("Deleted %1").arg(QDir::toNativeSeparators(_videos[_leftVideo]->filename)));
 
             _leftVideo++;
@@ -493,6 +498,9 @@ void Comparison::on_rightDelete_clicked()
         return;
     }
 
+    const Db cache(_videos[_rightVideo]->filename);
+    const QString id = cache.uniqueId();
+
     const QString askDelete = QString("Are you sure you want to delete this file?\n\n%1").
             arg(ui->rightFileName->text());
     QMessageBox::StandardButton confirm;
@@ -510,6 +518,7 @@ void Comparison::on_rightDelete_clicked()
         {
             _videosDeleted++;
             _spaceSaved = _spaceSaved + _videos[_rightVideo]->size;
+            cache.removeVideo(id);
             emit sendStatusMessage(QString("Deleted %1").arg(QDir::toNativeSeparators(_videos[_rightVideo]->filename)));
             _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
         }
@@ -586,6 +595,10 @@ void Comparison::on_rightMove_clicked()
 
 void Comparison::on_swapFilenames_clicked()
 {
+    const Db cache(_videos[_leftVideo]->filename);
+    const QString idLeft = cache.uniqueId(_videos[_leftVideo]->filename);
+    const QString idRight = cache.uniqueId(_videos[_rightVideo]->filename);
+
     const QFileInfo leftVideoFile(_videos[_leftVideo]->filename);
     const QString leftPathname = leftVideoFile.absolutePath();
     const QString oldLeftFilename = leftVideoFile.fileName();
@@ -615,6 +628,9 @@ void Comparison::on_swapFilenames_clicked()
 
     ui->leftFileName->setText(newLeftFilename);                     //update UI
     ui->rightFileName->setText(newRightFilename);
+
+    cache.removeVideo(idLeft);                                      //remove both videos from cache
+    cache.removeVideo((idRight));
 }
 
 void Comparison::on_thresholdSlider_valueChanged(const int &value)

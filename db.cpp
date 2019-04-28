@@ -62,3 +62,22 @@ void Db::write(const Video &video) const
                .arg(_id).arg(video.size).arg(video.duration).arg(video.bitrate).arg(video.framerate)
                .arg(video.codec).arg(video.audio).arg(video.width).arg(video.height));
 }
+
+bool Db::removeVideo(const QString &id) const
+{
+    QSqlQuery query(_db);
+
+    bool idCached = false;
+    query.exec(QString("SELECT id FROM videos WHERE id = '%1'").arg(id));
+    while(query.next())
+        idCached = true;
+    if(!idCached)
+        return false;
+
+    query.exec(QString("DELETE FROM videos WHERE id = '%1'").arg(id));
+
+    query.exec(QString("SELECT id FROM videos WHERE id = '%1'").arg(id));
+    while(query.next())
+        return false;
+    return true;
+}
