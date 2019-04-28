@@ -248,8 +248,7 @@ void Video::processThumbnail(const uchar *mergedScreenCapture, const ushort &mer
     using namespace cv;
     QImage ssim = QImage(mergedScreenCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
     ssim = ssim.rgbSwapped();   //OpenCV uses BGR instead of RGB
-    Mat mat = Mat( ssim.height(), ssim.width(), CV_8UC3, const_cast<uchar *>(ssim.bits()),
-                   static_cast<size_t>(ssim.bytesPerLine()) ).clone();
+    Mat mat = Mat(ssim.height(), ssim.width(), CV_8UC3, ssim.bits(), static_cast<uint>(ssim.bytesPerLine()));
     resize(mat, mat, Size(16, 16), 0, 0, INTER_AREA);   //16x16 seems to suffice, larger size has slower comparison
     cvtColor(mat, grayThumb, CV_BGR2GRAY);
     grayThumb.convertTo(grayThumb, CV_64F);
