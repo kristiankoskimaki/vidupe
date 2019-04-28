@@ -45,11 +45,20 @@ FORMS += \
     mainwindow.ui \
     comparison.ui
 
-RC_ICONS = vidupe16.ico
-
 LIBS += \
     $$PWD/bin/libopencv_core341.dll \
     $$PWD/bin/libopencv_imgproc341.dll
+
+VERSION = "1.1"
+QMAKE_TARGET_PRODUCT = "Vidupe"
+QMAKE_TARGET_DESCRIPTION = "Vidupe"
+QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2018-2019 Kristian Koskim\\344ki"
+
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+DEFINES += APP_NAME=\"\\\"$$QMAKE_TARGET_PRODUCT\\\"\"
+DEFINES += APP_COPYRIGHT=\"\\\"$$QMAKE_TARGET_COPYRIGHT\\\"\"
+
+RC_ICONS = vidupe16.ico
 
 #How to compile Vidupe:
     #Qt5.xx (https://www.qt.io/) MingW-32 is the default compiler and was used for Vidupe development
