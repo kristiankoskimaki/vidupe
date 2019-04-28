@@ -210,10 +210,11 @@ ushort Video::takeScreenCaptures()
             return _failure;
         }
 
+        const size_t bytesPerLine = static_cast<size_t>(img.width() * _BPP);
         for(int line=0; line<img.height(); line++)  //write screen capture line by line into thumbnail
         {
-            const int writeLineTo = mergedOrigin + line * mergedWidth * _BPP;
-            memcpy(mergedScreenCapture + writeLineTo, img.constScanLine(line), static_cast<size_t>(img.width()) * _BPP);
+            uchar *writeLineTo = mergedScreenCapture + mergedOrigin + line * mergedWidth * _BPP;
+            memcpy(writeLineTo, img.constScanLine(line), bytesPerLine);
         }
     }
 
