@@ -112,7 +112,7 @@ void Comparison::on_nextVideo_clicked()
             emit sendStatusMessage(QString("\nComparison window closed because no matching videos found "
                                            "(a lower threshold may help to find more matches)"));
         QKeyEvent *closeEvent = new QKeyEvent(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
-        QApplication::postEvent(this, dynamic_cast<QEvent *>(closeEvent));  //"pressing" ESC closes dialog
+        QApplication::postEvent(this, closeEvent);  //"pressing" ESC closes dialog
     }
 }
 
