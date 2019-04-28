@@ -690,11 +690,15 @@ void Comparison::wheelEvent(QWheelEvent *event)
     const double ratiox = 1-static_cast<double>(wmax-pos.x()) / imagePtr->pixmap()->width();    //mouse pos inside image
     const double ratioy = 1-static_cast<double>(hmax-pos.y()) / imagePtr->pixmap()->height();
 
-    if(pos.x() > wmax || pos.y() > hmax)    //mouse is on label, but image is smaller than that
+    const int widescreenBlack = (imagePtr->height() - imagePtr->pixmap()->height()) / 2;
+    const int imgTop = imagePtr->mapToGlobal(QPoint(0,0)).y() + widescreenBlack;
+    const int imgBtm = imgTop + imagePtr->pixmap()->height();
+    if(pos.x() > wmax || pos.y() < imgTop || pos.y() > imgBtm)      //image is smaller than label underneath
         return;
 
     if(_zoomLevel == 0)     //first mouse wheel movement: retrieve actual screen captures in full resolution
     {
+        QApplication::setOverrideCursor(Qt::WaitCursor);
         const QTemporaryDir tempDir1, tempDir2;
         if(!tempDir1.isValid() || !tempDir2.isValid())
             return;
@@ -715,6 +719,7 @@ void Comparison::wheelEvent(QWheelEvent *event)
         _rightH = image.height();
 
         _zoomLevel = 1;
+        QApplication::restoreOverrideCursor();
         return;
     }
 
