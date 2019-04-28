@@ -28,17 +28,11 @@ void Video::run()
         return;
     }
 
-    const QFileInfo videoFile(filename);
-    modified = videoFile.lastModified();        //unique video id = md5 hash of filename+last modified time
-    const QString name_date = QString("%1_%2").arg(videoFile.fileName().toLower())
-                                              .arg(modified.toString("yyyy-MM-dd hh:mm:ss.zzz"));
-    const QString id = QString(QCryptographicHash::hash(name_date.toLatin1(), QCryptographicHash::Md5).toHex());
-
-    Db db(id);
-    if(!db.read(*this))                 //check first if video properties are cached
+    Db cache(filename);
+    if(!cache.read(*this))              //check first if video properties are cached
     {
         getMetadata(filename);          //if not, read them with ffmpeg
-        db.write(*this);
+        cache.write(*this);
     }
 
     if(width == 0 || height == 0 || duration == 0)

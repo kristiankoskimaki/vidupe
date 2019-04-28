@@ -1,10 +1,11 @@
 #include "db.h"
 #include <QApplication>
+#include <QCryptographicHash>
 #include <QSqlQuery>
 
-Db::Db(const QString &id)
+Db::Db(const QString &filename)
 {
-    _id = id;
+    _id = uniqueId(filename);           //cache primary key AND multithreaded connection name must be unique
     const QString dbfilename = QString("%1/cache.db").arg(QApplication::applicationDirPath());
     _db = QSqlDatabase::addDatabase("QSQLITE", _id);
     _db.setDatabaseName(dbfilename);
@@ -18,6 +19,20 @@ Db::Db(const QString &id)
                    "size INTEGER, duration INTEGER, bitrate INTEGER, framerate REAL, "
                    "codec TEXT, audio TEXT, width INTEGER, height INTEGER)");
     }
+}
+
+QString Db::uniqueId(const QString &filename) const
+{
+    if(filename == "")
+        return _id;
+
+    const QFileInfo file(filename);
+    if(!QFileInfo::exists(filename))
+        return "0";
+
+    const QString name_modified = QString("%1_%2").arg(filename.toLower())
+                                                  .arg(file.lastModified().toString("yyyy-MM-dd hh:mm:ss.zzz"));
+    return QCryptographicHash::hash(name_modified.toLatin1(), QCryptographicHash::Md5).toHex();
 }
 
 bool Db::read(Video &video) const
@@ -40,7 +55,7 @@ bool Db::read(Video &video) const
     return false;
 }
 
-void Db::write(Video &video) const
+void Db::write(const Video &video) const
 {
     QSqlQuery query(_db);
     query.exec(QString("INSERT INTO videos VALUES('%1',%2,%3,%4,%5,'%6','%7',%8,%9)")
