@@ -217,6 +217,16 @@ ushort Video::takeScreenCaptures()
         }
     }
 
+    processThumbnail(mergedScreenCapture, mergedWidth, mergedHeight);
+
+    if(reencodeStatus != _notReencoded)
+        needsReencoding = true;
+    delete[] mergedScreenCapture;
+    return _success;
+}
+
+void Video::processThumbnail(const uchar *mergedScreenCapture, const ushort &mergedWidth, const ushort &mergedHeight)
+{
     //the thumbnail is saved in the video object so it can be instantly loaded in GUI,
     //but resized small to save memory (there may be thousands of files)
     QImage smallImage = QImage(mergedScreenCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
@@ -243,11 +253,6 @@ ushort Video::takeScreenCaptures()
     resize(mat, mat, Size(16, 16), 0, 0, INTER_AREA);   //16x16 seems to suffice, larger size has slower comparison
     cvtColor(mat, grayThumb, CV_BGR2GRAY);
     grayThumb.convertTo(grayThumb, CV_64F);
-
-    if(reencodeStatus != _notReencoded)
-        needsReencoding = true;
-    delete[] mergedScreenCapture;
-    return _success;
 }
 
 QImage Video::captureAt(const QString &filename, const QTemporaryDir &tempDir, const short &percent, const double &ofDuration)

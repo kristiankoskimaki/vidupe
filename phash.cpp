@@ -1,6 +1,6 @@
 #include "video.h"
 
-void Video::calculateHash(uchar *mergedScreenCapture, ushort &mergedWidth, ushort &mergedHeight)
+void Video::calculateHash(const uchar *mergedScreenCapture, const ushort &mergedWidth, const ushort &mergedHeight)
 {
     double transform[_blockSize * _blockSize];
     const ushort smallBlock = 8;
@@ -46,7 +46,7 @@ bool Video::convertGrayscale(QImage &image) const
     return(arePixelsIdentical);
 }
 
-void Video::discreteCosineTransform(QImage &image, double *transform) const
+void Video::discreteCosineTransform(const QImage &image, double *transform) const
 {
     double iCoeff, jCoeff, dct, sum;
 

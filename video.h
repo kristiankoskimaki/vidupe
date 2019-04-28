@@ -63,15 +63,16 @@ private slots:
     void getMetadata(const QString &filename);
     QString reencodeVideo(const QTemporaryDir &tempDir, int &reencodeStatus);
     ushort takeScreenCaptures();
+    void processThumbnail(const uchar *mergedScreenCapture, const ushort &mergedWidth, const ushort &mergedHeight);
 
     void setMergedWidthAndHeight(ushort &mergedWidth, ushort &mergedHeight) const;
     short getSkipPercent() const;
     QString msToHHMSS(const qint64 &time) const;
     int calculateOrigin(const short &percent) const;
 
-    void calculateHash(uchar *mergedScreenCapture, ushort &mergedWidth, ushort &mergedHeight);
+    void calculateHash(const uchar *mergedScreenCapture, const ushort &mergedWidth, const ushort &mergedHeight);
     bool convertGrayscale(QImage &image) const;
-    void discreteCosineTransform(QImage &image, double *transform) const;
+    void discreteCosineTransform(const QImage &image, double *transform) const;
 
 public slots:
     QImage captureAt(const QString &filename, const QTemporaryDir &tempDir, const short &percent, const double &ofDuration=1.0);
