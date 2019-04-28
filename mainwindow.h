@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QDragEnterEvent>
 #include <QMimeData>
+#include "ui_mainwindow.h"
 #include "video.h"
 #include "prefs.h"
 
@@ -17,7 +18,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() { deleteTemporaryFiles(); delete ui; }
 
     QVector<Video *> _videoList;
     QStringList _rejectedVideos;

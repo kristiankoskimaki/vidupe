@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "comparison.h"
 #include <QTextStream>
 #include <QFileDialog>
@@ -53,12 +52,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->processedFiles->setVisible(false);
     ui->progressBar->setVisible(false);
     ui->mainToolBar->setVisible(false);
-}
-
-MainWindow::~MainWindow()
-{
-    deleteTemporaryFiles();
-    delete ui;
 }
 
 void MainWindow::deleteTemporaryFiles() const
