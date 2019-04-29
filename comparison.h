@@ -51,8 +51,8 @@ private slots:
     void reportMatchingVideos() const;
     int comparisonsSoFar() const;
 
-    void on_selectPhash_clicked(const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._PHASH; }
-    void on_selectSSIM_clicked(const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._SSIM; }
+    void on_selectPhash_clicked ( const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._PHASH; }
+    void on_selectSSIM_clicked ( const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._SSIM; }
     void on_leftImage_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(_videos[_leftVideo]->filename)); }
     void on_rightImage_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(_videos[_rightVideo]->filename)); }
     void on_leftFileName_clicked() const;
@@ -61,7 +61,7 @@ private slots:
     void on_rightDelete_clicked();
     void on_leftMove_clicked();
     void on_rightMove_clicked();
-    void on_swapFilenames_clicked();
+    void on_swapFilenames_clicked() const;
 
     void on_thresholdSlider_valueChanged(const int &value);
     void resizeEvent(QResizeEvent *event);

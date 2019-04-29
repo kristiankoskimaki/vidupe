@@ -593,7 +593,7 @@ void Comparison::on_rightMove_clicked()
     }
 }
 
-void Comparison::on_swapFilenames_clicked()
+void Comparison::on_swapFilenames_clicked() const
 {
     const Db cache(_videos[_leftVideo]->filename);
     const QString idLeft = cache.uniqueId(_videos[_leftVideo]->filename);
