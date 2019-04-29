@@ -244,7 +244,7 @@ void Video::processThumbnail(const uchar *mergedScreenCapture, const ushort &mer
     smallImage.save(&buffer, "JPG", _jpegQuality);
     thumbnail = qCompress(thumbnail, _zlibCompression);
 
-    calculateHash(mergedScreenCapture, mergedWidth, mergedHeight);
+    hash = calculateHash(mergedScreenCapture, mergedWidth, mergedHeight);
 
     using namespace cv;
     QImage ssim = QImage(mergedScreenCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);

@@ -70,7 +70,7 @@ private slots:
     QString msToHHMSS(const qint64 &time) const;
     int calculateOrigin(const short &percent) const;
 
-    void calculateHash(const uchar *mergedScreenCapture, const ushort &mergedWidth, const ushort &mergedHeight);
+    uint64_t calculateHash(const uchar *imageData, const ushort &width, const ushort &height) const;
     bool convertGrayscale(QImage &image) const;
     void discreteCosineTransform(const QImage &image, double *transform) const;
 

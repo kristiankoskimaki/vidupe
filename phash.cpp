@@ -1,14 +1,14 @@
 #include "video.h"
 
-void Video::calculateHash(const uchar *mergedScreenCapture, const ushort &mergedWidth, const ushort &mergedHeight)
+uint64_t Video::calculateHash(const uchar *imageData, const ushort &width, const ushort &height) const
 {
     double transform[_blockSize * _blockSize];
     const ushort smallBlock = 8;
 
-    QImage image = QImage(mergedScreenCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
+    QImage image = QImage(imageData, width, height, width*_BPP, QImage::Format_RGB888);
     image = image.scaled(_blockSize, _blockSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     if(convertGrayscale(image) == true)                 //also reject video if happened to capture monochrome image
-        return;
+        return 0;
     discreteCosineTransform(image, transform);
 
     double reducedTransform[smallBlock*smallBlock];      //only use upper left 8*8 transforms (most significant ones)
@@ -21,10 +21,12 @@ void Video::calculateHash(const uchar *mergedScreenCapture, const ushort &merged
         avgTransform += reducedTransform[i];
     avgTransform = avgTransform / (smallBlock * smallBlock - 1);
 
-    //construct hash from all 64 bits: larger than avg = 1, smaller than avg = 0
+    uint64_t hash = 0;      //construct hash from all 64 bits: larger than avg = 1, smaller than avg = 0
     for(ushort i=0; i<smallBlock*smallBlock; i++)
         if(reducedTransform[i] > avgTransform)
             hash |= 1ULL << i;
+
+    return hash;
 }
 
 bool Video::convertGrayscale(QImage &image) const
