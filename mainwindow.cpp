@@ -19,7 +19,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
     ui->setupUi(this);
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
-    ui->statusBox->setReadOnly(true);
     ui->statusBox->append(QString("%1 %2").arg(APP_NAME, APP_VERSION));
     ui->statusBox->append(QString("%1").arg(APP_COPYRIGHT).replace("\xEF\xBF\xBD ", "© ").replace("\xEF\xBF\xBD", "ä"));
     ui->statusBox->append("Licensed under GNU General Public License\n");
@@ -45,7 +44,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->differentDurationCombo->setCurrentIndex(5);
     ui->sameDurationCombo->setCurrentIndex(5);
 
-    this->setAcceptDrops(true);
     ui->directoryBox->setFocus();
     ui->browseFolders->setIcon(ui->browseFolders->style()->standardIcon(QStyle::SP_DirOpenIcon));
 
