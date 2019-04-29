@@ -18,6 +18,9 @@ Db::Db(const QString &filename)
         query.exec("CREATE TABLE videos (id TEXT PRIMARY KEY, "
                    "size INTEGER, duration INTEGER, bitrate INTEGER, framerate REAL, "
                    "codec TEXT, audio TEXT, width INTEGER, height INTEGER)");
+
+        query.exec("CREATE TABLE version (version TEXT)");
+        query.exec(QString("INSERT INTO version VALUES('%1')").arg(APP_VERSION));
     }
 }
 
