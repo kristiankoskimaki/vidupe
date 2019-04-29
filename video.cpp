@@ -106,7 +106,7 @@ void Video::getMetadata(const QString &filename)
                 channels = " stereo";
             audio = QString("%1%2%3").arg(audioCodec, rate, channels);
             const QString kbps = line.split(",").value(4).split("kb/s").value(0);
-            if(kbps != "")
+            if(kbps != "" && kbps != " 0 ")
                 audio = QString("%1%2kb/s").arg(audio, kbps);
         }
         if(line.contains("rotate") && !rotatedOnce)
