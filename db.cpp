@@ -11,13 +11,17 @@ Db::Db(const QString &filename)
     _db.setDatabaseName(dbfilename);
     _db.open();
 
-    QSqlQuery query(_db);
-    query.exec("CREATE TABLE IF NOT EXISTS metadata (id TEXT PRIMARY KEY, "
-               "size INTEGER, duration INTEGER, bitrate INTEGER, framerate REAL, "
-               "codec TEXT, audio TEXT, width INTEGER, height INTEGER)");
+    const QFileInfo dbFile(dbfilename);     //create a cache database if one does not exist
+    if(dbFile.size() == 0)
+    {
+        QSqlQuery query(_db);
+        query.exec("CREATE TABLE metadata (id TEXT PRIMARY KEY, "
+                   "size INTEGER, duration INTEGER, bitrate INTEGER, framerate REAL, "
+                   "codec TEXT, audio TEXT, width INTEGER, height INTEGER)");
 
-    query.exec("CREATE TABLE IF NOT EXISTS version (version TEXT)");
-    query.exec(QString("INSERT INTO version VALUES('%1')").arg(APP_VERSION));
+        query.exec("CREATE TABLE version (version TEXT)");
+        query.exec(QString("INSERT INTO version VALUES('%1')").arg(APP_VERSION));
+    }
 }
 
 QString Db::uniqueId(const QString &filename) const
