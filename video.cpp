@@ -133,7 +133,6 @@ QString Video::reencodeVideo(const QTemporaryDir &tempDir, int &reencodeStatus)
                   filename.split(filename.left(filename.lastIndexOf("."))).value(1));
 
     QProcess encode;
-    encode.setProcessChannelMode(QProcess::MergedChannels);
     encode.start(QString("ffmpeg -i \"%1\" -acodec copy -vcodec copy -map_metadata -1 \"%2\"").
                  arg(QDir::toNativeSeparators(filename), QDir::toNativeSeparators(filenameReencoded)));
     encode.waitForFinished();
@@ -262,12 +261,11 @@ QImage Video::captureAt(const QString &filename, const QTemporaryDir &tempDir, c
     const QString screenshot = QString("%1/vidupe%2.bmp").arg(tempDir.path()).arg(percent);
 
     QProcess ffmpeg;
-    ffmpeg.setProcessChannelMode(QProcess::MergedChannels);
     const QString ffmpegCommand = QString("ffmpeg -ss %1 -i \"%2\" -an -frames:v 1 -pix_fmt rgb24 %3")
                                   .arg(msToHHMSS(static_cast<qint64>( percent * ofDuration * duration / 100) ),
                                   QDir::toNativeSeparators(videoFilename), QDir::toNativeSeparators(screenshot));
     ffmpeg.start(ffmpegCommand);
-    ffmpeg.waitForFinished();
+    ffmpeg.waitForFinished(15000);
 
     QImage img(screenshot, "BMP");
     img = img.convertToFormat(QImage::Format_RGB888);
