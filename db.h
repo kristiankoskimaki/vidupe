@@ -16,8 +16,8 @@ public:
 
 public slots:
     QString uniqueId(const QString &filename="") const;
-    bool read(Video &video) const;        //return true if video is cached
-    void write(const Video &video) const;
+    bool readMetadata(Video &video) const;        //return true if video is cached
+    void writeMetadata(const Video &video) const;
 
     //removeVideo returns false if id not cached or could not be removed
     bool removeVideo(const QString &id) const;

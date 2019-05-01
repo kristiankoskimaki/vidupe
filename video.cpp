@@ -29,10 +29,10 @@ void Video::run()
     }
 
     Db cache(filename);
-    if(!cache.read(*this))              //check first if video properties are cached
+    if(!cache.readMetadata(*this))      //check first if video properties are cached
     {
         getMetadata(filename);          //if not, read them with ffmpeg
-        cache.write(*this);
+        cache.writeMetadata(*this);
     }
 
     if(width == 0 || height == 0 || duration == 0)
