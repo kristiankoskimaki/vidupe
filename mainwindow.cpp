@@ -187,7 +187,7 @@ void MainWindow::on_findDuplicates_clicked()
             delete _videoList[i];
         _videoList.clear();
 
-        ui->statusBox->append("\nStarting file search...");
+        ui->statusBox->append("\nSearching for videos...");
         ui->processedFiles->setVisible(false);
         ui->progressBar->setVisible(false);
 
@@ -253,6 +253,7 @@ void MainWindow::processVideos(const QStringList &everyVideo)
     {
         ui->processedFiles->setVisible(true);
         ui->processedFiles->setText(QString("0/%1").arg(numberOfVideos));
+        ui->statusBar->showMessage("");
         ui->progressBar->setVisible(true);
         ui->progressBar->setValue(0);
         ui->progressBar->setMaximum(everyVideo.count());
