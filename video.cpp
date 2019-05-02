@@ -265,7 +265,7 @@ QImage Video::captureAt(const QString &filename, const QTemporaryDir &tempDir, c
                                   .arg(msToHHMSS(static_cast<qint64>( percent * ofDuration * duration / 100) ),
                                   QDir::toNativeSeparators(videoFilename), QDir::toNativeSeparators(screenshot));
     ffmpeg.start(ffmpegCommand);
-    ffmpeg.waitForFinished(15000);
+    ffmpeg.waitForFinished(10000);
 
     QImage img(screenshot, "BMP");
     img = img.convertToFormat(QImage::Format_RGB888);
