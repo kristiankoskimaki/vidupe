@@ -24,7 +24,7 @@ Db::Db(const QString &filename)
     }
 }
 
-QString Db::uniqueId(const QString &filename) const
+QString Db::uniqueId(const QString &filename)
 {
     if(filename == "")
         return _id;
@@ -33,8 +33,9 @@ QString Db::uniqueId(const QString &filename) const
     if(!QFileInfo::exists(filename))
         return "0";
 
+    _modified = file.lastModified();
     const QString name_modified = QString("%1_%2").arg(filename.toLower())
-                                                  .arg(file.lastModified().toString("yyyy-MM-dd hh:mm:ss.zzz"));
+                                                  .arg(_modified.toString("yyyy-MM-dd hh:mm:ss.zzz"));
     return QCryptographicHash::hash(name_modified.toLatin1(), QCryptographicHash::Md5).toHex();
 }
 
@@ -45,6 +46,7 @@ bool Db::readMetadata(Video &video) const
 
     while(query.next())
     {
+        video.modified = _modified;
         video.size = query.value(1).toLongLong();
         video.duration = query.value(2).toLongLong();
         video.bitrate = query.value(3).toUInt();

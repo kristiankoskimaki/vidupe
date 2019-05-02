@@ -458,8 +458,8 @@ void Comparison::on_leftDelete_clicked()
         return;
     }
 
-    const Db cache(_videos[_leftVideo]->filename);    //generate unique id before file has been deleted
-    const QString id = cache.uniqueId();
+    Db cache(_videos[_leftVideo]->filename);    //generate unique id before file has been deleted
+    QString id = cache.uniqueId();
 
     const QString askDelete = QString("Are you sure you want to delete this file?\n\n%1").
             arg(ui->leftFileName->text());
@@ -498,8 +498,8 @@ void Comparison::on_rightDelete_clicked()
         return;
     }
 
-    const Db cache(_videos[_rightVideo]->filename);
-    const QString id = cache.uniqueId();
+    Db cache(_videos[_rightVideo]->filename);
+    QString id = cache.uniqueId();
 
     const QString askDelete = QString("Are you sure you want to delete this file?\n\n%1").
             arg(ui->rightFileName->text());
@@ -595,9 +595,9 @@ void Comparison::on_rightMove_clicked()
 
 void Comparison::on_swapFilenames_clicked() const
 {
-    const Db cache(_videos[_leftVideo]->filename);
-    const QString idLeft = cache.uniqueId(_videos[_leftVideo]->filename);
-    const QString idRight = cache.uniqueId(_videos[_rightVideo]->filename);
+    Db cache(_videos[_leftVideo]->filename);
+    QString idLeft = cache.uniqueId(_videos[_leftVideo]->filename);
+    QString idRight = cache.uniqueId(_videos[_rightVideo]->filename);
 
     const QFileInfo leftVideoFile(_videos[_leftVideo]->filename);
     const QString leftPathname = leftVideoFile.absolutePath();

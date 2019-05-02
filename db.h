@@ -13,9 +13,10 @@ public:
 
     QSqlDatabase _db;
     QString _id = "default";
+    QDateTime _modified;
 
 public slots:
-    QString uniqueId(const QString &filename="") const;
+    QString uniqueId(const QString &filename="");
     bool readMetadata(Video &video) const;        //return true if video is cached
     void writeMetadata(const Video &video) const;
 
