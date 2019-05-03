@@ -5,11 +5,10 @@
 
 class ClickableLabel : public QLabel
 {
-    Q_OBJECT 
+    Q_OBJECT
 
 public:
-    explicit ClickableLabel(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::WindowFlags()) { Q_UNUSED (flags); Q_UNUSED (parent); }
-    ~ClickableLabel() { }
+    explicit ClickableLabel(QWidget *parent) { Q_UNUSED (parent); }
 
 signals:
     void clicked();
