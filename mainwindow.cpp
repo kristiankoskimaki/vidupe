@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "comparison.h"
-#include <QTextStream>
 #include <QFileDialog>
 #include <QDirIterator>
 #include <QProcess>

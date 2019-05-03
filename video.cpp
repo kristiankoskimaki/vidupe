@@ -1,6 +1,5 @@
 #include "video.h"
 #include "db.h"
-#include <QCryptographicHash>
 #include <QTextEdit>
 #include <QProcess>
 #include <QBuffer>
