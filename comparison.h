@@ -16,6 +16,10 @@ class Comparison : public QDialog
 public:
     explicit Comparison(QVector<Video *> &userVideos, Prefs &userPrefs, QWidget &parent);
     ~Comparison();
+
+private:
+    Ui::Comparison *ui;
+
     QVector<Video *> _videos;
     Prefs _prefs;
     int _leftVideo = 0;
@@ -69,9 +73,6 @@ private slots:
 
 signals:
     void sendStatusMessage(const QString) const;
-
-private:
-    Ui::Comparison *ui;
 };
 
 #endif // COMPARISON_H
