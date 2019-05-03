@@ -4,7 +4,6 @@
 #include <QBuffer>
 #include <QProcess>
 #include <QMessageBox>
-#include <QTextEdit>
 #include <QWheelEvent>
 
 Comparison::Comparison(QVector<Video *> &userVideos, Prefs &userPrefs, QWidget &parent)
