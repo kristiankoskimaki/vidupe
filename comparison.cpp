@@ -595,8 +595,8 @@ void Comparison::on_rightMove_clicked()
 void Comparison::on_swapFilenames_clicked() const
 {
     Db cache(_videos[_leftVideo]->filename);
-    QString idLeft = cache.uniqueId(_videos[_leftVideo]->filename);
-    QString idRight = cache.uniqueId(_videos[_rightVideo]->filename);
+    const QString idLeft = cache.uniqueId(_videos[_leftVideo]->filename);
+    const QString idRight = cache.uniqueId(_videos[_rightVideo]->filename);
 
     const QFileInfo leftVideoFile(_videos[_leftVideo]->filename);
     const QString leftPathname = leftVideoFile.absolutePath();
