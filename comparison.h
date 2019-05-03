@@ -7,11 +7,7 @@
 #include "video.h"
 #include "prefs.h"
 
-using namespace cv;
-
-namespace Ui {
-class Comparison;
-}
+namespace Ui { class Comparison; }
 
 class Comparison : public QDialog
 {
@@ -67,9 +63,9 @@ private slots:
     void resizeEvent(QResizeEvent *event);
     void wheelEvent(QWheelEvent *event);
 
-    double sigma(const Mat &m, const int &i, const int &j, const int &block_size) const;
-    double covariance(const Mat &m0, const Mat &m1, const int &i, const int &j, const int &block_size) const;
-    double ssim(const Mat &m0, const Mat &m1, const int &block_size) const;
+    double sigma(const cv::Mat &m, const int &i, const int &j, const int &block_size) const;
+    double covariance(const cv::Mat &m0, const cv::Mat &m1, const int &i, const int &j, const int &block_size) const;
+    double ssim(const cv::Mat &m0, const cv::Mat &m1, const int &block_size) const;
 
 signals:
     void sendStatusMessage(const QString) const;
