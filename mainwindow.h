@@ -8,9 +8,7 @@
 #include "video.h"
 #include "prefs.h"
 
-namespace Ui {
-class MainWindow;
-}
+namespace Ui { class MainWindow; }
 
 class MainWindow : public QMainWindow
 {
@@ -19,6 +17,9 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() { deleteTemporaryFiles(); delete ui; }
+
+private:
+    Ui::MainWindow *ui;
 
     QVector<Video *> _videoList;
     QStringList _rejectedVideos;
@@ -53,9 +54,6 @@ private slots:
     void addStatusMessage(const QString &message) const;
     void addVideo(const QString &filename) const;
     void removeVideo(Video *deleteMe);
-
-private:
-    Ui::MainWindow *ui;
 };
 
 #endif // MAINWINDOW_H
