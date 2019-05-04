@@ -1,28 +1,16 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2018-08-26T11:24:06
-#
-#-------------------------------------------------
-
-QT += core gui sql
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
 TARGET = Vidupe
 TEMPLATE = app
 
-# The following define makes your compiler emit warnings if you use
-# any feature of Qt which has been marked as deprecated (the exact warnings
-# depend on your compiler). Please consult the documentation of the
-# deprecated API in order to know how to port your code away from it.
-DEFINES += QT_DEPRECATED_WARNINGS
-
-# You can also make your code fail to compile if you use deprecated APIs.
-# In order to do so, uncomment the following line.
-# You can also select to disable deprecated APIs only up to a certain version of Qt.
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+QT += core gui widgets sql
 
 QMAKE_LFLAGS += -Wl,--large-address-aware
+
+HEADERS += \
+    mainwindow.h \
+    prefs.h \
+    video.h \
+    db.h \
+    comparison.h
 
 SOURCES += \
     mainwindow.cpp \
@@ -33,13 +21,6 @@ SOURCES += \
     comparison.cpp \
     ssim.cpp
 
-HEADERS += \
-    mainwindow.h \
-    prefs.h \
-    video.h \
-    db.h \
-    comparison.h
-
 FORMS += \
     mainwindow.ui \
     comparison.ui
@@ -48,7 +29,9 @@ LIBS += \
     $$PWD/bin/libopencv_core345.dll \
     $$PWD/bin/libopencv_imgproc345.dll
 
-VERSION = "1.1"
+RC_ICONS = vidupe16.ico
+
+VERSION = 1.1
 QMAKE_TARGET_PRODUCT = "Vidupe"
 QMAKE_TARGET_DESCRIPTION = "Vidupe"
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2018-2019 Kristian Koskim\\344ki"
@@ -57,7 +40,8 @@ DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 DEFINES += APP_NAME=\"\\\"$$QMAKE_TARGET_PRODUCT\\\"\"
 DEFINES += APP_COPYRIGHT=\"\\\"$$QMAKE_TARGET_COPYRIGHT\\\"\"
 
-RC_ICONS = vidupe16.ico
+DEFINES += QT_DEPRECATED_WARNINGS
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 
 #How to compile Vidupe:
     #Qt5.xx (https://www.qt.io/) MingW-32 is the default compiler and was used for Vidupe development
