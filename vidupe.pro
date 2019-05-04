@@ -45,8 +45,8 @@ FORMS += \
     comparison.ui
 
 LIBS += \
-    $$PWD/bin/libopencv_core341.dll \
-    $$PWD/bin/libopencv_imgproc341.dll
+    $$PWD/bin/libopencv_core345.dll \
+    $$PWD/bin/libopencv_imgproc345.dll
 
 VERSION = "1.1"
 QMAKE_TARGET_PRODUCT = "Vidupe"
