@@ -282,9 +282,11 @@ void MainWindow::processVideos(const QStringList &everyVideo)
     threadPool.waitForDone();
     QApplication::processEvents();    //process signals from last threads
 
+    addStatusMessage(QString("%1 intact video(s) out of %2 total").arg(_videoList.count()).arg(everyVideo.count()));
     if(!_rejectedVideos.empty())
     {
-        addStatusMessage("\nThe following videos could not be added due to errors:");
+        addStatusMessage(QString("\nThe following %1 video(s) could not be added due to errors:")
+                         .arg(_rejectedVideos.count()));
         for(int i=0; i<_rejectedVideos.count(); i++)
             addStatusMessage(_rejectedVideos[i]);
     }

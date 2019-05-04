@@ -359,14 +359,10 @@ void Comparison::reportMatchingVideos() const
     const int numberOfVideos = _videos.count();
     if( (_prefs._ComparisonMode == _prefs._PHASH && numberOfVideos > 15000) ||
         (_prefs._ComparisonMode == _prefs._SSIM && numberOfVideos > 6000) )
-    {
-        emit sendStatusMessage("Skipped counting number of matches (too many videos to calculate)");
-        return;
-    }
+        return;     //too slow
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    emit sendStatusMessage(QString("\n[%1] Counting match combinations (may take long time for many videos)")
-                           .arg(QTime::currentTime().toString()));
+    emit sendStatusMessage(QString("\n[%1] Counting match combinations...").arg(QTime::currentTime().toString()));
 
     QVector<int> knownMatches;
     qint64 combinedFilesize = 0;
