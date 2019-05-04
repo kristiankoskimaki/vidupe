@@ -921,7 +921,6 @@
   <customwidget>
    <class>ClickableLabel</class>
    <extends>QWidget</extends>
-   <header>clickablelabel.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

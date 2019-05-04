@@ -38,8 +38,7 @@ HEADERS += \
     prefs.h \
     video.h \
     db.h \
-    comparison.h \
-    clickablelabel.h
+    comparison.h
 
 FORMS += \
     mainwindow.ui \
