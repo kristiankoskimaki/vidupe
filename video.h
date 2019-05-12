@@ -15,11 +15,8 @@ const ushort _blockSize = 32;                   //phash generated from 32x32 ima
 
 const ushort _success     = 0;
 const ushort _failure     = 1;
-const ushort _retry       = 2;
-const ushort _outOfMemory = 3;
+const ushort _outOfMemory = 2;
 
-const uint   _reencodeMaxSize    = 50000000;    //broken videos (50 Mb or less) will be re-encoded
-const double _smallestReencoded  = 0.10;        //re-encoded file cannot be <10% of original size
 const double _goBackwardsPercent = 0.07;        //if capture fails, retry but omit this much from ending...
 const double _videoStillUsable   = 0.86;        //...but no more than 14% of total runtime
 const uint   _thumbnailMaxWidth  = 448;
@@ -30,10 +27,6 @@ extern ushort _jpegQuality;
 const ushort _okJpegQuality      = 60;          //default
 const ushort _lowJpegQuality     = 25;
 const int    _hugeAmountVideos   = 200000;
-
-const ushort _notReencoded       = 0;           //video re-encoding status
-const ushort _reencoded          = 1;
-const ushort _reencodingFailed   = 2;
 
 class Video : public QObject, public QRunnable
 {
@@ -58,11 +51,9 @@ public:
     ushort height = 0;
     QByteArray thumbnail;
     cv::Mat grayThumb;
-    bool needsReencoding = false;
 
 private slots:
     void getMetadata(const QString &filename);
-    QString reencodeVideo(const QTemporaryDir &tempDir, int &reencodeStatus);
     ushort takeScreenCaptures();
     void processThumbnail(const uchar *mergedScreenCapture, const ushort &mergedWidth, const ushort &mergedHeight);
 
@@ -71,7 +62,7 @@ private slots:
     void discreteCosineTransform(const QImage &image, double *transform) const;
 
 public slots:
-    QImage captureAt(const QString &filename, const QTemporaryDir &tempDir, const short &percent, const double &ofDuration=1.0);
+    QImage captureAt(const short &percent, const double &ofDuration=1.0);
 
 signals:
     void acceptVideo(const QString) const;

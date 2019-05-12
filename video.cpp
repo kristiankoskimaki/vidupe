@@ -127,30 +127,6 @@ void Video::getMetadata(const QString &filename)
     modified = videoFile.lastModified();
 }
 
-QString Video::reencodeVideo(const QTemporaryDir &tempDir, int &reencodeStatus)
-{
-    const QString filenameReencoded = QString("%1/reencoded%2").arg(tempDir.path(),
-                  filename.split(filename.left(filename.lastIndexOf("."))).value(1));
-
-    QProcess encode;
-    encode.start(QString("ffmpeg -i \"%1\" -acodec copy -vcodec copy -map_metadata -1 \"%2\"").
-                 arg(QDir::toNativeSeparators(filename), QDir::toNativeSeparators(filenameReencoded)));
-    encode.waitForFinished();
-
-    if(!QFileInfo::exists(filenameReencoded))
-    {
-        reencodeStatus = _reencodingFailed;
-        return filenameReencoded;
-    }
-    const QFileInfo newFile(filenameReencoded);
-    const QFileInfo oldFile(filename);
-    if(static_cast<double>(newFile.size()) / static_cast<double>(oldFile.size()) > _smallestReencoded)
-        getMetadata(filenameReencoded);          //hopefully metadata is correct now
-
-    reencodeStatus = _reencoded;
-    return filenameReencoded;
-}
-
 ushort Video::takeScreenCaptures()
 {
     Thumbnail thumb(thumbnailMode);
@@ -166,36 +142,21 @@ ushort Video::takeScreenCaptures()
         return _outOfMemory;
     }
 
-    const QTemporaryDir tempDir;
-    if(!tempDir.isValid())
-        return _failure;
-
-    int reencodeStatus = _notReencoded;
-    QString filenameReencoded;
     double ofDuration = 1.0;
     const QVector<short> percentages = thumb.percentages();
     int thumbnail = percentages.count();
 
     while(--thumbnail >= 0)     //screen captures are taken in reverse order so errors are found early
     {
-        const QString videoFilename = reencodeStatus == _reencoded? filenameReencoded : filename;
-
-        const QImage img = captureAt(videoFilename, tempDir, percentages[thumbnail], ofDuration);
+        const QImage img = captureAt(percentages[thumbnail], ofDuration);
         if(img.isNull())        //taking a screen capture may fail if video is broken
         {
-            if(reencodeStatus == _notReencoded && size < _reencodeMaxSize)      //try re-encoding first
-            {
-                filenameReencoded = reencodeVideo(tempDir, reencodeStatus);
-                thumbnail = percentages.count();
-                continue;
-            }
             if(ofDuration >= _videoStillUsable)     //retry a few times, always starting closer to beginning
             {
                 ofDuration = ofDuration - _goBackwardsPercent;
                 thumbnail = percentages.count();
                 continue;
             }
-
             delete[] mergedScreenCapture;       //video is mostly garbage or seeking impossible, skip it
             return _failure;
         }
@@ -220,8 +181,6 @@ ushort Video::takeScreenCaptures()
 
     processThumbnail(mergedScreenCapture, mergedWidth, mergedHeight);
 
-    if(reencodeStatus != _notReencoded)
-        needsReencoding = true;
     delete[] mergedScreenCapture;
     return _success;
 }
@@ -255,16 +214,18 @@ void Video::processThumbnail(const uchar *mergedScreenCapture, const ushort &mer
     grayThumb.convertTo(grayThumb, CV_64F);
 }
 
-QImage Video::captureAt(const QString &filename, const QTemporaryDir &tempDir, const short &percent, const double &ofDuration)
+QImage Video::captureAt(const short &percent, const double &ofDuration)
 {
-    int reencodeStatus;
-    const QString videoFilename = needsReencoding? reencodeVideo(tempDir, reencodeStatus) : filename;
+    const QTemporaryDir tempDir;
+    if(!tempDir.isValid())
+        return QImage();
+
     const QString screenshot = QString("%1/vidupe%2.bmp").arg(tempDir.path()).arg(percent);
 
     QProcess ffmpeg;
     const QString ffmpegCommand = QString("ffmpeg -ss %1 -i \"%2\" -an -frames:v 1 -pix_fmt rgb24 %3")
                                   .arg(Thumbnail::msToHHMMSS(static_cast<qint64>( percent * ofDuration * duration / 100) ),
-                                  QDir::toNativeSeparators(videoFilename), QDir::toNativeSeparators(screenshot));
+                                  QDir::toNativeSeparators(filename), QDir::toNativeSeparators(screenshot));
     ffmpeg.start(ffmpegCommand);
     ffmpeg.waitForFinished(10000);
 

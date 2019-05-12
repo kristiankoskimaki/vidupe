@@ -696,19 +696,16 @@ void Comparison::wheelEvent(QWheelEvent *event)
     if(_zoomLevel == 0)     //first mouse wheel movement: retrieve actual screen captures in full resolution
     {
         QApplication::setOverrideCursor(Qt::WaitCursor);
-        const QTemporaryDir tempDir1, tempDir2;
-        if(!tempDir1.isValid() || !tempDir2.isValid())
-            return;
 
         QImage image;
-        image = _videos[_leftVideo]->captureAt(_videos[_leftVideo]->filename, tempDir1, 10);
+        image = _videos[_leftVideo]->captureAt(10);
         ui->leftImage->setPixmap(QPixmap::fromImage(image).scaled(
                                  ui->leftImage->width(), ui->leftImage->height(), Qt::KeepAspectRatio));
         _leftZoomed = QPixmap::fromImage(image);      //keep it in memory
         _leftW = image.width();
         _leftH = image.height();
 
-        image = _videos[_rightVideo]->captureAt(_videos[_rightVideo]->filename, tempDir2, 10);
+        image = _videos[_rightVideo]->captureAt(10);
         ui->rightImage->setPixmap(QPixmap::fromImage(image).scaled(
                                   ui->rightImage->width(), ui->rightImage->height(), Qt::KeepAspectRatio));
         _rightZoomed = QPixmap::fromImage(image);
