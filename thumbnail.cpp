@@ -1,15 +1,13 @@
 #include "video.h"
 
-/* 1x1     2x1         3x1         2x2         3x2           3x3             4*3               4x4
-  +---+ +---+---+ +---+---+---+ +---+---+ +---+---+---+ +---+---+---+ +---+---+---+---+ +---+---+---+---+
-  |51%| |34%|68%| |25%|50%|75%| |20%|40%| |15%|30%|45%| |10%|20%|30%| | 8%|16%|24%|32%| | 6%|12%|18%|24%|
-  +---+ +---+---+ +---+---+---+ +---+---+ +---+---+---+ +---+---+---+ +---+---+---+---+ +---+---+---+---+
-                                |60%|80%| |60%|75%|90%| |40%|50%|60%| |40%|48%|56%|64%| |30%|36%|42%|48%|
-                                +---+---+ +---+---+---+ +---+---+---+ +---+---+---+---+ +---+---+---+---+
-                                                        |70%|80%|90%| |72%|80%|88%|96%| |54%|60%|66%|72%|
-                                                        +---+---+---+ +---+---+---+---+ +---+---+---+---+
-                                                                                        |78%|84%|90%|96%|
-                                                                                        +---+---+---+---+ */
+/* 1x1     2x1         3x1         2x2         3x2           3x3             4*3
+  +---+ +---+---+ +---+---+---+ +---+---+ +---+---+---+ +---+---+---+ +---+---+---+---+
+  |51%| |34%|68%| |25%|50%|75%| |20%|40%| |15%|30%|45%| |10%|20%|30%| | 8%|16%|24%|32%|
+  +---+ +---+---+ +---+---+---+ +---+---+ +---+---+---+ +---+---+---+ +---+---+---+---+
+                                |60%|80%| |60%|75%|90%| |40%|50%|60%| |40%|48%|56%|64%|
+                                +---+---+ +---+---+---+ +---+---+---+ +---+---+---+---+
+                                                        |70%|80%|90%| |72%|80%|88%|96%|
+                                                        +---+---+---+ +---+---+---+---+ */
 
 void Video::setMergedWidthAndHeight(ushort &mergedWidth, ushort &mergedHeight) const
 {
@@ -48,11 +46,6 @@ void Video::setMergedWidthAndHeight(ushort &mergedWidth, ushort &mergedHeight) c
         mergedWidth =  4 * width;
         mergedHeight = 3 * height;
     }
-    else if(thumbnails == 4*4)
-    {
-        mergedWidth =  4 * width;
-        mergedHeight = 4 * height;
-    }
 }
 
 short Video::getSkipPercent() const
@@ -71,8 +64,6 @@ short Video::getSkipPercent() const
         return 10;                      //10%, 20%, .... 90%
     else if(thumbnails == 4*3)
         return 8;                       //8%, 16%, .... 96%
-    else if(thumbnails == 4*4)
-        return 6;                       //6%, 12%, .... 96%
     return 100;
 }
 
@@ -196,32 +187,6 @@ int Video::calculateOrigin(const short &percent) const
             case 76: return 4 * width * _BPP * 2 * height + 1 * width * _BPP;  //lower left of center
             case 84: return 4 * width * _BPP * 2 * height + 2 * width * _BPP;  //lower right of center
             case 92: return 4 * width * _BPP * 2 * height + 3 * width * _BPP;  //lower right
-        }
-    }
-
-    else if(thumbnails == 4*4)
-    {
-        switch(percent)
-        {
-            case  6: return 0;  //upper left
-            case 10: return 1 * width * _BPP;   //upper left of center
-            case 16: return 2 * width * _BPP;   //upper right of center
-            case 22: return 3 * width * _BPP;   //upper right
-
-            case 28: return 4 * width * _BPP * 1 * height;     //upper middle left
-            case 34: return 4 * width * _BPP * 1 * height + 1 * width * _BPP;  //upper middle left of center
-            case 40: return 4 * width * _BPP * 1 * height + 2 * width * _BPP;  //upper middle right of center
-            case 46: return 4 * width * _BPP * 1 * height + 3 * width * _BPP;  //upper middle right
-
-            case 52: return 4 * width * _BPP * 2 * height;      //lower middle left
-            case 58: return 4 * width * _BPP * 2 * height + 1 * width * _BPP;  //lower middle left of center
-            case 64: return 4 * width * _BPP * 2 * height + 2 * width * _BPP;  //lower middle right of center
-            case 70: return 4 * width * _BPP * 2 * height + 3 * width * _BPP;  //lower middle right
-
-            case 76: return 4 * width * _BPP * 3 * height;      //lower left
-            case 82: return 4 * width * _BPP * 3 * height + 1 * width * _BPP;  //lower left of center
-            case 88: return 4 * width * _BPP * 3 * height + 2 * width * _BPP;  //lower right of center
-            case 94: return 4 * width * _BPP * 3 * height + 3 * width * _BPP;  //lower right
         }
     }
 
