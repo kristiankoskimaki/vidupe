@@ -36,7 +36,7 @@ private slots:
     void loadExtensions();
     bool detectffmpeg() const;
 
-    void on_selectThumbnails_activated(const int &index);
+    void on_selectThumbnails_activated(const int &index) { _prefs._thumbnails = static_cast<short>(index); }
     void on_selectPhash_clicked(const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._PHASH; }
     void on_selectSSIM_clicked(const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._SSIM; }
     void on_blocksizeCombo_activated(const int &index) { _prefs._ssimBlockSize = static_cast<short>(pow(2, index+1)); }

@@ -1,4 +1,5 @@
 #include "video.h"
+#include "thumbnail.h"
 #include "db.h"
 #include <QTextEdit>
 #include <QProcess>
@@ -9,7 +10,7 @@ ushort _jpegQuality = _okJpegQuality;
 Video::Video(QWidget &parent, const QString &userFilename, const int &numberOfVideos, const short &userThumbnails)
 {
     filename = userFilename;
-    thumbnails = userThumbnails;
+    thumbnailMode = userThumbnails;
 
     if(numberOfVideos > _hugeAmountVideos)       //save memory to avoid crash due to 32 bit limit
         _jpegQuality = _lowJpegQuality;
@@ -152,7 +153,10 @@ QString Video::reencodeVideo(const QTemporaryDir &tempDir, int &reencodeStatus)
 
 ushort Video::takeScreenCaptures()
 {
-    const int mergedScreenSize = width * height * _BPP * thumbnails;
+    Thumbnail thumb(thumbnailMode);
+
+    const ushort mergedWidth = thumb.cols() * width, mergedHeight = thumb.rows() * height;
+    const int mergedScreenSize = mergedWidth * mergedHeight * _BPP;
     uchar *mergedScreenCapture;
     try {
         mergedScreenCapture = new uchar[mergedScreenSize];
@@ -161,8 +165,6 @@ ushort Video::takeScreenCaptures()
         Q_UNUSED (ex);
         return _outOfMemory;
     }
-    ushort mergedWidth, mergedHeight;
-    setMergedWidthAndHeight(mergedWidth, mergedHeight);
 
     const QTemporaryDir tempDir;
     if(!tempDir.isValid())
@@ -171,26 +173,26 @@ ushort Video::takeScreenCaptures()
     int reencodeStatus = _notReencoded;
     QString filenameReencoded;
     double ofDuration = 1.0;
-    const short skipPercent = getSkipPercent();
-    //screen captures are taken starting at the end (any errors are likely there)
-    for(short percent=100-skipPercent; percent>0; percent-=skipPercent)
+    const QVector<short> percentages = thumb.percentages();
+    int thumbnail = percentages.count();
+
+    while(--thumbnail >= 0)     //screen captures are taken in reverse order so errors are found early
     {
         const QString videoFilename = reencodeStatus == _reencoded? filenameReencoded : filename;
 
-        const QImage img = captureAt(videoFilename, tempDir, percent, ofDuration);
-        //taking a screen capture may fail if video is broken (botched encoding, failed download)
-        if(img.isNull())
+        const QImage img = captureAt(videoFilename, tempDir, percentages[thumbnail], ofDuration);
+        if(img.isNull())        //taking a screen capture may fail if video is broken
         {
             if(reencodeStatus == _notReencoded && size < _reencodeMaxSize)      //try re-encoding first
             {
                 filenameReencoded = reencodeVideo(tempDir, reencodeStatus);
-                percent = 100;
+                thumbnail = percentages.count();
                 continue;
             }
             if(ofDuration >= _videoStillUsable)     //retry a few times, always starting closer to beginning
             {
                 ofDuration = ofDuration - _goBackwardsPercent;
-                percent = 100;
+                thumbnail = percentages.count();
                 continue;
             }
 
@@ -198,7 +200,7 @@ ushort Video::takeScreenCaptures()
             return _failure;
         }
 
-        const int mergedOrigin = calculateOrigin(percent);
+        const int mergedOrigin = thumb.origin(this, percentages[thumbnail]);
         if(mergedOrigin + (img.height()-1) * mergedWidth * _BPP + img.width() * _BPP > mergedScreenSize)
         {   //prevent crash if screen capture has larger dimensions than buffer size
             emit sendStatusMessage(QString("ERROR: Buffer overflow prevented in %1 (%2x%3, expected %4x%5)").
@@ -261,7 +263,7 @@ QImage Video::captureAt(const QString &filename, const QTemporaryDir &tempDir, c
 
     QProcess ffmpeg;
     const QString ffmpegCommand = QString("ffmpeg -ss %1 -i \"%2\" -an -frames:v 1 -pix_fmt rgb24 %3")
-                                  .arg(msToHHMSS(static_cast<qint64>( percent * ofDuration * duration / 100) ),
+                                  .arg(Thumbnail::msToHHMMSS(static_cast<qint64>( percent * ofDuration * duration / 100) ),
                                   QDir::toNativeSeparators(videoFilename), QDir::toNativeSeparators(screenshot));
     ffmpeg.start(ffmpegCommand);
     ffmpeg.waitForFinished(10000);

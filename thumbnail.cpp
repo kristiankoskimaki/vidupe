@@ -1,73 +1,7 @@
+#include "thumbnail.h"
 #include "video.h"
 
-/* 1x1     2x1         3x1         2x2         3x2           3x3             4*3
-  +---+ +---+---+ +---+---+---+ +---+---+ +---+---+---+ +---+---+---+ +---+---+---+---+
-  |51%| |34%|68%| |25%|50%|75%| |20%|40%| |15%|30%|45%| |10%|20%|30%| | 8%|16%|24%|32%|
-  +---+ +---+---+ +---+---+---+ +---+---+ +---+---+---+ +---+---+---+ +---+---+---+---+
-                                |60%|80%| |60%|75%|90%| |40%|50%|60%| |40%|48%|56%|64%|
-                                +---+---+ +---+---+---+ +---+---+---+ +---+---+---+---+
-                                                        |70%|80%|90%| |72%|80%|88%|96%|
-                                                        +---+---+---+ +---+---+---+---+ */
-
-void Video::setMergedWidthAndHeight(ushort &mergedWidth, ushort &mergedHeight) const
-{
-    if(thumbnails == 1*1)
-    {
-        mergedWidth =  1 * width;
-        mergedHeight = 1 * height;
-    }
-    else if(thumbnails == 2*1)
-    {
-        mergedWidth =  2 * width;
-        mergedHeight = 1 * height;
-    }
-    else if(thumbnails == 3*1)
-    {
-        mergedWidth =  3 * width;
-        mergedHeight = 1 * height;
-    }
-    else if(thumbnails == 2*2)
-    {
-        mergedWidth =  2 * width;
-        mergedHeight = 2 * height;
-    }
-    else if(thumbnails == 3*2)
-    {
-        mergedWidth =  3 * width;
-        mergedHeight = 2 * height;
-    }
-    else if(thumbnails == 3*3)
-    {
-        mergedWidth =  3 * width;
-        mergedHeight = 3 * height;
-    }
-    else if(thumbnails == 4*3)
-    {
-        mergedWidth =  4 * width;
-        mergedHeight = 3 * height;
-    }
-}
-
-short Video::getSkipPercent() const
-{
-    if(thumbnails == 1*1)
-        return 51;                      //51%
-    else if(thumbnails == 2*1)
-        return 34;                      //34%, 68%
-    else if(thumbnails == 3*1)
-        return 25;                      //25%, 50%, 75%
-    else if(thumbnails == 2*2)
-        return 20;                      //20%, 40%, 60%, 80%
-    else if(thumbnails == 3*2)
-        return 15;                      //15%, 30%, .... 90%
-    else if(thumbnails == 3*3)
-        return 10;                      //10%, 20%, .... 90%
-    else if(thumbnails == 4*3)
-        return 8;                       //8%, 16%, .... 96%
-    return 100;
-}
-
-QString Video::msToHHMSS(const qint64 &time) const
+QString Thumbnail::msToHHMMSS(const qint64 &time)
 {
     const ushort hours   = time / (1000*60*60) % 24;
     const ushort minutes = time / (1000*60) % 60;
@@ -95,100 +29,88 @@ QString Video::msToHHMSS(const qint64 &time) const
     return QString("%1:%2:%3.%4").arg(paddedHours, paddedMinutes, paddedSeconds).arg(milliseconds);
 }
 
-int Video::calculateOrigin(const short &percent) const
+int Thumbnail::origin(const Video *video, const int &percent) const
 {
-    //every case counts backwards from 100
-    if(thumbnails == 1*1)
-    {
+    if(m_mode == thumb1)
+        return 0;
+
+    else if(m_mode == thumb2)
         switch(percent)
         {
-            case 49: return 0;  //upper left
+            case 32: return 0;
+            case 64: return 1 * video->width * _BPP;
+            default: return 0;
         }
-    }
 
-    else if(thumbnails == 2*1)
-    {
+    else if(m_mode == thumb3)
         switch(percent)
         {
-            case 32: return 0;  //upper left
-            case 66: return 1 * width * _BPP;   //upper right
+            case 24: return 0;
+            case 48: return 1 * video->width * _BPP;
+            case 72: return 2 * video->width * _BPP;
+            default: return 0;
         }
-    }
 
-    else if(thumbnails == 3*1)
-    {
+    else if(m_mode == thumb4)
         switch(percent)
         {
-            case 25: return 0;  //left
-            case 50: return 1 * width * _BPP;   //center
-            case 75: return 2 * width * _BPP;   //right
-        }
-    }
+            case 16: return 0;
+            case 40: return 1 * video->width * _BPP;
 
-    else if(thumbnails == 2*2)
-    {
+            case 56: return 2 * video->width * _BPP * 1 * video->height;
+            case 80: return 2 * video->width * _BPP * 1 * video->height + video->width * _BPP;
+            default: return 0;
+        }
+
+    else if(m_mode == thumb6)
         switch(percent)
         {
-            case 20: return 0;  //upper left
-            case 40: return 1 * width * _BPP;   //upper right
+            case 16: return 0;
+            case 32: return 1 * video->width * _BPP;
+            case 48: return 2 * video->width * _BPP;
 
-            case 60: return 2 * width * _BPP * 1 * height;     //lower left
-            case 80: return 2 * width * _BPP * 1 * height + width * _BPP;  //lower right
+            case 64: return 3 * video->width * _BPP * 1 * video->height;
+            case 72: return 3 * video->width * _BPP * 1 * video->height + 1 * video->width * _BPP;
+            case 88: return 3 * video->width * _BPP * 1 * video->height + 2 * video->width * _BPP;
+            default: return 0;
         }
-    }
 
-    else if(thumbnails == 3*2)
-    {
+    else if(m_mode == thumb9)
         switch(percent)
         {
-            case 10: return 0;  //upper left
-            case 25: return 1 * width * _BPP;   //upper center
-            case 40: return 2 * width * _BPP;   //upper right
+            case  8: return 0;
+            case 16: return 1 * video->width * _BPP;
+            case 32: return 2 * video->width * _BPP;
 
-            case 55: return 3 * width * _BPP * 1 * height;     //lower left
-            case 70: return 3 * width * _BPP * 1 * height + 1 * width * _BPP;  //lower center
-            case 85: return 3 * width * _BPP * 1 * height + 2 * width * _BPP;  //lower right
+            case 40: return 3 * video->width * _BPP * 1 * video->height;
+            case 48: return 3 * video->width * _BPP * 1 * video->height + 1 * video->width * _BPP;
+            case 56: return 3 * video->width * _BPP * 1 * video->height + 2 * video->width * _BPP;
+
+            case 72: return 3 * video->width * _BPP * 2 * video->height;
+            case 80: return 3 * video->width * _BPP * 2 * video->height + 1 * video->width * _BPP;
+            case 88: return 3 * video->width * _BPP * 2 * video->height + 2 * video->width * _BPP;
+            default: return 0;
         }
-    }
 
-    else if(thumbnails == 3*3)
-    {
+    else if(m_mode == thumb12)
         switch(percent)
         {
-            case 10: return 0;  //upper left
-            case 20: return 1 * width * _BPP;   //upper center
-            case 30: return 2 * width * _BPP;   //upper right
+            case  8: return 0;
+            case 16: return 1 * video->width * _BPP;
+            case 24: return 2 * video->width * _BPP;
+            case 32: return 3 * video->width * _BPP;
 
-            case 40: return 3 * width * _BPP * 1 * height;     //middle left
-            case 50: return 3 * width * _BPP * 1 * height + 1 * width * _BPP;  //middle center
-            case 60: return 3 * width * _BPP * 1 * height + 2 * width * _BPP;  //middle right
+            case 40: return 4 * video->width * _BPP * 1 * video->height;
+            case 48: return 4 * video->width * _BPP * 1 * video->height + 1 * video->width * _BPP;
+            case 56: return 4 * video->width * _BPP * 1 * video->height + 2 * video->width * _BPP;
+            case 64: return 4 * video->width * _BPP * 1 * video->height + 3 * video->width * _BPP;
 
-            case 70: return 3 * width * _BPP * 2 * height;     //lower left
-            case 80: return 3 * width * _BPP * 2 * height + 1 * width * _BPP;  //lower center
-            case 90: return 3 * width * _BPP * 2 * height + 2 * width * _BPP;  //lower right
+            case 72: return 4 * video->width * _BPP * 2 * video->height;
+            case 80: return 4 * video->width * _BPP * 2 * video->height + 1 * video->width * _BPP;
+            case 88: return 4 * video->width * _BPP * 2 * video->height + 2 * video->width * _BPP;
+            case 96: return 4 * video->width * _BPP * 2 * video->height + 3 * video->width * _BPP;
+            default: return 0;
         }
-    }
-
-    else if(thumbnails == 4*3)
-    {
-        switch(percent)
-        {
-            case  4: return 0;  //upper left
-            case 12: return 1 * width * _BPP;   //upper left of center
-            case 20: return 2 * width * _BPP;   //upper right of center
-            case 28: return 3 * width * _BPP;   //upper right
-
-            case 36: return 4 * width * _BPP * 1 * height;     //middle left
-            case 44: return 4 * width * _BPP * 1 * height + 1 * width * _BPP;  //middle left of center
-            case 52: return 4 * width * _BPP * 1 * height + 2 * width * _BPP;  //middle right of center
-            case 60: return 4 * width * _BPP * 1 * height + 3 * width * _BPP;  //middle right
-
-            case 68: return 4 * width * _BPP * 2 * height;      //lower left
-            case 76: return 4 * width * _BPP * 2 * height + 1 * width * _BPP;  //lower left of center
-            case 84: return 4 * width * _BPP * 2 * height + 2 * width * _BPP;  //lower right of center
-            case 92: return 4 * width * _BPP * 2 * height + 3 * width * _BPP;  //lower right
-        }
-    }
 
     return 0;
 }

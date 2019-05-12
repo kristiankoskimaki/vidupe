@@ -1,12 +1,14 @@
 #ifndef PREFS_H
 #define PREFS_H
 
+#include "thumbnail.h"
+
 class Prefs
 {
 public:
     enum _modes { _PHASH, _SSIM };
     short _ComparisonMode = _PHASH;
-    short _thumbnails = 2*2;
+    short _thumbnails = thumb4;
 
     short _thresholdPhash = 7;
     short _thresholdPhashOriginal = 7;

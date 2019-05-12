@@ -8,6 +8,7 @@
 #include <QTemporaryDir>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgcodecs/imgcodecs.hpp>
+#include "thumbnail.h"
 
 const ushort _BPP = 3;                          //bits per pixel
 const ushort _blockSize = 32;                   //phash generated from 32x32 image
@@ -42,7 +43,7 @@ public:
     Video(QWidget &parent, const QString &userFilename, const int &numberOfVideos, const short &userThumbnails=2*2);
     void run() override;
 
-    short thumbnails = 2*2;
+    short thumbnailMode = thumb4;
 
     QString filename = "";
     qint64 size = 0;
@@ -64,11 +65,6 @@ private slots:
     QString reencodeVideo(const QTemporaryDir &tempDir, int &reencodeStatus);
     ushort takeScreenCaptures();
     void processThumbnail(const uchar *mergedScreenCapture, const ushort &mergedWidth, const ushort &mergedHeight);
-
-    void setMergedWidthAndHeight(ushort &mergedWidth, ushort &mergedHeight) const;
-    short getSkipPercent() const;
-    QString msToHHMSS(const qint64 &time) const;
-    int calculateOrigin(const short &percent) const;
 
     uint64_t calculateHash(const uchar *imageData, const ushort &width, const ushort &height) const;
     bool convertGrayscale(QImage &image) const;

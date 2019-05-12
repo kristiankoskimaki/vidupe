@@ -30,7 +30,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->blocksizeCombo->addItems( { "2", "4", "8", "16" } );
     ui->blocksizeCombo->setCurrentIndex(3);
 
-    ui->selectThumbnails->addItems( { "1x1", "2x1", "3x1", "2x2", "3x2", "3x3", "4x3" } );
+    Thumbnail thumb;
+    for(ushort i=0; i<thumb.countModes(); i++)
+        ui->selectThumbnails->addItem(thumb.modeName(i));
     ui->selectThumbnails->setCurrentIndex(3);
 
     for(ushort i=0; i<=9; i++)
@@ -116,20 +118,6 @@ bool MainWindow::detectffmpeg() const
         return false;
     }
     return true;
-}
-
-void MainWindow::on_selectThumbnails_activated(const int &index)
-{
-    switch(index)
-    {
-        case 0: _prefs._thumbnails = 1*1; break;
-        case 1: _prefs._thumbnails = 2*1; break;
-        case 2: _prefs._thumbnails = 3*1; break;
-        case 3: _prefs._thumbnails = 2*2; break;
-        case 4: _prefs._thumbnails = 3*2; break;
-        case 5: _prefs._thumbnails = 3*3; break;
-        case 6: _prefs._thumbnails = 4*3; break;
-    }
 }
 
 void MainWindow::calculateThreshold(const int &value)

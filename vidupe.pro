@@ -9,6 +9,7 @@ HEADERS += \
     mainwindow.h \
     prefs.h \
     video.h \
+    thumbnail.h \
     db.h \
     comparison.h
 
