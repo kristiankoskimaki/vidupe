@@ -9,10 +9,11 @@ class Db
 
 public:
     Db(const QString &filename);
-    ~Db() { _db.close(); _db = QSqlDatabase(); _db.removeDatabase(_id); }
+    ~Db() { _db.close(); _db = QSqlDatabase(); _db.removeDatabase(_connection); }
 
     QSqlDatabase _db;
-    QString _id = "default";
+    QString _connection;
+    QString _id;
     QDateTime _modified;
 
 public slots:

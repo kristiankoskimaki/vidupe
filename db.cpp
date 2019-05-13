@@ -5,9 +5,13 @@
 
 Db::Db(const QString &filename)
 {
-    _id = uniqueId(filename);           //cache primary key AND multithreaded connection name must be unique
+    const QFileInfo file(filename);
+    _modified = file.lastModified();
+    _connection = uniqueId(filename);       //connection name is unique (generated from full path+filename)
+    _id = uniqueId(file.fileName());        //primary key remains same even if file is moved to other folder
+
     const QString dbfilename = QString("%1/cache.db").arg(QApplication::applicationDirPath());
-    _db = QSqlDatabase::addDatabase("QSQLITE", _id);
+    _db = QSqlDatabase::addDatabase("QSQLITE", _connection);
     _db.setDatabaseName(dbfilename);
     _db.open();
 
@@ -24,18 +28,12 @@ Db::Db(const QString &filename)
     }
 }
 
-QString Db::uniqueId(const QString &filename)
+QString Db::uniqueId(const QString &filename) const
 {
     if(filename == "")
         return _id;
 
-    const QFileInfo file(filename);
-    if(!QFileInfo::exists(filename))
-        return "0";
-
-    _modified = file.lastModified();
-    const QString name_modified = QString("%1_%2").arg(filename.toLower())
-                                                  .arg(_modified.toString("yyyy-MM-dd hh:mm:ss.zzz"));
+    const QString name_modified = QString("%1_%2").arg(filename).arg(_modified.toString("yyyy-MM-dd hh:mm:ss.zzz"));
     return QCryptographicHash::hash(name_modified.toLatin1(), QCryptographicHash::Md5).toHex();
 }
 
