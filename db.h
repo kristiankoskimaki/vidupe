@@ -18,7 +18,7 @@ public:
 
 public slots:
     QString uniqueId(const QString &filename="") const;
-    void createTables(const QString &dbfilename) const;
+    void createTables() const;
     bool readMetadata(Video &video) const;        //return true if video is cached
     void writeMetadata(const Video &video) const;
 
