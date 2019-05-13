@@ -17,7 +17,8 @@ public:
     QDateTime _modified;
 
 public slots:
-    QString uniqueId(const QString &filename="");
+    QString uniqueId(const QString &filename="") const;
+    void createTables(const QString &dbfilename) const;
     bool readMetadata(Video &video) const;        //return true if video is cached
     void writeMetadata(const Video &video) const;
 

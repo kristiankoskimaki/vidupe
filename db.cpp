@@ -15,6 +15,20 @@ Db::Db(const QString &filename)
     _db.setDatabaseName(dbfilename);
     _db.open();
 
+    createTables(dbfilename);
+}
+
+QString Db::uniqueId(const QString &filename) const
+{
+    if(filename == "")
+        return _id;
+
+    const QString name_modified = QString("%1_%2").arg(filename).arg(_modified.toString("yyyy-MM-dd hh:mm:ss.zzz"));
+    return QCryptographicHash::hash(name_modified.toLatin1(), QCryptographicHash::Md5).toHex();
+}
+
+void Db::createTables(const QString &dbfilename) const
+{
     const QFileInfo dbFile(dbfilename);     //create a cache database if one does not exist
     if(dbFile.size() == 0)
     {
@@ -26,15 +40,6 @@ Db::Db(const QString &filename)
         query.exec("CREATE TABLE version (version TEXT)");
         query.exec(QString("INSERT INTO version VALUES('%1')").arg(APP_VERSION));
     }
-}
-
-QString Db::uniqueId(const QString &filename) const
-{
-    if(filename == "")
-        return _id;
-
-    const QString name_modified = QString("%1_%2").arg(filename).arg(_modified.toString("yyyy-MM-dd hh:mm:ss.zzz"));
-    return QCryptographicHash::hash(name_modified.toLatin1(), QCryptographicHash::Md5).toHex();
 }
 
 bool Db::readMetadata(Video &video) const
