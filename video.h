@@ -9,6 +9,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 #include "thumbnail.h"
+#include "db.h"
 
 const ushort _BPP = 3;                          //bits per pixel
 const ushort _blockSize = 32;                   //phash generated from 32x32 image
@@ -24,7 +25,8 @@ const uint   _thumbnailMaxHeight = 336;
 const ushort _zlibCompression    = 9;
 
 extern ushort _jpegQuality;
-const ushort _okJpegQuality      = 60;          //default
+const ushort _goodJpegQuality    = 75;
+const ushort _okJpegQuality      = 60;
 const ushort _lowJpegQuality     = 25;
 const int    _hugeAmountVideos   = 200000;
 
@@ -54,7 +56,7 @@ public:
 
 private slots:
     void getMetadata(const QString &filename);
-    ushort takeScreenCaptures();
+    ushort takeScreenCaptures(const Db &cache);
     void processThumbnail(const uchar *mergedScreenCapture, const ushort &mergedWidth, const ushort &mergedHeight);
 
     uint64_t calculateHash(const uchar *imageData, const ushort &width, const ushort &height) const;

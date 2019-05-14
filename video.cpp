@@ -41,7 +41,7 @@ void Video::run()
         return;
     }
 
-    const ushort ret = takeScreenCaptures();
+    const ushort ret = takeScreenCaptures(cache);
     if(ret == _outOfMemory)
         emit sendStatusMessage("ERROR: Out of memory");
     else if(ret == _failure)
@@ -127,7 +127,7 @@ void Video::getMetadata(const QString &filename)
     modified = videoFile.lastModified();
 }
 
-ushort Video::takeScreenCaptures()
+ushort Video::takeScreenCaptures(const Db &cache)
 {
     Thumbnail thumb(thumbnailMode);
 
@@ -146,19 +146,34 @@ ushort Video::takeScreenCaptures()
     const QVector<short> percentages = thumb.percentages();
     int thumbnail = percentages.count();
 
-    while(--thumbnail >= 0)     //screen captures are taken in reverse order so errors are found early
+    while(--thumbnail >= 0)         //screen captures are taken in reverse order so errors are found early
     {
-        const QImage img = captureAt(percentages[thumbnail], ofDuration);
-        if(img.isNull())        //taking a screen capture may fail if video is broken
+        QImage img;
+        QByteArray cachedImage = cache.readCapture(percentages[thumbnail]);
+        QBuffer captureBuffer(&cachedImage);
+
+        if(!cachedImage.isNull())   //image was already in cache
         {
-            if(ofDuration >= _videoStillUsable)     //retry a few times, always starting closer to beginning
+            img.load(&captureBuffer, "JPG");
+            img = img.convertToFormat(QImage::Format_RGB888);
+        }
+        else
+        {
+            img = captureAt(percentages[thumbnail], ofDuration);
+            if(img.isNull())        //taking a screen capture may fail if video is broken
             {
-                ofDuration = ofDuration - _goBackwardsPercent;
-                thumbnail = percentages.count();
-                continue;
+                if(ofDuration >= _videoStillUsable)     //retry a few times, always starting closer to beginning
+                {
+                    ofDuration = ofDuration - _goBackwardsPercent;
+                    thumbnail = percentages.count();
+                    continue;
+                }
+                delete[] mergedScreenCapture;           //video is mostly garbage or seeking impossible, skip it
+                return _failure;
             }
-            delete[] mergedScreenCapture;       //video is mostly garbage or seeking impossible, skip it
-            return _failure;
+
+            img.save(&captureBuffer, "JPG", _goodJpegQuality);        //compressing as jpg decreases cache size
+            cache.writeCapture(percentages[thumbnail], cachedImage);
         }
 
         const int mergedOrigin = thumb.origin(this, percentages[thumbnail]);
