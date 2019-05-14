@@ -1,8 +1,10 @@
 #ifndef DB_H
 #define DB_H
 
-#include "video.h"
 #include <QSqlDatabase>
+#include <QDateTime>
+
+class Video;
 
 class Db
 {
@@ -16,7 +18,7 @@ public:
     QString _id;
     QDateTime _modified;
 
-public slots:
+public:
     QString uniqueId(const QString &filename="") const;
     void createTables() const;
     bool readMetadata(Video &video) const;        //return true if video is cached
