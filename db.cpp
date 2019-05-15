@@ -31,6 +31,8 @@ QString Db::uniqueId(const QString &filename) const
 void Db::createTables() const
 {
     QSqlQuery query(_db);
+    query.exec("PRAGMA synchronous = OFF;");
+    query.exec("PRAGMA journal_mode = WAL;");
 
     query.exec("CREATE TABLE IF NOT EXISTS metadata (id TEXT PRIMARY KEY, "
                "size INTEGER, duration INTEGER, bitrate INTEGER, framerate REAL, "
