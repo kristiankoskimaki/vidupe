@@ -133,14 +133,9 @@ ushort Video::takeScreenCaptures(const Db &cache)
 
     const ushort mergedWidth = thumb.cols() * width, mergedHeight = thumb.rows() * height;
     const int mergedScreenSize = mergedWidth * mergedHeight * _BPP;
-    uchar *mergedScreenCapture;
-    try {
-        mergedScreenCapture = new uchar[mergedScreenSize];
-    }
-    catch (std::bad_alloc &ex) {
-        Q_UNUSED (ex);
-        return _outOfMemory;
-    }
+    uchar *mergedCapture;
+    try { mergedCapture = new uchar[mergedScreenSize]; }
+    catch (std::bad_alloc) { return _outOfMemory; }
 
     double ofDuration = 1.0;
     const QVector<short> percentages = thumb.percentages();
@@ -162,36 +157,29 @@ ushort Video::takeScreenCaptures(const Db &cache)
         else
         {
             img = captureAt(percentages[thumbnail], ofDuration);
-            if(img.isNull())        //taking a screen capture may fail if video is broken
+            if(img.isNull())                                //taking screen capture may fail if video is broken
             {
-                if(ofDuration >= _videoStillUsable)     //retry a few times, always starting closer to beginning
+                if(ofDuration >= _videoStillUsable)         //retry a few times, always closer to beginning
                 {
                     ofDuration = ofDuration - _goBackwardsPercent;
                     thumbnail = percentages.count();
                     continue;
                 }
-                delete[] mergedScreenCapture;           //video is mostly garbage or seeking impossible, skip it
+                delete[] mergedCapture;                     //video is broken or seeking impossible, skip it
                 return _failure;
             }
             writeToCache = true;
         }
-
-        const int mergedOrigin = thumb.origin(this, percentages[thumbnail]);
-        if(mergedOrigin + (img.height()-1) * mergedWidth * _BPP + img.width() * _BPP > mergedScreenSize)
-        {   //prevent crash if screen capture has larger dimensions than buffer size
-            emit sendStatusMessage(QString("ERROR: Buffer overflow prevented in %1 (%2x%3, expected %4x%5)").
-                                   arg(QDir::toNativeSeparators(filename)).
-                                   arg(img.width()).arg(img.height()).arg(width).arg(height));
-            delete[] mergedScreenCapture;
+        if(img.width() > width || img.height() > height)    //metadata parsing error or variable resolution
+        {
+            delete[] mergedCapture;
             return _failure;
         }
-
+                                                            //write screen capture line by line into thumbnail
         const size_t bytesPerLine = static_cast<size_t>(img.width() * _BPP);
-        for(int line=0; line<img.height(); line++)  //write screen capture line by line into thumbnail
-        {
-            uchar *writeLineTo = mergedScreenCapture + mergedOrigin + line * mergedWidth * _BPP;
-            memcpy(writeLineTo, img.constScanLine(line), bytesPerLine);
-        }
+        for(int line=0; line<img.height(); line++)
+            memcpy(mergedCapture + thumb.origin(this, percentages[thumbnail]) + line * mergedWidth * _BPP,
+                   img.constScanLine(line), bytesPerLine);
 
         if(writeToCache)
         {
@@ -201,26 +189,26 @@ ushort Video::takeScreenCaptures(const Db &cache)
         }
     }
 
-    processThumbnail(mergedScreenCapture, mergedWidth, mergedHeight);
+    processThumbnail(mergedCapture, mergedWidth, mergedHeight);
 
-    delete[] mergedScreenCapture;
+    delete[] mergedCapture;
     return _success;
 }
 
-void Video::processThumbnail(const uchar *mergedScreenCapture, const ushort &mergedWidth, const ushort &mergedHeight)
+void Video::processThumbnail(const uchar *mergedCapture, const ushort &mergedWidth, const ushort &mergedHeight)
 {
     //the thumbnail is saved in the video object so it can be instantly loaded in GUI,
     //but resized small to save memory (there may be thousands of files)
-    QImage smallImage = QImage(mergedScreenCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
+    QImage smallImage = QImage(mergedCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
     smallImage = minimizeImage(smallImage);
     QBuffer buffer(&thumbnail);
     smallImage.save(&buffer, "JPG", _jpegQuality);
     thumbnail = qCompress(thumbnail, _zlibCompression);
 
-    hash = calculateHash(mergedScreenCapture, mergedWidth, mergedHeight);
+    hash = calculateHash(mergedCapture, mergedWidth, mergedHeight);
 
     using namespace cv;
-    QImage ssim = QImage(mergedScreenCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
+    QImage ssim = QImage(mergedCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
     ssim = ssim.rgbSwapped();   //OpenCV uses BGR instead of RGB
     Mat mat = Mat(ssim.height(), ssim.width(), CV_8UC3, ssim.bits(), static_cast<uint>(ssim.bytesPerLine()));
     resize(mat, mat, Size(16, 16), 0, 0, INTER_AREA);   //16x16 seems to suffice, larger size has slower comparison

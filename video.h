@@ -56,7 +56,7 @@ public:
 private slots:
     void getMetadata(const QString &filename);
     ushort takeScreenCaptures(const Db &cache);
-    void processThumbnail(const uchar *mergedScreenCapture, const ushort &mergedWidth, const ushort &mergedHeight);
+    void processThumbnail(const uchar *mergedCapture, const ushort &mergedWidth, const ushort &mergedHeight);
     QImage minimizeImage(const QImage &image) const;
 
     uint64_t calculateHash(const uchar *imageData, const ushort &width, const ushort &height) const;
