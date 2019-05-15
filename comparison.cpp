@@ -592,10 +592,6 @@ void Comparison::on_rightMove_clicked()
 
 void Comparison::on_swapFilenames_clicked() const
 {
-    Db cache(_videos[_leftVideo]->filename);
-    const QString idLeft = cache.uniqueId(_videos[_leftVideo]->filename);
-    const QString idRight = cache.uniqueId(_videos[_rightVideo]->filename);
-
     const QFileInfo leftVideoFile(_videos[_leftVideo]->filename);
     const QString leftPathname = leftVideoFile.absolutePath();
     const QString oldLeftFilename = leftVideoFile.fileName();
@@ -626,8 +622,9 @@ void Comparison::on_swapFilenames_clicked() const
     ui->leftFileName->setText(newLeftFilename);                     //update UI
     ui->rightFileName->setText(newRightFilename);
 
-    cache.removeVideo(idLeft);                                      //remove both videos from cache
-    cache.removeVideo((idRight));
+    Db cache(_videos[_leftVideo]->filename);
+    cache.removeVideo(cache.uniqueId(oldLeftFilename));             //remove both videos from cache
+    cache.removeVideo(cache.uniqueId(oldRightFilename));
 }
 
 void Comparison::on_thresholdSlider_valueChanged(const int &value)

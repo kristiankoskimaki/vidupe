@@ -107,6 +107,7 @@ bool Db::removeVideo(const QString &id) const
         return false;
 
     query.exec(QString("DELETE FROM metadata WHERE id = '%1';").arg(id));
+    query.exec(QString("DELETE FROM capture WHERE id = '%1';").arg(id));
 
     query.exec(QString("SELECT id FROM metadata WHERE id = '%1';").arg(id));
     while(query.next())
