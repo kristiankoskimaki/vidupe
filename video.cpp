@@ -151,11 +151,13 @@ ushort Video::takeScreenCaptures(const Db &cache)
         QImage img;
         QByteArray cachedImage = cache.readCapture(percentages[thumbnail]);
         QBuffer captureBuffer(&cachedImage);
+        bool writeToCache = false;
 
         if(!cachedImage.isNull())   //image was already in cache
         {
             img.load(&captureBuffer, "JPG");
-            img = img.convertToFormat(QImage::Format_RGB888);
+            img = img.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation)
+                     .convertToFormat(QImage::Format_RGB888);
         }
         else
         {
@@ -171,9 +173,7 @@ ushort Video::takeScreenCaptures(const Db &cache)
                 delete[] mergedScreenCapture;           //video is mostly garbage or seeking impossible, skip it
                 return _failure;
             }
-
-            img.save(&captureBuffer, "JPG", _goodJpegQuality);        //compressing as jpg decreases cache size
-            cache.writeCapture(percentages[thumbnail], cachedImage);
+            writeToCache = true;
         }
 
         const int mergedOrigin = thumb.origin(this, percentages[thumbnail]);
@@ -192,6 +192,13 @@ ushort Video::takeScreenCaptures(const Db &cache)
             uchar *writeLineTo = mergedScreenCapture + mergedOrigin + line * mergedWidth * _BPP;
             memcpy(writeLineTo, img.constScanLine(line), bytesPerLine);
         }
+
+        if(writeToCache)
+        {
+            img = minimizeImage(img);                                   //shrink image = smaller cache
+            img.save(&captureBuffer, "JPG", _okJpegQuality);            //blurry jpg may actually increase
+            cache.writeCapture(percentages[thumbnail], cachedImage);    //comparison accuracy (less strict)
+        }
     }
 
     processThumbnail(mergedScreenCapture, mergedWidth, mergedHeight);
@@ -205,15 +212,7 @@ void Video::processThumbnail(const uchar *mergedScreenCapture, const ushort &mer
     //the thumbnail is saved in the video object so it can be instantly loaded in GUI,
     //but resized small to save memory (there may be thousands of files)
     QImage smallImage = QImage(mergedScreenCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
-
-    if(mergedWidth >= mergedHeight)
-    {
-        if(mergedWidth > _thumbnailMaxWidth)
-            smallImage = smallImage.scaledToWidth(_thumbnailMaxWidth, Qt::SmoothTransformation);
-    }
-    else if(mergedHeight > _thumbnailMaxHeight)
-        smallImage = smallImage.scaledToHeight(_thumbnailMaxHeight, Qt::SmoothTransformation);
-
+    smallImage = minimizeImage(smallImage);
     QBuffer buffer(&thumbnail);
     smallImage.save(&buffer, "JPG", _jpegQuality);
     thumbnail = qCompress(thumbnail, _zlibCompression);
@@ -227,6 +226,19 @@ void Video::processThumbnail(const uchar *mergedScreenCapture, const ushort &mer
     resize(mat, mat, Size(16, 16), 0, 0, INTER_AREA);   //16x16 seems to suffice, larger size has slower comparison
     cvtColor(mat, grayThumb, CV_BGR2GRAY);
     grayThumb.convertTo(grayThumb, CV_64F);
+}
+
+QImage Video::minimizeImage(const QImage &image) const
+{
+    if(image.width() >= image.height())
+    {
+        if(image.width() > _thumbnailMaxWidth)
+            return image.scaledToWidth(_thumbnailMaxWidth, Qt::SmoothTransformation);
+    }
+    else if(image.height() > _thumbnailMaxHeight)
+        return image.scaledToHeight(_thumbnailMaxHeight, Qt::SmoothTransformation);
+
+    return image;
 }
 
 QImage Video::captureAt(const short &percent, const double &ofDuration)

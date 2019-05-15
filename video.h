@@ -20,12 +20,11 @@ const ushort _outOfMemory = 2;
 
 const double _goBackwardsPercent = 0.07;        //if capture fails, retry but omit this much from ending...
 const double _videoStillUsable   = 0.86;        //...but no more than 14% of total runtime
-const uint   _thumbnailMaxWidth  = 448;
-const uint   _thumbnailMaxHeight = 336;
+const int    _thumbnailMaxWidth  = 448;
+const int    _thumbnailMaxHeight = 336;
 const ushort _zlibCompression    = 9;
 
 extern ushort _jpegQuality;
-const ushort _goodJpegQuality    = 75;
 const ushort _okJpegQuality      = 60;
 const ushort _lowJpegQuality     = 25;
 const int    _hugeAmountVideos   = 200000;
@@ -58,6 +57,7 @@ private slots:
     void getMetadata(const QString &filename);
     ushort takeScreenCaptures(const Db &cache);
     void processThumbnail(const uchar *mergedScreenCapture, const ushort &mergedWidth, const ushort &mergedHeight);
+    QImage minimizeImage(const QImage &image) const;
 
     uint64_t calculateHash(const uchar *imageData, const ushort &width, const ushort &height) const;
     bool convertGrayscale(QImage &image) const;
