@@ -22,7 +22,6 @@ const double _goBackwardsPercent = 0.07;        //if capture fails, retry but om
 const double _videoStillUsable   = 0.86;        //...but no more than 14% of total runtime
 const int    _thumbnailMaxWidth  = 448;
 const int    _thumbnailMaxHeight = 336;
-const ushort _zlibCompression    = 9;
 
 extern ushort _jpegQuality;
 const ushort _okJpegQuality      = 60;

@@ -200,10 +200,8 @@ void Video::processThumbnail(const uchar *mergedCapture, const ushort &mergedWid
     //the thumbnail is saved in the video object so it can be instantly loaded in GUI,
     //but resized small to save memory (there may be thousands of files)
     QImage smallImage = QImage(mergedCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
-    smallImage = minimizeImage(smallImage);
     QBuffer buffer(&thumbnail);
-    smallImage.save(&buffer, "JPG", _jpegQuality);
-    thumbnail = qCompress(thumbnail, _zlibCompression);
+    minimizeImage(smallImage).save(&buffer, "JPG", _jpegQuality);
 
     hash = calculateHash(mergedCapture, mergedWidth, mergedHeight);
 

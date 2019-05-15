@@ -170,8 +170,7 @@ void Comparison::showVideo(const QString &side) const
         thisVideo = _rightVideo;
 
     auto *Image = this->findChild<ClickableLabel *>(side + "Image");
-    QByteArray uncompressed = qUncompress(_videos[thisVideo]->thumbnail);
-    QBuffer pixels(&uncompressed);
+    QBuffer pixels(&_videos[thisVideo]->thumbnail);
     QImage image;
     image.load(&pixels, "JPG");
     Image->setPixmap(QPixmap::fromImage(image).scaled(Image->width(), Image->height(), Qt::KeepAspectRatio));
@@ -652,17 +651,12 @@ void Comparison::resizeEvent(QResizeEvent *event)
     if(ui->leftFileName->text() == "" || _leftVideo >= _videos.count() || _rightVideo >= _videos.count())
         return;     //automatic initial resize event can happen before closing when values went over limit
 
-    QByteArray uncompressed;
     QImage image;
-
-    uncompressed = qUncompress(_videos[_leftVideo]->thumbnail);
-    QBuffer leftPixels(&uncompressed);
+    QBuffer leftPixels(&_videos[_leftVideo]->thumbnail);
     image.load(&leftPixels, "JPG");
     ui->leftImage->setPixmap(QPixmap::fromImage(image).scaled(
                              ui->leftImage->width(), ui->leftImage->height(), Qt::KeepAspectRatio));
-
-    uncompressed = qUncompress(_videos[_rightVideo]->thumbnail);
-    QBuffer rightPixels(&uncompressed);
+    QBuffer rightPixels(&_videos[_rightVideo]->thumbnail);
     image.load(&rightPixels, "JPG");
     ui->rightImage->setPixmap(QPixmap::fromImage(image).scaled(
                               ui->rightImage->width(), ui->rightImage->height(), Qt::KeepAspectRatio));
