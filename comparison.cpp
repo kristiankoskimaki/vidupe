@@ -359,11 +359,10 @@ void Comparison::reportMatchingVideos() const
 {
     const int numberOfVideos = _videos.count();
     if( (_prefs._ComparisonMode == _prefs._PHASH && numberOfVideos > 15000) ||
-        (_prefs._ComparisonMode == _prefs._SSIM && numberOfVideos > 6000) )
+        (_prefs._ComparisonMode == _prefs._SSIM  && numberOfVideos >  6000) || numberOfVideos < 2)
         return;     //too slow
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    emit sendStatusMessage(QString("\n[%1] Counting match combinations...").arg(QTime::currentTime().toString()));
 
     QVector<int> knownMatches;
     qint64 combinedFilesize = 0;
@@ -390,7 +389,7 @@ void Comparison::reportMatchingVideos() const
             }
     }
 
-    emit sendStatusMessage(QString("[%1] Found %2 video(s) (%3) with matches").
+    emit sendStatusMessage(QString("\n[%1] Found %2 video(s) (%3) with matches").
                            arg(QTime::currentTime().toString()).arg(knownMatches.count()).
                            arg(readableFileSize(combinedFilesize)));
     QApplication::restoreOverrideCursor();

@@ -234,6 +234,7 @@ void MainWindow::findVideos(QDir &dir, QStringList &everyVideo) const
 
 void MainWindow::processVideos(const QStringList &everyVideo)
 {
+    const ushort thumbnails = _prefs._thumbnails;
     const int numberOfVideos = everyVideo.count();
     if(numberOfVideos > 0)
     {
@@ -244,7 +245,7 @@ void MainWindow::processVideos(const QStringList &everyVideo)
         ui->progressBar->setValue(0);
         ui->progressBar->setMaximum(everyVideo.count());
     }
-    const ushort thumbnails = _prefs._thumbnails;
+    else return;
 
     QThreadPool threadPool;
     for(int i=0; i<numberOfVideos; i++)
@@ -269,9 +270,11 @@ void MainWindow::processVideos(const QStringList &everyVideo)
     threadPool.waitForDone();
     QApplication::processEvents();    //process signals from last threads
 
-    addStatusMessage(QString("%1 intact video(s) out of %2 total").arg(_videoList.count()).arg(everyVideo.count()));
-    if(!_rejectedVideos.empty())
+    if(_rejectedVideos.empty())
+        addStatusMessage(QString("%1 intact video(s) were found").arg(everyVideo.count()));
+    else
     {
+        addStatusMessage(QString("%1 intact video(s) out of %2 total").arg(_videoList.count()).arg(everyVideo.count()));
         addStatusMessage(QString("\nThe following %1 video(s) could not be added due to errors:")
                          .arg(_rejectedVideos.count()));
         for(int i=0; i<_rejectedVideos.count(); i++)
