@@ -3,6 +3,7 @@
 #include "db.h"
 #include <QTextEdit>
 #include <QProcess>
+#include <QPainter>
 #include <QBuffer>
 
 ushort Video::_thumbnailMode = thumb4;
@@ -131,85 +132,65 @@ void Video::getMetadata(const QString &filename)
 ushort Video::takeScreenCaptures(const Db &cache)
 {
     Thumbnail thumb(_thumbnailMode);
-
-    const ushort mergedWidth = thumb.cols() * width, mergedHeight = thumb.rows() * height;
-    const int mergedScreenSize = mergedWidth * mergedHeight * _BPP;
-    uchar *mergedCapture;
-    try { mergedCapture = new uchar[mergedScreenSize]; }
-    catch (std::bad_alloc) { return _outOfMemory; }
-
-    short ofDuration = 100;
+    QImage thumbnail(thumb.cols() * width, thumb.rows() * height, QImage::Format_RGB888);
     const QVector<short> percentages = thumb.percentages();
-    int thumbnail = percentages.count();
+    int capture = percentages.count();
+    short ofDuration = 100;
 
-    while(--thumbnail >= 0)         //screen captures are taken in reverse order so errors are found early
+    while(--capture >= 0)           //screen captures are taken in reverse order so errors are found early
     {
-        QImage img;
-        QByteArray cachedImage = cache.readCapture(percentages[thumbnail]);
+        QImage frame;
+        QByteArray cachedImage = cache.readCapture(percentages[capture]);
         QBuffer captureBuffer(&cachedImage);
         bool writeToCache = false;
 
         if(!cachedImage.isNull())   //image was already in cache
         {
-            img.load(&captureBuffer, "JPG");
-            img = img.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation)
-                     .convertToFormat(QImage::Format_RGB888);
+            frame.load(&captureBuffer, "JPG");
+            frame = frame.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation)
+                         .convertToFormat(QImage::Format_RGB888);
         }
         else
         {
-            img = captureAt(percentages[thumbnail], ofDuration);
-            if(img.isNull())                                //taking screen capture may fail if video is broken
+            frame = captureAt(percentages[capture], ofDuration);
+            if(frame.isNull())                                  //taking screen capture may fail if video is broken
             {
-                if(ofDuration >= _videoStillUsable)         //retry a few times, always closer to beginning
+                if(ofDuration >= _videoStillUsable)             //retry a few times, always closer to beginning
                 {
                     ofDuration = ofDuration - _goBackwardsPercent;
-                    thumbnail = percentages.count();
+                    capture = percentages.count();
                     continue;
                 }
-                delete[] mergedCapture;                     //video is broken or seeking impossible, skip it
                 return _failure;
             }
             writeToCache = true;
         }
-        if(img.width() > width || img.height() > height)    //metadata parsing error or variable resolution
-        {
-            delete[] mergedCapture;
+        if(frame.width() > width || frame.height() > height)    //metadata parsing error or variable resolution
             return _failure;
-        }
-                                                            //write screen capture line by line into thumbnail
-        const size_t bytesPerLine = static_cast<size_t>(img.width() * _BPP);
-        for(int line=0; line<img.height(); line++)
-            memcpy(mergedCapture + thumb.origin(this, percentages[thumbnail]) + line * mergedWidth * _BPP,
-                   img.constScanLine(line), bytesPerLine);
+
+        QPainter painter(&thumbnail);                           //copy captured frame into right place in thumbnail
+        painter.drawImage(capture % thumb.cols() * width, capture / thumb.cols() * height, frame);
 
         if(writeToCache)
         {
-            img = minimizeImage(img);                                   //shrink image = smaller cache
-            img.save(&captureBuffer, "JPG", _okJpegQuality);            //blurry jpg may actually increase
-            cache.writeCapture(percentages[thumbnail], cachedImage);    //comparison accuracy (less strict)
+            frame = minimizeImage(frame);                               //shrink image = smaller cache
+            frame.save(&captureBuffer, "JPG", _okJpegQuality);          //blurry jpg may actually increase
+            cache.writeCapture(percentages[capture], cachedImage);      //comparison accuracy (less strict)
         }
     }
-
-    processThumbnail(mergedCapture, mergedWidth, mergedHeight);
-
-    delete[] mergedCapture;
+    processThumbnail(thumbnail);
     return _success;
 }
 
-void Video::processThumbnail(const uchar *mergedCapture, const ushort &mergedWidth, const ushort &mergedHeight)
+void Video::processThumbnail(QImage &image)
 {
-    //the thumbnail is saved in the video object so it can be instantly loaded in GUI,
-    //but resized small to save memory (there may be thousands of files)
-    QImage smallImage = QImage(mergedCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
-    QBuffer buffer(&thumbnail);
-    minimizeImage(smallImage).save(&buffer, "JPG", _jpegQuality);
-
-    hash = calculateHash(mergedCapture, mergedWidth, mergedHeight);
+    QBuffer buffer(&thumbnail);         //save GUI thumbnail as tiny JPEG to conserve memory
+    minimizeImage(image).save(&buffer, "JPG", _jpegQuality);
+    hash = calculateHash(image);
 
     using namespace cv;
-    QImage ssim = QImage(mergedCapture, mergedWidth, mergedHeight, mergedWidth*_BPP, QImage::Format_RGB888);
-    ssim = ssim.rgbSwapped();   //OpenCV uses BGR instead of RGB
-    Mat mat = Mat(ssim.height(), ssim.width(), CV_8UC3, ssim.bits(), static_cast<uint>(ssim.bytesPerLine()));
+    image = image.rgbSwapped();         //OpenCV uses BGR instead of RGB
+    Mat mat = Mat(image.height(), image.width(), CV_8UC3, image.bits(), static_cast<uint>(image.bytesPerLine()));
     resize(mat, mat, Size(16, 16), 0, 0, INTER_AREA);   //16x16 seems to suffice, larger size has slower comparison
     cvtColor(mat, grayThumb, CV_BGR2GRAY);
     grayThumb.convertTo(grayThumb, CV_64F);
