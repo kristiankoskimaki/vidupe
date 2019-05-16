@@ -3,7 +3,7 @@
 uint64_t Video::calculateHash(const uchar *imageData, const ushort &width, const ushort &height) const
 {
     double transform[_blockSize * _blockSize];
-    const ushort smallBlock = 8;
+    constexpr ushort smallBlock = 8;
 
     QImage image = QImage(imageData, width, height, width*_BPP, QImage::Format_RGB888);
     image = image.scaled(_blockSize, _blockSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
