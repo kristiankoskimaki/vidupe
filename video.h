@@ -57,9 +57,7 @@ private:
     static ushort _thumbnailMode;
     static ushort _jpegQuality;
 
-    static constexpr ushort _success     = 0;
-    static constexpr ushort _failure     = 1;
-    static constexpr ushort _outOfMemory = 2;
+    enum _returnValues { _success, _failure, _outOfMemory };
 
     static constexpr ushort _okJpegQuality    = 60;
     static constexpr ushort _lowJpegQuality   = 25;
