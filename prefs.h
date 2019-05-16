@@ -8,7 +8,7 @@ class Prefs
 public:
     enum _modes { _PHASH, _SSIM };
     short _ComparisonMode = _PHASH;
-    short _thumbnails = thumb4;
+    ushort _thumbnails = thumb4;
 
     short _thresholdPhash = 7;
     short _thresholdPhashOriginal = 7;

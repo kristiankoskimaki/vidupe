@@ -244,7 +244,7 @@ void MainWindow::processVideos(const QStringList &everyVideo)
         ui->progressBar->setValue(0);
         ui->progressBar->setMaximum(everyVideo.count());
     }
-    const short thumbnails = _prefs._thumbnails;
+    const ushort thumbnails = _prefs._thumbnails;
 
     QThreadPool threadPool;
     for(int i=0; i<numberOfVideos; i++)
