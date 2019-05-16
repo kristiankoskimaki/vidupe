@@ -138,7 +138,7 @@ ushort Video::takeScreenCaptures(const Db &cache)
     try { mergedCapture = new uchar[mergedScreenSize]; }
     catch (std::bad_alloc) { return _outOfMemory; }
 
-    double ofDuration = 1.0;
+    short ofDuration = 100;
     const QVector<short> percentages = thumb.percentages();
     int thumbnail = percentages.count();
 
@@ -228,17 +228,16 @@ QImage Video::minimizeImage(const QImage &image) const
     return image;
 }
 
-QImage Video::captureAt(const short &percent, const double &ofDuration)
+QImage Video::captureAt(const short &percent, const short &ofDuration)
 {
     const QTemporaryDir tempDir;
     if(!tempDir.isValid())
         return QImage();
 
     const QString screenshot = QString("%1/vidupe%2.bmp").arg(tempDir.path()).arg(percent);
-
     QProcess ffmpeg;
     const QString ffmpegCommand = QString("ffmpeg -ss %1 -i \"%2\" -an -frames:v 1 -pix_fmt rgb24 %3")
-                                  .arg(Thumbnail::msToHHMMSS(static_cast<qint64>( percent * ofDuration * duration / 100) ),
+                                  .arg(Thumbnail::msToHHMMSS(duration * (percent * ofDuration) / (100 * 100)),
                                   QDir::toNativeSeparators(filename), QDir::toNativeSeparators(screenshot));
     ffmpeg.start(ffmpegCommand);
     ffmpeg.waitForFinished(10000);

@@ -46,7 +46,7 @@ private slots:
     void discreteCosineTransform(const QImage &image, double *transform) const;
 
 public slots:
-    QImage captureAt(const short &percent, const double &ofDuration=1.0);
+    QImage captureAt(const short &percent, const short &ofDuration=100);
 
 signals:
     void acceptVideo(const QString) const;
@@ -57,20 +57,19 @@ private:
     static ushort _thumbnailMode;
     static ushort _jpegQuality;
 
-    static constexpr ushort _blockSize = 32;                //phash generated from 32x32 image
-
     static constexpr ushort _success     = 0;
     static constexpr ushort _failure     = 1;
     static constexpr ushort _outOfMemory = 2;
 
-    static constexpr double _goBackwardsPercent = 0.07;     //if capture fails, retry but omit this much from ending...
-    static constexpr double _videoStillUsable   = 0.86;     //...but no more than 14% of total runtime
-    static constexpr int    _thumbnailMaxWidth  = 448;
-    static constexpr int    _thumbnailMaxHeight = 336;
+    static constexpr ushort _okJpegQuality    = 60;
+    static constexpr ushort _lowJpegQuality   = 25;
+    static constexpr int    _hugeAmountVideos = 200000;
 
-    static constexpr ushort _okJpegQuality      = 60;
-    static constexpr ushort _lowJpegQuality     = 25;
-    static constexpr int    _hugeAmountVideos   = 200000;
+    static constexpr ushort _goBackwardsPercent = 7;    //if capture fails, retry but omit this much from end
+    static constexpr ushort _videoStillUsable   = 86;   //86% of video duration is considered usable
+    static constexpr int    _thumbnailMaxWidth  = 448;  //small size to save memory and cache space
+    static constexpr int    _thumbnailMaxHeight = 336;
+    static constexpr ushort _blockSize          = 32;   //phash generated from 32x32 image
 };
 
 #endif // VIDEO_H
