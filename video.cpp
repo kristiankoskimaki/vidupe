@@ -5,12 +5,13 @@
 #include <QProcess>
 #include <QBuffer>
 
-ushort _jpegQuality = _okJpegQuality;
+ushort Video::_thumbnailMode = thumb4;
+ushort Video::_jpegQuality = _okJpegQuality;
 
-Video::Video(QWidget &parent, const QString &userFilename, const int &numberOfVideos, const short &userThumbnails)
+Video::Video(QWidget &parent, const QString &userFilename, const int &numberOfVideos, const ushort &userThumbnails)
 {
     filename = userFilename;
-    thumbnailMode = userThumbnails;
+    _thumbnailMode = userThumbnails;
 
     if(numberOfVideos > _hugeAmountVideos)       //save memory to avoid crash due to 32 bit limit
         _jpegQuality = _lowJpegQuality;
@@ -129,7 +130,7 @@ void Video::getMetadata(const QString &filename)
 
 ushort Video::takeScreenCaptures(const Db &cache)
 {
-    Thumbnail thumb(thumbnailMode);
+    Thumbnail thumb(_thumbnailMode);
 
     const ushort mergedWidth = thumb.cols() * width, mergedHeight = thumb.rows() * height;
     const int mergedScreenSize = mergedWidth * mergedHeight * _BPP;

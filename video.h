@@ -11,32 +11,15 @@
 #include "thumbnail.h"
 #include "db.h"
 
-const ushort _BPP = 3;                          //bits per pixel
-const ushort _blockSize = 32;                   //phash generated from 32x32 image
-
-const ushort _success     = 0;
-const ushort _failure     = 1;
-const ushort _outOfMemory = 2;
-
-const double _goBackwardsPercent = 0.07;        //if capture fails, retry but omit this much from ending...
-const double _videoStillUsable   = 0.86;        //...but no more than 14% of total runtime
-const int    _thumbnailMaxWidth  = 448;
-const int    _thumbnailMaxHeight = 336;
-
-extern ushort _jpegQuality;
-const ushort _okJpegQuality      = 60;
-const ushort _lowJpegQuality     = 25;
-const int    _hugeAmountVideos   = 200000;
+static constexpr ushort _BPP = 3;               //bits per pixel
 
 class Video : public QObject, public QRunnable
 {
     Q_OBJECT
 
 public:
-    Video(QWidget &parent, const QString &userFilename, const int &numberOfVideos, const short &userThumbnails=2*2);
+    Video(QWidget &parent, const QString &userFilename, const int &numberOfVideos, const ushort &userThumbnails=2*2);
     void run() override;
-
-    short thumbnailMode = thumb4;
 
     QString filename = "";
     qint64 size = 0;
@@ -69,6 +52,25 @@ signals:
     void acceptVideo(const QString) const;
     void rejectVideo(Video *) const;
     void sendStatusMessage(const QString) const;
+
+private:
+    static ushort _thumbnailMode;
+    static ushort _jpegQuality;
+
+    static constexpr ushort _blockSize = 32;                //phash generated from 32x32 image
+
+    static constexpr ushort _success     = 0;
+    static constexpr ushort _failure     = 1;
+    static constexpr ushort _outOfMemory = 2;
+
+    static constexpr double _goBackwardsPercent = 0.07;     //if capture fails, retry but omit this much from ending...
+    static constexpr double _videoStillUsable   = 0.86;     //...but no more than 14% of total runtime
+    static constexpr int    _thumbnailMaxWidth  = 448;
+    static constexpr int    _thumbnailMaxHeight = 336;
+
+    static constexpr ushort _okJpegQuality      = 60;
+    static constexpr ushort _lowJpegQuality     = 25;
+    static constexpr int    _hugeAmountVideos   = 200000;
 };
 
 #endif // VIDEO_H
