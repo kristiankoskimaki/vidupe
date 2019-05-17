@@ -11,8 +11,6 @@
 #include "thumbnail.h"
 #include "db.h"
 
-static constexpr ushort _BPP = 3;               //bits per pixel
-
 class Video : public QObject, public QRunnable
 {
     Q_OBJECT
