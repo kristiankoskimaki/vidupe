@@ -42,8 +42,8 @@ private slots:
     QImage minimizeImage(const QImage &image) const;
 
     uint64_t calculateHash(QImage &image) const;
-    bool convertGrayscale(QImage &image) const;
-    void discreteCosineTransform(const QImage &image, double *transform) const;
+    bool convertGrayscale(const QImage &image, QVector<double> &grayImage) const;
+    void fastDCTransform(double vec[], double temp[], size_t len) const;
 
 public slots:
     QImage captureAt(const short &percent, const short &ofDuration=100);
@@ -68,6 +68,7 @@ private:
     static constexpr int    _thumbnailMaxWidth  = 448;  //small size to save memory and cache space
     static constexpr int    _thumbnailMaxHeight = 336;
     static constexpr ushort _blockSize          = 32;   //phash generated from 32x32 image
+    static constexpr ushort _smallBlock         = 8;    //phash uses only most significant 8x8 transforms
 };
 
 #endif // VIDEO_H

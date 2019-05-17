@@ -2,33 +2,39 @@
 
 uint64_t Video::calculateHash(QImage &image) const
 {
-    double transform[_blockSize * _blockSize];
-    constexpr ushort smallBlock = 8;
-
     image = image.scaled(_blockSize, _blockSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    if(convertGrayscale(image) == true)                 //also reject video if happened to capture monochrome image
-        return 0;
-    discreteCosineTransform(image, transform);
 
-    double reducedTransform[smallBlock*smallBlock];      //only use upper left 8*8 transforms (most significant ones)
-    for(ushort i=0; i<smallBlock; i++)
-        for(ushort j=0; j<smallBlock; j++)
-            reducedTransform[i * smallBlock + j] = transform[i * _blockSize + j];
+    QVector<double> grayImage;
+    grayImage.reserve(_blockSize * _blockSize);
+    if(convertGrayscale(image, grayImage) == true)      //also reject video if happened to capture monochrome image
+        return 0;
+
+    QVector<double> temp(_blockSize * _blockSize);
+    fastDCTransform(grayImage.data(), temp.data(), _blockSize * _blockSize);   //perform discrete cosine transform (DCT)
 
     double avgTransform = 0;
-    for(ushort i=1; i<smallBlock*smallBlock; i++)       //skip first term since it differs much from others
-        avgTransform += reducedTransform[i];
-    avgTransform = avgTransform / (smallBlock * smallBlock - 1);
+    QVector<double> reducedTransform;
+    reducedTransform.reserve(_smallBlock * _smallBlock);
+
+    for(ushort i=0; i<_smallBlock; i++)                 //only use upper left 8*8 transforms (most significant ones)
+        for(ushort j=0; j<_smallBlock; j++)
+        {
+            const double element = grayImage[i * _blockSize + j];
+            reducedTransform.push_back(element);
+            avgTransform = avgTransform + element;
+        }
+                                                        //skip first term since it differs much from others
+    avgTransform = (avgTransform - grayImage[0]) / (_smallBlock * _smallBlock - 1);
 
     uint64_t hash = 0;      //construct hash from all 64 bits: larger than avg = 1, smaller than avg = 0
-    for(ushort i=0; i<smallBlock*smallBlock; i++)
+    for(ushort i=0; i<_smallBlock*_smallBlock; i++)
         if(reducedTransform[i] > avgTransform)
             hash |= 1ULL << i;
 
     return hash;
 }
 
-bool Video::convertGrayscale(QImage &image) const
+bool Video::convertGrayscale(const QImage &image, QVector<double> &grayImage) const
 {
     const QRgb firstPixel = image.pixel(0, 0);
     bool arePixelsIdentical = true;
@@ -37,8 +43,7 @@ bool Video::convertGrayscale(QImage &image) const
         for(ushort j=0; j<_blockSize; j++)
         {
             const QRgb pixel = image.pixel(i, j);
-            const int gray = qGray(qRed(pixel), qGreen(pixel), qBlue(pixel));
-            image.setPixel(i, j, static_cast<uchar>(gray));
+            grayImage.push_back(qGray(qRed(pixel), qGreen(pixel), qBlue(pixel)));
 
             if(pixel != firstPixel)
                 arePixelsIdentical = false;
@@ -47,35 +52,51 @@ bool Video::convertGrayscale(QImage &image) const
     return(arePixelsIdentical);
 }
 
-void Video::discreteCosineTransform(const QImage &image, double *transform) const
+/*
+Fast discrete cosine transform algorithms (C++)
+
+Copyright (c) 2017 Project Nayuki. (MIT License)
+https://www.nayuki.io/page/fast-discrete-cosine-transform-algorithms
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+- The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+- The Software is provided "as is", without warranty of any kind, express or
+  implied, including but not limited to the warranties of merchantability,
+  fitness for a particular purpose and noninfringement. In no event shall the
+  authors or copyright holders be liable for any claim, damages or other
+  liability, whether in an action of contract, tort or otherwise, arising from,
+  out of or in connection with the Software or the use or other dealings in the
+  Software.
+*/
+//Byeong Gi Lee: “FCT - A Fast Cosine Transform” IEEE 1984
+void Video::fastDCTransform(double vec[], double temp[], size_t len) const
 {
-    double iCoeff, jCoeff, dct, sum;
+    if(len == 1)
+        return;
 
-    for(ushort i=0; i<_blockSize; i++)
+    size_t halfLen = len / 2;
+    for(size_t i=0; i<halfLen; i++)
     {
-        for(ushort j=0; j<_blockSize; j++)
-        {
-            if(i == 0)
-                iCoeff = 1 / sqrt(_blockSize);
-            else
-                iCoeff = sqrt(2) / sqrt(_blockSize);
-            if(j == 0)
-                jCoeff = 1 / sqrt(_blockSize);
-            else
-                jCoeff = sqrt(2) / sqrt(_blockSize);
-
-            sum = 0;
-            for(ushort k=0; k<_blockSize; k++)
-            {
-                for(ushort l=0; l<_blockSize; l++)
-                {
-                    dct = image.pixel(k, l) *
-                           cos((2 * k + 1) * i * M_PI / (2 * _blockSize)) *
-                           cos((2 * l + 1) * j * M_PI / (2 * _blockSize));
-                    sum = sum + dct;
-                }
-            }
-            transform[_blockSize * i + j] = iCoeff * jCoeff * sum;
-        }
+        double x = vec[i];
+        double y = vec[len - 1 - i];
+        temp[i] = x + y;
+        temp[i + halfLen] = (x - y) / (cos((i + 0.5) * M_PI / len) * 2);
     }
+
+    fastDCTransform(temp, vec, halfLen);
+    fastDCTransform(&temp[halfLen], vec, halfLen);
+
+    for(size_t i=0; i<halfLen-1; i++)
+    {
+        vec[i * 2 + 0] = temp[i];
+        vec[i * 2 + 1] = temp[i + halfLen] + temp[i + halfLen + 1];
+    }
+    vec[len - 2] = temp[halfLen - 1];
+    vec[len - 1] = temp[len - 1];
 }
