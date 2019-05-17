@@ -121,7 +121,7 @@ void Comparison::on_nextVideo_clicked()
     }
 }
 
-bool Comparison::bothVideosMatch(const int &left, const int &right) const
+bool Comparison::bothVideosMatch(const int &left, const int &right)
 {
     const short similarity = phashSimilarity(left, right);
     if(_prefs._ComparisonMode == _prefs._PHASH)
@@ -132,35 +132,29 @@ bool Comparison::bothVideosMatch(const int &left, const int &right) const
     }
     else if(similarity <= qMax(_prefs._thresholdPhash, static_cast<short>(20)))
     {   //ssim comparison takes long time, only do it if pHash somewhat matches
-        double threshold = _prefs._thresholdSSIM;
         const double ss = ssim(_videos[left]->grayThumb, _videos[right]->grayThumb, _prefs._ssimBlockSize);
-
-        if( qAbs(_videos[left]->duration - _videos[right]->duration) <= 1000 )
-            threshold = threshold - _prefs._sameDurationModifier / 64;      //lower distance if both durations within 1s
-        else
-            threshold = threshold + _prefs._differentDurationModifier / 64;
-
-        if(ss > threshold)
+        if(static_cast<double>(ss + _prefs._durationModifier / 64) > _prefs._thresholdSSIM)
             return true;
     }
     return false;
 }
 
-short Comparison::phashSimilarity(const int &left, const int &right) const
+short Comparison::phashSimilarity(const int &left, const int &right)
 {
     short distance = 0;
-
     uint64_t differentBits = _videos[left]->hash ^ _videos[right]->hash;    //XOR to value (only ones for differing bits)
     while(differentBits != 0)
     {
         differentBits &= differentBits - 1;     //count number of bits of value
         distance++;
     }
-    if( qAbs(_videos[left]->duration - _videos[right]->duration) <= 1000 )
-        distance = distance - _prefs._sameDurationModifier;                 //lower distance if both durations within 1s
-    else
-        distance = distance + _prefs._differentDurationModifier;
 
+    if( qAbs(_videos[left]->duration - _videos[right]->duration) <= 1000 )
+        _prefs._durationModifier = 0 - _prefs._sameDurationModifier;        //lower distance if both durations within 1s
+    else
+        _prefs._durationModifier = 0 + _prefs._differentDurationModifier;   //raise distance if both durations differ 1s
+
+    distance = distance + _prefs._durationModifier;
     return distance > 0? distance : 0;  //negative value would wrap into huge value because return value is short
                                         //could return ushort, but "-2/64 different bits" looks weird (although useful)
 }
@@ -357,7 +351,7 @@ void Comparison::updateUI()
     ui->progressBar->setValue(comparisonsSoFar());
 }
 
-void Comparison::reportMatchingVideos() const
+void Comparison::reportMatchingVideos()
 {
     const int numberOfVideos = _videos.count();
     if( (_prefs._ComparisonMode == _prefs._PHASH && numberOfVideos > 15000) ||

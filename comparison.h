@@ -40,8 +40,8 @@ private:
 private slots:
     void on_prevVideo_clicked();
     void on_nextVideo_clicked();
-    bool bothVideosMatch(const int &left, const int &right) const;
-    short phashSimilarity(const int &left, const int &right) const;
+    bool bothVideosMatch(const int &left, const int &right);
+    short phashSimilarity(const int &left, const int &right);
 
     void showVideo(const QString &side) const;
     QString readableDuration(const qint64 &milliseconds) const;
@@ -49,7 +49,7 @@ private slots:
     QString readableBitRate(const double &kbps) const;
     void highlightBetterProperties() const;
     void updateUI();
-    void reportMatchingVideos() const;
+    void reportMatchingVideos();
     int comparisonsSoFar() const;
 
     void on_selectPhash_clicked ( const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._PHASH; }
