@@ -40,6 +40,7 @@ private slots:
     ushort takeScreenCaptures(const Db &cache);
     void processThumbnail(QImage &image);
     QImage minimizeImage(const QImage &image) const;
+    QString msToHHMMSS(const qint64 &time) const;
 
     uint64_t calculateHash(QImage &image) const;
     bool convertGrayscale(const QImage &image, QVector<double> &grayImage) const;

@@ -16,7 +16,6 @@ HEADERS += \
 SOURCES += \
     mainwindow.cpp \
     video.cpp \
-    thumbnail.cpp \
     phash.cpp \
     db.cpp \
     comparison.cpp \

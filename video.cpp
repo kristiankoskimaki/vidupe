@@ -208,6 +208,28 @@ QImage Video::minimizeImage(const QImage &image) const
     return image;
 }
 
+QString Video::msToHHMMSS(const qint64 &time) const
+{
+    const ushort hours   = time / (1000*60*60) % 24;
+    const ushort minutes = time / (1000*60) % 60;
+    const ushort seconds = time / 1000 % 60;
+    const ushort msecs   = time % 1000;
+
+    QString paddedHours = QString("%1").arg(hours);
+    if(hours < 10)
+        paddedHours = "0" + paddedHours;
+
+    QString paddedMinutes = QString("%1").arg(minutes);
+    if(minutes < 10)
+        paddedMinutes = "0" + paddedMinutes;
+
+    QString paddedSeconds = QString("%1").arg(seconds);
+    if(seconds < 10)
+        paddedSeconds = "0" + paddedSeconds;
+
+    return QString("%1:%2:%3.%4").arg(paddedHours, paddedMinutes, paddedSeconds).arg(msecs);
+}
+
 QImage Video::captureAt(const short &percent, const short &ofDuration)
 {
     const QTemporaryDir tempDir;
@@ -217,7 +239,7 @@ QImage Video::captureAt(const short &percent, const short &ofDuration)
     const QString screenshot = QString("%1/vidupe%2.bmp").arg(tempDir.path()).arg(percent);
     QProcess ffmpeg;
     const QString ffmpegCommand = QString("ffmpeg -ss %1 -i \"%2\" -an -frames:v 1 -pix_fmt rgb24 %3")
-                                  .arg(Thumbnail::msToHHMMSS(duration * (percent * ofDuration) / (100 * 100)),
+                                  .arg(msToHHMMSS(duration * (percent * ofDuration) / (100 * 100)),
                                   QDir::toNativeSeparators(filename), QDir::toNativeSeparators(screenshot));
     ffmpeg.start(ffmpegCommand);
     ffmpeg.waitForFinished(10000);

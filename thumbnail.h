@@ -3,8 +3,6 @@
 
 #include <QVector>
 
-class Video;
-
 enum modes { thumb1, thumb2, thumb3, thumb4, thumb6, thumb9, thumb12 };
 
 class Thumbnail
@@ -30,8 +28,6 @@ public:
     ushort cols() { return m_layout[m_mode][0]; }
     ushort rows() { return m_layout[m_mode][1]; }
     QVector<short> percentages() { return m_capturePos[m_mode]; }
-    static QString msToHHMMSS(const qint64 &time);
-    int origin(const Video *video, const int &percent) const;
 };
 
 #endif // THUMBNAIL_H
