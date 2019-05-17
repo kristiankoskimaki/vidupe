@@ -274,7 +274,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="sameDurationModifierLabel">
             <property name="text">
-             <string>If both durations differ &lt;4%, lower threshold by</string>
+             <string>If both durations within 1s, lower threshold by</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -328,7 +328,7 @@
              <enum>Qt::LeftToRight</enum>
             </property>
             <property name="text">
-             <string>If both durations differ &gt;4%, raise threshold by</string>
+             <string>If both durations differ 1s, raise threshold by</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

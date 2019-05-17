@@ -135,11 +135,10 @@ bool Comparison::bothVideosMatch(const int &left, const int &right) const
         double threshold = _prefs._thresholdSSIM;
         const double ss = ssim(_videos[left]->grayThumb, _videos[right]->grayThumb, _prefs._ssimBlockSize);
 
-        if(_videos[right]->duration > _videos[left]->duration * 0.96 &&
-           _videos[right]->duration < _videos[left]->duration * 1.04)
-            threshold = threshold - _prefs._sameDurationModifier / 64;        //lower distance if video lengths are within 4%
+        if( qAbs(_videos[left]->duration - _videos[right]->duration) <= 1000 )
+            threshold = threshold - _prefs._sameDurationModifier / 64;      //lower distance if both durations within 1s
         else
-            threshold = threshold + _prefs._differentDurationModifier / 64;   //raise distance if video lengths differ over 4%
+            threshold = threshold + _prefs._differentDurationModifier / 64;
 
         if(ss > threshold)
             return true;
@@ -151,17 +150,16 @@ short Comparison::phashSimilarity(const int &left, const int &right) const
 {
     short distance = 0;
 
-    uint64_t differentBits = _videos[left]->hash ^ _videos[right]->hash;     //XOR to value (only ones for differing bits)
+    uint64_t differentBits = _videos[left]->hash ^ _videos[right]->hash;    //XOR to value (only ones for differing bits)
     while(differentBits != 0)
     {
         differentBits &= differentBits - 1;     //count number of bits of value
         distance++;
     }
-    if(_videos[right]->duration > _videos[left]->duration * 0.96 &&
-       _videos[right]->duration < _videos[left]->duration * 1.04)
-        distance = distance - _prefs._sameDurationModifier;        //lower distance if video lengths are within 4%
+    if( qAbs(_videos[left]->duration - _videos[right]->duration) <= 1000 )
+        distance = distance - _prefs._sameDurationModifier;                 //lower distance if both durations within 1s
     else
-        distance = distance + _prefs._differentDurationModifier;   //raise distance if video lengths differ over 4%
+        distance = distance + _prefs._differentDurationModifier;
 
     return distance > 0? distance : 0;  //negative value would wrap into huge value because return value is short
                                         //could return ushort, but "-2/64 different bits" looks weird (although useful)
