@@ -97,21 +97,25 @@ void Comparison::on_nextVideo_clicked()
 
     this->show();   //no results: just close window if only a few videos, otherwise ask first
     int confirm = QMessageBox::Yes;
-    if(ui->leftFileName->text() != "" || numberOfVideos > 500)
+    if(ui->leftFileName->text() != "")
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Out of videos to compare");
-        msgBox.setText("Close window?\n(comparison results will be discarded)");
+        msgBox.setText("Close window?                  ");
         msgBox.setIcon(QMessageBox::QMessageBox::Question);
         msgBox.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
         msgBox.setDefaultButton(QMessageBox::No);
         confirm = msgBox.exec();
     }
-    if((ui->leftFileName->text() == "" && numberOfVideos < 500) || confirm == QMessageBox::Yes)
+    if(confirm == QMessageBox::Yes)
     {
-        if(ui->leftFileName->text() == "" && numberOfVideos < 500)
+        if(ui->leftFileName->text() != "")
+            emit sendStatusMessage(QString("\nPressing Find duplicates button opens comparison window "
+                                           "again if thumbnail mode and directories remain the same"));
+        else
             emit sendStatusMessage(QString("\nComparison window closed because no matching videos found "
                                            "(a lower threshold may help to find more matches)"));
+
         QKeyEvent *closeEvent = new QKeyEvent(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
         QApplication::postEvent(this, closeEvent);  //"pressing" ESC closes dialog
     }
