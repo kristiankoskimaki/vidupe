@@ -50,9 +50,9 @@ public slots:
     QImage captureAt(const short &percent, const short &ofDuration=100);
 
 signals:
-    void acceptVideo(const QString) const;
-    void rejectVideo(Video *) const;
-    void sendStatusMessage(const QString) const;
+    void acceptVideo(const QString &filename) const;
+    void rejectVideo(Video *deleteMe) const;
+    void sendStatusMessage(const QString &message) const;
 
 private:
     static ushort _thumbnailMode;

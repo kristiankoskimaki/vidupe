@@ -14,7 +14,9 @@ Comparison::Comparison(QVector<Video *> &userVideos, Prefs &userPrefs, QWidget &
 
     ui->setupUi(this);
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
-    connect(this, SIGNAL(sendStatusMessage(QString)), &parent, SLOT(addStatusMessage(QString)));
+    connect(this, SIGNAL(sendStatusMessage(const QString &)), &parent, SLOT(addStatusMessage(const QString &)));
+    connect(this, SIGNAL(switchComparisonMode(const short &)), &parent, SLOT(setComparisonMode(const short &)));
+    connect(this, SIGNAL(adjustThresholdSlider(const int &)), &parent, SLOT(on_thresholdSlider_valueChanged(const int &)));
 
     if(_prefs._ComparisonMode == _prefs._SSIM)
         ui->selectSSIM->setChecked(true);
@@ -637,6 +639,8 @@ void Comparison::on_thresholdSlider_valueChanged(const int &value)
         _prefs._thresholdPhash = static_cast<short>(64 - value);
         _prefs._thresholdSSIM = static_cast<double>(value) / 64;
     }
+
+    emit adjustThresholdSlider(64 - _prefs._thresholdPhash);
 }
 
 void Comparison::resizeEvent(QResizeEvent *event)

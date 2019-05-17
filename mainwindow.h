@@ -36,13 +36,14 @@ private slots:
     void loadExtensions();
     bool detectffmpeg() const;
 
+    void setComparisonMode(const short &mode) { if(mode == _prefs._PHASH) ui->selectPhash->click(); else ui->selectSSIM->click(); }
     void on_selectThumbnails_activated(const int &index) { _prefs._thumbnails = static_cast<ushort>(index); }
     void on_selectPhash_clicked(const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._PHASH; }
     void on_selectSSIM_clicked(const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._SSIM; }
     void on_blocksizeCombo_activated(const int &index) { _prefs._ssimBlockSize = static_cast<short>(pow(2, index+1)); }
     void on_differentDurationCombo_activated(const int &index) { _prefs._differentDurationModifier = static_cast<short>(index); }
     void on_sameDurationCombo_activated(const int &index) { _prefs._sameDurationModifier = static_cast<short>(index); }
-    void on_thresholdSlider_valueChanged(const int &value) { calculateThreshold(value); }
+    void on_thresholdSlider_valueChanged(const int &value) { ui->thresholdSlider->setValue(value); calculateThreshold(value); }
     void calculateThreshold(const int &value);
 
     void on_browseFolders_clicked();

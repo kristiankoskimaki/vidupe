@@ -17,9 +17,9 @@ Video::Video(QWidget &parent, const QString &userFilename, const int &numberOfVi
     if(numberOfVideos > _hugeAmountVideos)       //save memory to avoid crash due to 32 bit limit
         _jpegQuality = _lowJpegQuality;
 
-    QObject::connect(this, SIGNAL(rejectVideo(Video*)), &parent, SLOT(removeVideo(Video*)));
-    QObject::connect(this, SIGNAL(acceptVideo(QString)), &parent, SLOT(addVideo(QString)));
-    QObject::connect(this, SIGNAL(sendStatusMessage(QString)), &parent, SLOT(addStatusMessage(QString)));
+    QObject::connect(this, SIGNAL(rejectVideo(Video *)), &parent, SLOT(removeVideo(Video *)));
+    QObject::connect(this, SIGNAL(acceptVideo(const QString &)), &parent, SLOT(addVideo(const QString &)));
+    QObject::connect(this, SIGNAL(sendStatusMessage(const QString &)), &parent, SLOT(addStatusMessage(const QString &)));
 }
 
 void Video::run()

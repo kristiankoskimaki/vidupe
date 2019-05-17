@@ -52,8 +52,10 @@ private slots:
     void reportMatchingVideos();
     int comparisonsSoFar() const;
 
-    void on_selectPhash_clicked ( const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._PHASH; }
-    void on_selectSSIM_clicked ( const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._SSIM; }
+    void on_selectPhash_clicked ( const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._PHASH;
+                                                         emit switchComparisonMode(_prefs._ComparisonMode); }
+    void on_selectSSIM_clicked ( const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._SSIM;
+                                                        emit switchComparisonMode(_prefs._ComparisonMode); }
     void on_leftImage_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(_videos[_leftVideo]->filename)); }
     void on_rightImage_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(_videos[_rightVideo]->filename)); }
     void on_leftFileName_clicked() const;
@@ -73,7 +75,9 @@ private slots:
     double ssim(const cv::Mat &m0, const cv::Mat &m1, const int &block_size) const;
 
 signals:
-    void sendStatusMessage(const QString) const;
+    void sendStatusMessage(const QString &message) const;
+    void switchComparisonMode(const short &mode) const;
+    void adjustThresholdSlider(const int &value) const;
 };
 
 
