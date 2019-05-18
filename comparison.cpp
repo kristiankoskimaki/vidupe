@@ -125,17 +125,18 @@ void Comparison::on_nextVideo_clicked()
 
 bool Comparison::bothVideosMatch(const int &left, const int &right)
 {
-    const short similarity = phashSimilarity(left, right);
+    _phashSimilarity = phashSimilarity(left, right);
     if(_prefs._ComparisonMode == _prefs._PHASH)
     {
-        if(similarity <= _prefs._thresholdPhash)
+        if(_phashSimilarity <= _prefs._thresholdPhash)
             return true;
         return false;
     }
-    else if(similarity <= qMax(_prefs._thresholdPhash, static_cast<short>(20)))
+    else if(_phashSimilarity <= qMax(_prefs._thresholdPhash, static_cast<short>(20)))
     {   //ssim comparison takes long time, only do it if pHash somewhat matches
-        const double ss = ssim(_videos[left]->grayThumb, _videos[right]->grayThumb, _prefs._ssimBlockSize);
-        if(static_cast<double>(ss + _prefs._durationModifier / 64) > _prefs._thresholdSSIM)
+        _ssimSimilarity = ssim(_videos[left]->grayThumb, _videos[right]->grayThumb, _prefs._ssimBlockSize);
+        _ssimSimilarity = static_cast<double>(_ssimSimilarity + _durationModifier / 64);
+        if(_ssimSimilarity > _prefs._thresholdSSIM)
             return true;
     }
     return false;
@@ -152,11 +153,11 @@ short Comparison::phashSimilarity(const int &left, const int &right)
     }
 
     if( qAbs(_videos[left]->duration - _videos[right]->duration) <= 1000 )
-        _prefs._durationModifier = 0 - _prefs._sameDurationModifier;        //lower distance if both durations within 1s
+        _durationModifier = 0 - _prefs._sameDurationModifier;               //lower distance if both durations within 1s
     else
-        _prefs._durationModifier = 0 + _prefs._differentDurationModifier;   //raise distance if both durations differ 1s
+        _durationModifier = 0 + _prefs._differentDurationModifier;          //raise distance if both durations differ 1s
 
-    distance = distance + _prefs._durationModifier;
+    distance = distance + _durationModifier;
     return distance > 0? distance : 0;  //negative value would wrap into huge value because return value is short
                                         //could return ushort, but "-2/64 different bits" looks weird (although useful)
 }
@@ -342,12 +343,9 @@ void Comparison::updateUI()
     }
 
     if(_prefs._ComparisonMode == _prefs._PHASH)
-        ui->identicalBits->setText(QString("%1/64 different bits").arg(phashSimilarity(_leftVideo, _rightVideo)));
+        ui->identicalBits->setText(QString("%1/64 different bits").arg(_phashSimilarity));
     if(_prefs._ComparisonMode == _prefs._SSIM)
-    {
-        const double ss = ssim(_videos[_leftVideo]->grayThumb, _videos[_rightVideo]->grayThumb, _prefs._ssimBlockSize);
-        ui->identicalBits->setText(QString("%1 SSIM index").arg(QString::number(ss, 'f', 3)));
-    }
+        ui->identicalBits->setText(QString("%1 SSIM index").arg(QString::number(_ssimSimilarity, 'f', 3)));
 
     _zoomLevel = 0;
     ui->progressBar->setValue(comparisonsSoFar());

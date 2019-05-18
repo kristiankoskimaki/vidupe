@@ -29,6 +29,10 @@ private:
     qint64 _spaceSaved = 0;
     bool _seekForwards = true;
 
+    short _durationModifier = 0;
+    short _phashSimilarity = 0;
+    double _ssimSimilarity = 0.0;
+
     int _zoomLevel = 0;
     QPixmap _leftZoomed;
     int _leftW = 0;

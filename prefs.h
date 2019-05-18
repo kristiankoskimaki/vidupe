@@ -16,7 +16,6 @@ public:
     double _thresholdSSIM = 0.90;
     short _ssimBlockSize = 16;
 
-    short _durationModifier = 0;
     short _differentDurationModifier = 5;
     short _sameDurationModifier = 5;
 };
