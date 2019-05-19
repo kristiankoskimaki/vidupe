@@ -363,27 +363,20 @@ void Comparison::reportMatchingVideos()
     QVector<int> knownMatches;
     qint64 combinedFilesize = 0;
     for(int left=0; left<numberOfVideos; left++)
-    {
-        int videosMatchingLeft = 0;
         for(int right=left+1; right<numberOfVideos; right++)
             if(bothVideosMatch(left, right))
             {
-                videosMatchingLeft++;
-                if(videosMatchingLeft <= 1)
-                {
-                    bool alreadyFound = false;
-                    for(int i=0; i<knownMatches.count(); i++)
-                        if(knownMatches[i] == right)   //matching videos only counted ONCE
-                            alreadyFound = true;
-                    if(!alreadyFound)
-                    {
-                        knownMatches.append(right);
-                        //smaller of two matching videos is likely the one to be deleted
-                        combinedFilesize += std::min(_videos[left]->size , _videos[right]->size);
-                    }
+                bool alreadyFound = false;
+                for(int i=0; i<knownMatches.count(); i++)
+                    if(knownMatches[i] == right)   //this video has already been matched with another
+                        alreadyFound = true;
+                if(!alreadyFound)
+                {   //smaller of two matching videos is likely the one to be deleted
+                    combinedFilesize += std::min(_videos[left]->size , _videos[right]->size);
+                    knownMatches.append(right);
                 }
+            right = numberOfVideos;
             }
-    }
 
     emit sendStatusMessage(QString("\n[%1] Found %2 video(s) (%3) with matches").
                            arg(QTime::currentTime().toString()).arg(knownMatches.count()).
