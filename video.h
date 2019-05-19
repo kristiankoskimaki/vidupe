@@ -68,6 +68,7 @@ private:
     static constexpr int    _thumbnailMaxHeight = 336;
     static constexpr ushort _blockSize          = 32;   //phash generated from 32x32 image
     static constexpr ushort _smallBlock         = 8;    //phash uses only most significant 8x8 transforms
+    static constexpr ushort _ssimSize           = 16;   //larger than 16x16 seems to have slower comparison
 };
 
 #endif // VIDEO_H

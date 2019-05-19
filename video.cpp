@@ -184,14 +184,16 @@ ushort Video::takeScreenCaptures(const Db &cache)
 
 void Video::processThumbnail(QImage &image)
 {
-    using namespace cv;     //note: mat is now RGB-swapped since opencv uses BGR (moot, since we use grayscale)
+    image = minimizeImage(image);
+    QBuffer buffer(&thumbnail);
+    image.save(&buffer, "JPG", _jpegQuality);    //save GUI thumbnail as tiny JPEG to conserve memory
+
+    using namespace cv;     //note: mat is now RGB-swapped since opencv uses BGR (moot, since it is grayscale)
     Mat mat = Mat(image.height(), image.width(), CV_8UC3, image.bits(), static_cast<uint>(image.bytesPerLine()));
-    resize(mat, mat, Size(16, 16), 0, 0, INTER_AREA);   //16x16 seems to suffice, larger size has slower comparison
+    resize(mat, mat, Size(_ssimSize, _ssimSize), 0, 0, INTER_AREA);
     cvtColor(mat, grayThumb, CV_BGR2GRAY);
     grayThumb.convertTo(grayThumb, CV_64F);
 
-    QBuffer buffer(&thumbnail);
-    minimizeImage(image).save(&buffer, "JPG", _jpegQuality);    //save GUI thumbnail as tiny JPEG to conserve memory
     hash = calculateHash(image);
 }
 
