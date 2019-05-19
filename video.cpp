@@ -146,9 +146,8 @@ ushort Video::takeScreenCaptures(const Db &cache)
 
         if(!cachedImage.isNull())   //image was already in cache
         {
-            frame.load(&captureBuffer, "JPG");
-            frame = frame.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation)
-                         .convertToFormat(QImage::Format_RGB888);
+            frame.load(&captureBuffer, "JPG");              //was saved in cache as small size, resize to original
+            frame = frame.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
         else
         {
@@ -199,7 +198,7 @@ void Video::processThumbnail(QImage &image)
 
 QImage Video::minimizeImage(const QImage &image) const
 {
-    if(image.width() >= image.height())
+    if(image.width() > image.height())
     {
         if(image.width() > _thumbnailMaxWidth)
             return image.scaledToWidth(_thumbnailMaxWidth, Qt::SmoothTransformation);
@@ -247,7 +246,6 @@ QImage Video::captureAt(const short &percent, const short &ofDuration)
     ffmpeg.waitForFinished(10000);
 
     QImage img(screenshot, "BMP");
-    img = img.convertToFormat(QImage::Format_RGB888);
     QFile::remove(screenshot);
     return img;
 }
