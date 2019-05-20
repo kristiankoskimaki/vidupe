@@ -42,7 +42,7 @@ private slots:
 
     uint64_t calculateHash(QImage &image) const;
     bool convertGrayscale(const QImage &image, QVector<double> &grayImage) const;
-    void fastDCTransform(double vec[], double temp[], size_t len) const;
+    void discreteCosineTransform(QVector<double> &vec, const int &length) const;
 
 public slots:
     QImage captureAt(const short &percent, const short &ofDuration=100);

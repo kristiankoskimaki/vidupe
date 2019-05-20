@@ -10,7 +10,7 @@ uint64_t Video::calculateHash(QImage &image) const
         return 0;
 
     QVector<double> temp(_blockSize * _blockSize);
-    fastDCTransform(grayImage.data(), temp.data(), _blockSize * _blockSize);   //perform discrete cosine transform (DCT)
+    discreteCosineTransform(grayImage, _blockSize);
 
     double avgTransform = 0;
     QVector<double> reducedTransform;
@@ -52,51 +52,35 @@ bool Video::convertGrayscale(const QImage &image, QVector<double> &grayImage) co
     return(arePixelsIdentical);
 }
 
-/*
-Fast discrete cosine transform algorithms (C++)
-
-Copyright (c) 2017 Project Nayuki. (MIT License)
-https://www.nayuki.io/page/fast-discrete-cosine-transform-algorithms
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
-- The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-- The Software is provided "as is", without warranty of any kind, express or
-  implied, including but not limited to the warranties of merchantability,
-  fitness for a particular purpose and noninfringement. In no event shall the
-  authors or copyright holders be liable for any claim, damages or other
-  liability, whether in an action of contract, tort or otherwise, arising from,
-  out of or in connection with the Software or the use or other dealings in the
-  Software.
-*/
-//Byeong Gi Lee: “FCT - A Fast Cosine Transform” IEEE 1984
-void Video::fastDCTransform(double vec[], double temp[], size_t len) const
+void Video::discreteCosineTransform(QVector<double> &vec, const int &length) const
 {
-    if(len == 1)
-        return;
+    double iCoeff, jCoeff, dct, sum;
 
-    size_t halfLen = len / 2;
-    for(size_t i=0; i<halfLen; i++)
+    for(ushort i=0; i<length; i++)
     {
-        double x = vec[i];
-        double y = vec[len - 1 - i];
-        temp[i] = x + y;
-        temp[i + halfLen] = (x - y) / (cos((i + 0.5) * M_PI / len) * 2);
-    }
+        for(ushort j=0; j<length; j++)
+        {
+            if(i == 0)
+                iCoeff = 1 / sqrt(length);
+            else
+                iCoeff = sqrt(2) / sqrt(length);
+            if(j == 0)
+                jCoeff = 1 / sqrt(length);
+            else
+                jCoeff = sqrt(2) / sqrt(length);
 
-    fastDCTransform(temp, vec, halfLen);
-    fastDCTransform(&temp[halfLen], vec, halfLen);
-
-    for(size_t i=0; i<halfLen-1; i++)
-    {
-        vec[i * 2 + 0] = temp[i];
-        vec[i * 2 + 1] = temp[i + halfLen] + temp[i + halfLen + 1];
+            sum = 0;
+            for(ushort k=0; k<length; k++)
+            {
+                for(ushort l=0; l<length; l++)
+                {
+                    dct = vec[k * length + l] *
+                           cos((2 * k + 1) * i * M_PI / (2 * length)) *
+                           cos((2 * l + 1) * j * M_PI / (2 * length));
+                    sum = sum + dct;
+                }
+            }
+            vec[i*length+j] = iCoeff * jCoeff * sum;
+        }
     }
-    vec[len - 2] = temp[halfLen - 1];
-    vec[len - 1] = temp[len - 1];
 }
