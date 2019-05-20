@@ -42,8 +42,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->sameDurationCombo->addItem(index);
     }
 
-    ui->differentDurationCombo->setCurrentIndex(5);
-    ui->sameDurationCombo->setCurrentIndex(5);
+    ui->differentDurationCombo->setCurrentIndex(4);
+    ui->sameDurationCombo->setCurrentIndex(1);
 
     ui->directoryBox->setFocus();
     ui->browseFolders->setIcon(ui->browseFolders->style()->standardIcon(QStyle::SP_DirOpenIcon));
