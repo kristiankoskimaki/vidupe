@@ -203,10 +203,11 @@ void MainWindow::on_findDuplicates_clicked()
     {
         Comparison comparisonWnd(_videoList, _prefs, *this);
         comparisonWnd.exec();
+
+        _previousRunFolders = foldersToSearch;
+        _previousRunThumbnails = _prefs._thumbnails;
     }
 
-    _previousRunFolders = foldersToSearch;
-    _previousRunThumbnails = _prefs._thumbnails;
     ui->findDuplicates->setText("Find duplicates");
 }
 
@@ -216,6 +217,8 @@ void MainWindow::findVideos(QDir &dir, QStringList &everyVideo) const
     QDirIterator iter(dir, QDirIterator::Subdirectories);
     while(iter.hasNext())
     {
+        if(_userPressedStop)
+            return;
         const QFile file(iter.next());
         const QString filename = file.fileName();
         bool alreadyAdded = false;              //don't want duplicates of same file
