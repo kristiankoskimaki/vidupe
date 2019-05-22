@@ -378,11 +378,9 @@ void Comparison::reportMatchingVideos()
                 }
             right = numberOfVideos;
             }
+
         if(timer.elapsed() > 2000)
-        {
-            qDebug() << "late" << timer.elapsed() << left;
             break;
-        }
     }
 
     emit sendStatusMessage(QString("\n[%1] Found at least %2 video(s) (%3) with matches").
