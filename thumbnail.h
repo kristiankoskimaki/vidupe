@@ -12,7 +12,8 @@ public:
 
 private:
     int m_mode = thumb4;
-    QStringList m_modeNames =             { "1x1", "2x1", "3x1", "2x2", "3x2", "3x3", "4x3" };
+    QStringList m_modeNames = { QStringLiteral("1x1"), QStringLiteral("2x1"), QStringLiteral("3x1"), QStringLiteral("2x2"),
+                                QStringLiteral("3x2"), QStringLiteral("3x3"), QStringLiteral("4x3") };
     QVector< QVector<ushort> > m_layout = { {1,1}, {2,1}, {3,1}, {2,2}, {3,2}, {3,3}, {4,3} };    //{cols,rows}
 
     QVector< QVector<short> > m_capturePos = { { 48 },          //percent (of duration)
