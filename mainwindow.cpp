@@ -29,7 +29,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     ui->blocksizeCombo->addItems( { "2", "4", "8", "16" } );
     ui->blocksizeCombo->setCurrentIndex(3);
-
     Thumbnail thumb;
     for(ushort i=0; i<thumb.countModes(); i++)
         ui->selectThumbnails->addItem(thumb.modeName(i));
@@ -221,15 +220,17 @@ void MainWindow::findVideos(QDir &dir, QStringList &everyVideo) const
             return;
         const QFile file(iter.next());
         const QString filename = file.fileName();
-        bool alreadyAdded = false;              //don't want duplicates of same file
-        const int numberOfVideos = everyVideo.count();
-        for(int i=0; i<numberOfVideos; i++)
-        {
-            if(everyVideo[i].toLower() == filename.toLower())
-                alreadyAdded = true;
-        }
-        if(!alreadyAdded)
+
+        bool duplicate = false;                 //don't want duplicates of same file
+        for(const auto &alreadyAddedFile : everyVideo)
+            if(filename.toLower() == alreadyAddedFile.toLower())
+            {
+                duplicate = true;
+                break;
+            }
+        if(!duplicate)
             everyVideo << filename;
+
         ui->statusBar->showMessage(QString("%1").arg(QDir::toNativeSeparators(filename)), 10);
         QApplication::processEvents();
     }
