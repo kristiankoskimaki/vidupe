@@ -190,7 +190,7 @@ void Video::processThumbnail(QImage &image)
     cv::Mat mat = cv::Mat(image.height(), image.width(), CV_8UC3, image.bits(), static_cast<uint>(image.bytesPerLine()));
     resize(mat, mat, cv::Size(_ssimSize, _ssimSize), 0, 0, cv::INTER_AREA);
     cvtColor(mat, grayThumb, cv::COLOR_BGR2GRAY);
-    grayThumb.convertTo(grayThumb, CV_64F);
+    grayThumb.convertTo(grayThumb, CV_32F);
     hash = computePhash(mat);
 }
 

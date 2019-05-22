@@ -10,7 +10,7 @@ using namespace cv;
 
 double Comparison::sigma(const Mat &m, const int &i, const int &j, const int &block_size) const {
     const Mat m_tmp = m(Range(i, i + block_size), Range(j, j + block_size));
-    const Mat m_squared(block_size, block_size, CV_64F);
+    const Mat m_squared(block_size, block_size, CV_32F);
 
     multiply(m_tmp, m_tmp, m_squared);
 
