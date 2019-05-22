@@ -187,13 +187,45 @@ void Video::processThumbnail(QImage &image)
     QBuffer buffer(&thumbnail);
     image.save(&buffer, "JPG", _jpegQuality);    //save GUI thumbnail as tiny JPEG to conserve memory
 
-    using namespace cv;     //note: mat is now RGB-swapped since opencv uses BGR (moot, since it is grayscale)
-    Mat mat = Mat(image.height(), image.width(), CV_8UC3, image.bits(), static_cast<uint>(image.bytesPerLine()));
-    resize(mat, mat, Size(_ssimSize, _ssimSize), 0, 0, INTER_AREA);
-    cvtColor(mat, grayThumb, CV_BGR2GRAY);
+    cv::Mat mat = cv::Mat(image.height(), image.width(), CV_8UC3, image.bits(), static_cast<uint>(image.bytesPerLine()));
+    resize(mat, mat, cv::Size(_ssimSize, _ssimSize), 0, 0, cv::INTER_AREA);
+    cvtColor(mat, grayThumb, cv::COLOR_BGR2GRAY);
     grayThumb.convertTo(grayThumb, CV_64F);
+    hash = computePhash(mat);
+}
 
-    hash = calculateHash(image);
+uint64_t Video::computePhash(const cv::Mat &input)
+{
+    cv::Mat resizeImg, grayImg, grayFImg, dctImg, topLeftDCT;
+
+    cv::resize(input, resizeImg, cv::Size(_pHashSize, _pHashSize), 0, 0, cv::INTER_LINEAR_EXACT);
+    cv::cvtColor(resizeImg, grayImg, cv::COLOR_BGR2GRAY);           //resize image to 32x32 grayscale
+
+    int shadesOfGray = 0;
+    uchar* pixel = reinterpret_cast<uchar*>(grayImg.data);          //pointer to pixel values, starts at first one
+    const uchar* lastPixel = pixel + _pHashSize * _pHashSize;
+    const uchar firstPixel = *pixel;
+
+    for(pixel++; pixel<lastPixel; pixel++)              //skip first element since that one is already firstPixel
+        shadesOfGray += qAbs(firstPixel - *pixel);      //compare all pixels with first one, tabulate differences
+    if(shadesOfGray < _almostBlackBitmap)
+        return 0;                                       //reject video if capture was (almost) monochrome
+
+    grayImg.convertTo(grayFImg, CV_32F);
+    cv::dct(grayFImg, dctImg);                          //compute DCT (discrete cosine transform)
+    dctImg(cv::Rect(0, 0, 8, 8)).copyTo(topLeftDCT);    //use only upper left 8*8 transforms (most significant ones)
+
+    const float firstElement = *reinterpret_cast<float*>(topLeftDCT.data);      //compute avg but skip first element
+    const float average = (static_cast<float>(cv::sum(topLeftDCT)[0]) - firstElement) / 63;         //(it's very big)
+
+    uint64_t hash = 0;
+    float* transform = reinterpret_cast<float*>(topLeftDCT.data);
+    const float* endOfData = transform + 64;
+    for(int i=0; transform<endOfData; i++, transform++)             //construct hash from all 8x8 bits
+        if(*transform > average)
+            hash |= 1ULL << i;                                      //larger than avg = 1, smaller than avg = 0
+
+    return hash;
 }
 
 QImage Video::minimizeImage(const QImage &image) const

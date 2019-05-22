@@ -16,7 +16,6 @@ HEADERS += \
 SOURCES += \
     mainwindow.cpp \
     video.cpp \
-    phash.cpp \
     db.cpp \
     comparison.cpp \
     ssim.cpp

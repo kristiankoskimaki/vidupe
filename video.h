@@ -27,22 +27,19 @@ public:
     double framerate = 0;
     QString codec = "";
     QString audio = "";
-    uint64_t hash = 0;
     ushort width = 0;
     ushort height = 0;
     QByteArray thumbnail;
     cv::Mat grayThumb;
+    uint64_t hash = 0;
 
 private slots:
     void getMetadata(const QString &filename);
     ushort takeScreenCaptures(const Db &cache);
     void processThumbnail(QImage &image);
+    uint64_t computePhash(const cv::Mat &input);
     QImage minimizeImage(const QImage &image) const;
     QString msToHHMMSS(const qint64 &time) const;
-
-    uint64_t calculateHash(QImage &image) const;
-    bool convertGrayscale(const QImage &image, QVector<double> &grayImage) const;
-    void discreteCosineTransform(QVector<double> &vec, const int &length) const;
 
 public slots:
     QImage captureAt(const short &percent, const short &ofDuration=100);
@@ -66,9 +63,9 @@ private:
     static constexpr ushort _videoStillUsable   = 86;   //86% of video duration is considered usable
     static constexpr int    _thumbnailMaxWidth  = 448;  //small size to save memory and cache space
     static constexpr int    _thumbnailMaxHeight = 336;
-    static constexpr ushort _blockSize          = 32;   //phash generated from 32x32 image
-    static constexpr ushort _smallBlock         = 8;    //phash uses only most significant 8x8 transforms
+    static constexpr ushort _pHashSize          = 32;   //phash generated from 32x32 image
     static constexpr ushort _ssimSize           = 16;   //larger than 16x16 seems to have slower comparison
+    static constexpr ushort _almostBlackBitmap  = 1500; //monochrome thumbnail if less shades of gray than this
 };
 
 #endif // VIDEO_H
