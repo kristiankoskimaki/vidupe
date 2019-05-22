@@ -18,16 +18,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
     ui->setupUi(this);
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
-    ui->statusBox->append(QString("%1 %2").arg(APP_NAME, APP_VERSION));
-    ui->statusBox->append(QString("%1").arg(APP_COPYRIGHT).replace("\xEF\xBF\xBD ", "© ").replace("\xEF\xBF\xBD", "ä"));
-    ui->statusBox->append("Licensed under GNU General Public License\n");
+    ui->statusBox->append(QStringLiteral("%1 %2").arg(APP_NAME, APP_VERSION));
+    ui->statusBox->append(QStringLiteral("%1").arg(APP_COPYRIGHT).replace("\xEF\xBF\xBD ", QStringLiteral("© "))
+                                                                 .replace("\xEF\xBF\xBD",  QStringLiteral("ä")));
+    ui->statusBox->append(QStringLiteral("Licensed under GNU General Public License\n"));
 
     deleteTemporaryFiles();
     loadExtensions();
     detectffmpeg();
     calculateThreshold(ui->thresholdSlider->sliderPosition());
 
-    ui->blocksizeCombo->addItems( { "2", "4", "8", "16" } );
+    ui->blocksizeCombo->addItems( { QStringLiteral("2"), QStringLiteral("4"),
+                                    QStringLiteral("8"), QStringLiteral("16") } );
     ui->blocksizeCombo->setCurrentIndex(3);
     Thumbnail thumb;
     for(ushort i=0; i<thumb.countModes(); i++)
@@ -36,9 +38,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     for(ushort i=0; i<=9; i++)
     {
-        QString index = QString("%1").arg(i);
-        ui->differentDurationCombo->addItem(index);
-        ui->sameDurationCombo->addItem(index);
+        ui->differentDurationCombo->addItem(QStringLiteral("%1").arg(i));
+        ui->sameDurationCombo->addItem(QStringLiteral("%1").arg(i));
     }
 
     ui->differentDurationCombo->setCurrentIndex(4);
@@ -60,7 +61,7 @@ void MainWindow::deleteTemporaryFiles() const
     while(iter.hasNext())
     {
         QDir dir = iter.next();
-        if(dir.dirName().compare("Vidupe-") == 1)
+        if(dir.dirName().compare(QStringLiteral("Vidupe-")) == 1)
             dir.removeRecursively();
     }
 }
@@ -70,30 +71,31 @@ void MainWindow::dropEvent(QDropEvent *event)
     const QString fileName = event->mimeData()->urls().first().toLocalFile();
     const QFileInfo file(fileName);
     if(file.isDir())
-        ui->directoryBox->insert(";" + QDir::toNativeSeparators(fileName));
+        ui->directoryBox->insert(QStringLiteral(";%1").arg(QDir::toNativeSeparators(fileName)));
 }
 
 void MainWindow::loadExtensions()
 {
-    QFile file(QString("%1/extensions.ini").arg(QApplication::applicationDirPath()));
+    QFile file(QStringLiteral("%1/extensions.ini").arg(QApplication::applicationDirPath()));
     if(file.open(QIODevice::ReadOnly))
     {
-        addStatusMessage("Supported file extensions:");
+        addStatusMessage(QStringLiteral("Supported file extensions:"));
         QTextStream text(&file);
         while(!text.atEnd())
         {
             const QString line = text.readLine();
-            if(line.startsWith(";"))
+            if(line.startsWith(QStringLiteral(";")))
                 continue;
             else if(!line.isEmpty())
             {
-                const QStringList extensions = line.split(" ");
+                const QStringList extensions = line.split(QStringLiteral(" "));
                 QString foundTheseExtensions;
                 for(int i=0; i<extensions.size(); i++)
                 {
-                    QString ext = QString(extensions[i]).remove("*").remove(".").prepend("*.");
+                    QString ext = QString(extensions[i]).remove(QStringLiteral("*"))
+                                                        .remove(QStringLiteral(".")).prepend(QStringLiteral("*."));
                     _extensionList << ext;
-                    foundTheseExtensions.append(ext.remove("*") + " ");
+                    foundTheseExtensions.append(ext.remove(QStringLiteral("*")) + QStringLiteral(" "));
                 }
                 addStatusMessage(foundTheseExtensions);
             }
@@ -101,19 +103,19 @@ void MainWindow::loadExtensions()
         file.close();
     }
     else
-        addStatusMessage("Error: extensions.ini not found. No video file will be searched.");
+        addStatusMessage(QStringLiteral("Error: extensions.ini not found. No video file will be searched."));
 }
 
 bool MainWindow::detectffmpeg() const
 {
     QProcess ffmpeg;
     ffmpeg.setProcessChannelMode(QProcess::MergedChannels);
-    ffmpeg.start("ffmpeg");
+    ffmpeg.start(QStringLiteral("ffmpeg"));
     ffmpeg.waitForFinished();
 
-    if(ffmpeg.readAllStandardOutput() == "")
+    if(ffmpeg.readAllStandardOutput().isEmpty())
     {
-        addStatusMessage("Error: FFmpeg not found. Download it from https://ffmpeg.org/");
+        addStatusMessage(QStringLiteral("Error: FFmpeg not found. Download it from https://ffmpeg.org/"));
         return false;
     }
     return true;
@@ -123,7 +125,7 @@ void MainWindow::calculateThreshold(const int &value)
 {
     const int differentBits = 64 - value;           //two video's hashes may only differ this many bits
     const int percentage = 100 * value / 64;        //to be considered having the the same content
-    const QString thresholdMessage = QString(
+    const QString thresholdMessage = QStringLiteral(
                 "Threshold: %1% (%2/64 bits may differ)\n"
                 "Default is:  89% (7/64 bits may differ)\n"
                 "Smaller: less strict, can match different videos (false positive)\n"
@@ -135,11 +137,11 @@ void MainWindow::calculateThreshold(const int &value)
 
 void MainWindow::on_browseFolders_clicked()
 {
-    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "/home",
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), QStringLiteral("/home"),
                                                     QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-    if(dir == "")
+    if(dir.isEmpty())
         return;
-    dir = QString(";%1").arg(QDir::toNativeSeparators(dir));
+    dir = QStringLiteral(";%1").arg(QDir::toNativeSeparators(dir));
     ui->directoryBox->setText(ui->directoryBox->text().append(dir));
 }
 
@@ -147,20 +149,20 @@ void MainWindow::on_findDuplicates_clicked()
 {
     if(_extensionList.isEmpty())
     {
-        addStatusMessage("Error: No extensions found in extensions.ini. No video file will be searched.");
+        addStatusMessage(QStringLiteral("Error: No extensions found in extensions.ini. No video file will be searched."));
         return;
     }
     if(!detectffmpeg())
         return;
 
-    if(ui->findDuplicates->text() == "Stop")    //pressing "find duplicates" button will morph into a
+    if(ui->findDuplicates->text() == QLatin1String("Stop"))     //pressing "find duplicates" button will morph into a
     {                                           //stop button. a lengthy search can thus be stopped and
         _userPressedStop = true;                //those videos already processed are compared w/each other
         return;
     }
     else
     {
-        ui->findDuplicates->setText("Stop");
+        ui->findDuplicates->setText(QStringLiteral("Stop"));
         _userPressedStop = false;
     }
 
@@ -172,28 +174,27 @@ void MainWindow::on_findDuplicates_clicked()
             delete _videoList[i];
         _videoList.clear();
 
-        ui->statusBox->append("\nSearching for videos...");
+        ui->statusBox->append(QStringLiteral("\nSearching for videos..."));
         ui->processedFiles->setVisible(false);
         ui->progressBar->setVisible(false);
 
-        //QStringList directories = ui->directoryBox->text().split(";");
-        QStringList directories = foldersToSearch.split(";");
+        QStringList directories = foldersToSearch.split(QStringLiteral(";"));
 
         //add all video files from entered paths to list
         QStringList everyVideo;
         for(int i=0; i<directories.length(); i++)
         {
-            if(directories.value(i) != "")
+            if(!directories.value(i).isEmpty())
             {
-                QDir dir = directories.value(i).remove('"');
+                QDir dir = directories.value(i).remove(QStringLiteral("\""));
                 if(dir.exists())
                     findVideos(dir, everyVideo);
                 else
-                    addStatusMessage(QString("Cannot find directory: %1").arg(QDir::toNativeSeparators(dir.path())));
+                    addStatusMessage(QStringLiteral("Cannot find directory: %1").arg(QDir::toNativeSeparators(dir.path())));
             }
         }
 
-        ui->statusBox->append(QString("Found %1 video file(s):").arg(everyVideo.count()));
+        ui->statusBox->append(QStringLiteral("Found %1 video file(s):").arg(everyVideo.count()));
         everyVideo.sort();
         processVideos(everyVideo);
     }
@@ -207,7 +208,7 @@ void MainWindow::on_findDuplicates_clicked()
         _previousRunThumbnails = _prefs._thumbnails;
     }
 
-    ui->findDuplicates->setText("Find duplicates");
+    ui->findDuplicates->setText(QStringLiteral("Find duplicates"));
 }
 
 void MainWindow::findVideos(QDir &dir, QStringList &everyVideo) const
@@ -231,7 +232,7 @@ void MainWindow::findVideos(QDir &dir, QStringList &everyVideo) const
         if(!duplicate)
             everyVideo << filename;
 
-        ui->statusBar->showMessage(QString("%1").arg(QDir::toNativeSeparators(filename)), 10);
+        ui->statusBar->showMessage(QStringLiteral("%1").arg(QDir::toNativeSeparators(filename)), 10);
         QApplication::processEvents();
     }
 }
@@ -243,8 +244,8 @@ void MainWindow::processVideos(const QStringList &everyVideo)
     if(numberOfVideos > 0)
     {
         ui->processedFiles->setVisible(true);
-        ui->processedFiles->setText(QString("0/%1").arg(numberOfVideos));
-        ui->statusBar->showMessage("");
+        ui->processedFiles->setText(QStringLiteral("0/%1").arg(numberOfVideos));
+        ui->statusBar->clearMessage();
         ui->progressBar->setVisible(true);
         ui->progressBar->setValue(0);
         ui->progressBar->setMaximum(everyVideo.count());
@@ -275,11 +276,12 @@ void MainWindow::processVideos(const QStringList &everyVideo)
     QApplication::processEvents();    //process signals from last threads
 
     if(_rejectedVideos.empty())
-        addStatusMessage(QString("%1 intact video(s) were found").arg(everyVideo.count()));
+        addStatusMessage(QStringLiteral("%1 intact video(s) were found").arg(everyVideo.count()));
     else
     {
-        addStatusMessage(QString("%1 intact video(s) out of %2 total").arg(_videoList.count()).arg(everyVideo.count()));
-        addStatusMessage(QString("\nThe following %1 video(s) could not be added due to errors:")
+        addStatusMessage(QStringLiteral("%1 intact video(s) out of %2 total").arg(_videoList.count())
+                                                                             .arg(everyVideo.count()));
+        addStatusMessage(QStringLiteral("\nThe following %1 video(s) could not be added due to errors:")
                          .arg(_rejectedVideos.count()));
         for(int i=0; i<_rejectedVideos.count(); i++)
             addStatusMessage(_rejectedVideos[i]);
@@ -298,15 +300,15 @@ void MainWindow::addVideo(const QString &filename) const
 {
     addStatusMessage(filename);
     ui->progressBar->setValue(ui->progressBar->value() + 1);
-    ui->processedFiles->setText(QString("%1/%2").arg(ui->progressBar->value()).arg(ui->progressBar->maximum()));
+    ui->processedFiles->setText(QStringLiteral("%1/%2").arg(ui->progressBar->value()).arg(ui->progressBar->maximum()));
 }
 
 void MainWindow::removeVideo(Video *deleteMe)
 {
     _rejectedVideos << QDir::toNativeSeparators(deleteMe->filename);
     _videoList.removeAll(deleteMe);
-    addStatusMessage(QString("[%1] ERROR reading %2").arg(QTime::currentTime().toString(),
-                                                          QDir::toNativeSeparators(deleteMe->filename)));
+    addStatusMessage(QStringLiteral("[%1] ERROR reading %2").arg(QTime::currentTime().toString(),
+                                                                 QDir::toNativeSeparators(deleteMe->filename)));
     ui->progressBar->setValue(ui->progressBar->value() + 1);
-    ui->processedFiles->setText(QString("%1/%2").arg(ui->progressBar->value()).arg(ui->progressBar->maximum()));
+    ui->processedFiles->setText(QStringLiteral("%1/%2").arg(ui->progressBar->value()).arg(ui->progressBar->maximum()));
 }

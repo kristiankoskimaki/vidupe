@@ -26,7 +26,7 @@ private:
     QStringList _extensionList;
     Prefs _prefs;
     bool _userPressedStop = false;
-    QString _previousRunFolders = "";
+    QString _previousRunFolders = QStringLiteral("");
     ushort _previousRunThumbnails = 0;
 
 private slots:
