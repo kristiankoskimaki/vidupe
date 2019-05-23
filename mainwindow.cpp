@@ -90,10 +90,8 @@ void MainWindow::loadExtensions()
             {
                 const QStringList extensions = line.split(QStringLiteral(" "));
                 QString foundTheseExtensions;
-                for(int i=0; i<extensions.size(); i++)
+                for(auto ext : extensions)
                 {
-                    QString ext = QString(extensions[i]).remove(QStringLiteral("*"))
-                                                        .remove(QStringLiteral(".")).prepend(QStringLiteral("*."));
                     _extensionList << ext;
                     foundTheseExtensions.append(ext.remove(QStringLiteral("*")) + QStringLiteral(" "));
                 }
@@ -170,8 +168,8 @@ void MainWindow::on_findDuplicates_clicked()
     const QString foldersToSearch = ui->directoryBox->text();
     if(foldersToSearch != _previousRunFolders || _prefs._thumbnails != _previousRunThumbnails)
     {
-        for(int i=0; i<_videoList.count(); i++)     //new search: delete videos from previous search
-            delete _videoList[i];
+        for(const auto &video : _videoList)     //new search: delete videos from previous search
+            delete video;
         _videoList.clear();
 
         ui->statusBox->append(QStringLiteral("\nSearching for videos..."));
@@ -283,8 +281,9 @@ void MainWindow::processVideos(const QStringList &everyVideo)
                                                                              .arg(everyVideo.count()));
         addStatusMessage(QStringLiteral("\nThe following %1 video(s) could not be added due to errors:")
                          .arg(_rejectedVideos.count()));
-        for(int i=0; i<_rejectedVideos.count(); i++)
-            addStatusMessage(_rejectedVideos[i]);
+        for(const auto &filename : _rejectedVideos)
+            addStatusMessage(filename);
+
     }
     _rejectedVideos.clear();
 }

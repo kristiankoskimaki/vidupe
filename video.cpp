@@ -61,9 +61,8 @@ void Video::getMetadata(const QString &filename)
     bool rotatedOnce = false;
     const QString analysis(probe.readAllStandardOutput());
     const QStringList analysisLines = analysis.split(QStringLiteral("\r\n"));
-    for(int i=0; i<analysisLines.length(); i++)
+    for(auto line : analysisLines)
     {
-        QString line = analysisLines.value(i);
         if(line.contains(QStringLiteral(" Duration:")))
         {
             const QString time = line.split(QStringLiteral(" ")).value(3);
@@ -82,17 +81,17 @@ void Video::getMetadata(const QString &filename)
         if(line.contains(QStringLiteral(" Video:")) &&
           (line.contains(QStringLiteral("kb/s")) || line.contains(QStringLiteral(" fps"))))
         {
-            line = line.replace(QRegExp(QStringLiteral("\\([^\\)]+\\)")), QStringLiteral(""));
+            line.replace(QRegExp(QStringLiteral("\\([^\\)]+\\)")), QStringLiteral(""));
             codec = line.split(QStringLiteral(" ")).value(7).replace(QStringLiteral(","), QStringLiteral(""));
             const QString resolution = line.split(QStringLiteral(",")).value(2);
             width = static_cast<ushort>(resolution.split(QStringLiteral("x")).value(0).toInt());
             height = static_cast<ushort>(resolution.split(QStringLiteral("x")).value(1)
                                                    .split(QStringLiteral(" ")).value(0).toInt());
             const QStringList fields = line.split(QStringLiteral(","));
-            for(ushort j=0; j<fields.length(); j++)
-                if(fields.at(j).contains(QStringLiteral("fps")))
+            for(const auto &field : fields)
+                if(field.contains(QStringLiteral("fps")))
                 {
-                    framerate = QStringLiteral("%1").arg(fields.at(j)).remove(QStringLiteral("fps")).toDouble();
+                    framerate = QStringLiteral("%1").arg(field).remove(QStringLiteral("fps")).toDouble();
                     framerate = round(framerate * 10) / 10;     //round to one decimal point
                 }
         }

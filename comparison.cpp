@@ -368,8 +368,8 @@ void Comparison::reportMatchingVideos()
             if(bothVideosMatch(left, right))
             {
                 bool alreadyFound = false;
-                for(int i=0; i<knownMatches.count(); i++)
-                    if(knownMatches[i] == right)   //this video has already been matched with another
+                for(const auto &match : knownMatches)
+                    if(right == match)   //this video has already been matched with another
                         alreadyFound = true;
                 if(!alreadyFound)
                 {   //smaller of two matching videos is likely the one to be deleted
