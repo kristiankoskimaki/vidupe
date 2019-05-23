@@ -304,10 +304,11 @@ void MainWindow::addVideo(const QString &filename) const
 
 void MainWindow::removeVideo(Video *deleteMe)
 {
-    _rejectedVideos << QDir::toNativeSeparators(deleteMe->filename);
-    _videoList.removeAll(deleteMe);
     addStatusMessage(QStringLiteral("[%1] ERROR reading %2").arg(QTime::currentTime().toString(),
                                                                  QDir::toNativeSeparators(deleteMe->filename)));
     ui->progressBar->setValue(ui->progressBar->value() + 1);
     ui->processedFiles->setText(QStringLiteral("%1/%2").arg(ui->progressBar->value()).arg(ui->progressBar->maximum()));
+    _rejectedVideos << QDir::toNativeSeparators(deleteMe->filename);
+    _videoList.removeAll(deleteMe);
+    delete deleteMe;
 }
