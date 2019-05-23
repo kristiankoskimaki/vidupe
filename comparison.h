@@ -17,6 +17,7 @@ class Comparison : public QDialog
 public:
     explicit Comparison(QVector<Video *> &userVideos, Prefs &userPrefs, QWidget &parent);
     ~Comparison();
+    void reportMatchingVideos();
 
 private:
     Ui::Comparison *ui;
@@ -53,7 +54,6 @@ private slots:
     QString readableBitRate(const double &kbps) const;
     void highlightBetterProperties() const;
     void updateUI();
-    void reportMatchingVideos();
     int comparisonsSoFar() const;
 
     void on_selectPhash_clicked ( const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._PHASH;

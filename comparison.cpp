@@ -22,9 +22,8 @@ Comparison::Comparison(QVector<Video *> &userVideos, Prefs &userPrefs, QWidget &
         ui->selectSSIM->setChecked(true);
     _prefs._thresholdPhashOriginal = _prefs._thresholdPhash;
     ui->thresholdSlider->setValue(64 - _prefs._thresholdPhash);
-
     ui->progressBar->setMaximum(_videos.count() * (_videos.count() - 1) / 2);
-    reportMatchingVideos();
+
     on_nextVideo_clicked();
 }
 
@@ -34,6 +33,35 @@ Comparison::~Comparison()
         emit sendStatusMessage(QStringLiteral("\n%1 file(s) deleted, %2 freed").
                                arg(_videosDeleted).arg(readableFileSize(_spaceSaved)));
     delete ui;
+}
+
+void Comparison::reportMatchingVideos()
+{
+    QVector<int> knownMatches;
+    qint64 combinedFilesize = 0;
+    const int numberOfVideos = _videos.count();
+    for(int left=0; left<numberOfVideos; left++)
+    {
+        for(int right=left+1; right<numberOfVideos; right++)
+            if(bothVideosMatch(left, right))
+            {
+                bool alreadyFound = false;
+                for(const auto &match : knownMatches)
+                    if(right == match)   //this video has already been matched with another
+                        alreadyFound = true;
+                if(!alreadyFound)
+                {   //smaller of two matching videos is likely the one to be deleted
+                    combinedFilesize += std::min(_videos[left]->size , _videos[right]->size);
+                    knownMatches.append(right);
+                }
+            right = numberOfVideos;
+            }
+    }
+
+    if(knownMatches.length())
+        emit sendStatusMessage(QStringLiteral("\n[%1] Found at least %2 video(s) (%3) with matches").
+                               arg(QTime::currentTime().toString()).arg(knownMatches.count()).
+                               arg(readableFileSize(combinedFilesize)));
 }
 
 void Comparison::on_prevVideo_clicked()
@@ -349,43 +377,6 @@ void Comparison::updateUI()
 
     _zoomLevel = 0;
     ui->progressBar->setValue(comparisonsSoFar());
-}
-
-void Comparison::reportMatchingVideos()
-{
-    QTime timer;
-    timer.start();
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-
-    QVector<int> knownMatches;
-    qint64 combinedFilesize = 0;
-    const int numberOfVideos = _videos.count();
-    for(int left=0; left<numberOfVideos; left++)
-    {
-        for(int right=left+1; right<numberOfVideos; right++)
-            if(bothVideosMatch(left, right))
-            {
-                bool alreadyFound = false;
-                for(const auto &match : knownMatches)
-                    if(right == match)   //this video has already been matched with another
-                        alreadyFound = true;
-                if(!alreadyFound)
-                {   //smaller of two matching videos is likely the one to be deleted
-                    combinedFilesize += std::min(_videos[left]->size , _videos[right]->size);
-                    knownMatches.append(right);
-                }
-            right = numberOfVideos;
-            }
-
-        if(timer.elapsed() > 2000)
-            break;
-    }
-
-    if(knownMatches.length())
-        emit sendStatusMessage(QStringLiteral("\n[%1] Found at least %2 video(s) (%3) with matches").
-                               arg(QTime::currentTime().toString()).arg(knownMatches.count()).
-                               arg(readableFileSize(combinedFilesize)));
-    QApplication::restoreOverrideCursor();
 }
 
 int Comparison::comparisonsSoFar() const

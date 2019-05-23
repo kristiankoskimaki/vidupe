@@ -4,6 +4,7 @@
 #include <QDirIterator>
 #include <QProcess>
 #include <QThreadPool>
+#include <QtConcurrent/QtConcurrent>
 #include <QScrollBar>
 
 int main(int argc, char *argv[])
@@ -200,6 +201,7 @@ void MainWindow::on_findDuplicates_clicked()
     if(_videoList.count() > 1)      //very last thing to do in this file: start the comparison
     {
         Comparison comparisonWnd(_videoList, _prefs, *this);
+        QtConcurrent::run(&comparisonWnd, &Comparison::reportMatchingVideos);
         comparisonWnd.exec();
 
         _previousRunFolders = foldersToSearch;
