@@ -30,7 +30,7 @@ Comparison::Comparison(QVector<Video *> &userVideos, Prefs &userPrefs, QWidget &
 
 Comparison::~Comparison()
 {
-    if(_videosDeleted > 0)
+    if(_videosDeleted)
         emit sendStatusMessage(QStringLiteral("\n%1 file(s) deleted, %2 freed").
                                arg(_videosDeleted).arg(readableFileSize(_spaceSaved)));
     delete ui;
@@ -353,15 +353,13 @@ void Comparison::updateUI()
 
 void Comparison::reportMatchingVideos()
 {
-    const int numberOfVideos = _videos.count();
-    if(numberOfVideos < 2)
-        return;
     QTime timer;
     timer.start();
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
     QVector<int> knownMatches;
     qint64 combinedFilesize = 0;
+    const int numberOfVideos = _videos.count();
     for(int left=0; left<numberOfVideos; left++)
     {
         for(int right=left+1; right<numberOfVideos; right++)
@@ -383,9 +381,10 @@ void Comparison::reportMatchingVideos()
             break;
     }
 
-    emit sendStatusMessage(QStringLiteral("\n[%1] Found at least %2 video(s) (%3) with matches").
-                           arg(QTime::currentTime().toString()).arg(knownMatches.count()).
-                           arg(readableFileSize(combinedFilesize)));
+    if(knownMatches.length())
+        emit sendStatusMessage(QStringLiteral("\n[%1] Found at least %2 video(s) (%3) with matches").
+                               arg(QTime::currentTime().toString()).arg(knownMatches.count()).
+                               arg(readableFileSize(combinedFilesize)));
     QApplication::restoreOverrideCursor();
 }
 

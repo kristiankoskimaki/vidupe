@@ -197,7 +197,7 @@ void MainWindow::on_findDuplicates_clicked()
         processVideos(everyVideo);
     }
 
-    if(_videoList.count() > 0)      //very last thing to do in this file: start the comparison
+    if(_videoList.count() > 1)      //very last thing to do in this file: start the comparison
     {
         Comparison comparisonWnd(_videoList, _prefs, *this);
         comparisonWnd.exec();
