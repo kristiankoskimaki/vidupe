@@ -19,7 +19,6 @@ Video::Video(QWidget &parent, const QString &userFilename, const int &numberOfVi
 
     QObject::connect(this, SIGNAL(rejectVideo(Video *)), &parent, SLOT(removeVideo(Video *)));
     QObject::connect(this, SIGNAL(acceptVideo(const QString &)), &parent, SLOT(addVideo(const QString &)));
-    QObject::connect(this, SIGNAL(sendStatusMessage(const QString &)), &parent, SLOT(addStatusMessage(const QString &)));
 }
 
 void Video::run()
@@ -44,9 +43,7 @@ void Video::run()
     }
 
     const ushort ret = takeScreenCaptures(cache);
-    if(ret == _outOfMemory)
-        emit sendStatusMessage(QStringLiteral("ERROR: Out of memory"));
-    else if(ret == _failure)
+    if(ret == _failure)
         emit rejectVideo(this);
     else if(hash == 0)                 //all screen captures black
         emit rejectVideo(this);

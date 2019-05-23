@@ -47,13 +47,12 @@ public slots:
 signals:
     void acceptVideo(const QString &filename) const;
     void rejectVideo(Video *deleteMe) const;
-    void sendStatusMessage(const QString &message) const;
 
 private:
     static ushort _thumbnailMode;
     static ushort _jpegQuality;
 
-    enum _returnValues { _success, _failure, _outOfMemory };
+    enum _returnValues { _success, _failure };
 
     static constexpr ushort _okJpegQuality    = 60;
     static constexpr ushort _lowJpegQuality   = 25;
