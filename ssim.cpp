@@ -22,7 +22,7 @@ double Comparison::sigma(const Mat &m, const int &i, const int &j, const int &bl
 }
 
 double Comparison::covariance(const Mat &m0, const Mat &m1, const int &i, const int &j, const int &block_size) const {
-    const Mat m3 = Mat::zeros(block_size, block_size, m0.depth());
+    const Mat m3 = Mat::zeros(block_size, block_size, CV_32F);
     const Mat m0_tmp = m0(Range(i, i + block_size), Range(j, j + block_size));
     const Mat m1_tmp = m1(Range(i, i + block_size), Range(j, j + block_size));
 
@@ -40,8 +40,8 @@ double Comparison::ssim(const Mat &m0, const Mat &m1, const int &block_size) con
     double ssim = 0;
     const int nbBlockPerHeight = m0.rows / block_size;
     const int nbBlockPerWidth = m0.cols / block_size;
-    const double C1 = 0.01 * 255 * 0.01 * 255;
-    const double C2 = 0.03 * 255 * 0.03 * 255;
+    constexpr double C1 = 0.01 * 255 * 0.01 * 255;
+    constexpr double C2 = 0.03 * 255 * 0.03 * 255;
 
     for(int k=0; k<nbBlockPerHeight; k++) {
         for(int l=0; l<nbBlockPerWidth; l++) {
