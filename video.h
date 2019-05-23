@@ -19,14 +19,14 @@ public:
     Video(QWidget &parent, const QString &userFilename, const int &numberOfVideos, const ushort &userThumbnails=2*2);
     void run() override;
 
-    QString filename = "";
+    QString filename;
     qint64 size = 0;
     QDateTime modified;
     qint64 duration = 0;
     uint bitrate = 0;
     double framerate = 0;
-    QString codec = "";
-    QString audio = "";
+    QString codec;
+    QString audio;
     ushort width = 0;
     ushort height = 0;
     QByteArray thumbnail;

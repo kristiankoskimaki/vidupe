@@ -45,32 +45,32 @@ void Video::run()
 
     const ushort ret = takeScreenCaptures(cache);
     if(ret == _outOfMemory)
-        emit sendStatusMessage("ERROR: Out of memory");
+        emit sendStatusMessage(QStringLiteral("ERROR: Out of memory"));
     else if(ret == _failure)
         emit rejectVideo(this);
     else if(hash == 0)                 //all screen captures black
         emit rejectVideo(this);
     else
-        emit acceptVideo(QString("[%1] %2").arg(QTime::currentTime().toString(), QDir::toNativeSeparators(filename)));
+        emit acceptVideo(QStringLiteral("[%1] %2").arg(QTime::currentTime().toString(), QDir::toNativeSeparators(filename)));
 }
 
 void Video::getMetadata(const QString &filename)
 {
     QProcess probe;
     probe.setProcessChannelMode(QProcess::MergedChannels);
-    probe.start(QString("ffmpeg -hide_banner -i \"%1\"").arg(QDir::toNativeSeparators(filename)));
+    probe.start(QStringLiteral("ffmpeg -hide_banner -i \"%1\"").arg(QDir::toNativeSeparators(filename)));
     probe.waitForFinished();
 
     bool rotatedOnce = false;
     const QString analysis(probe.readAllStandardOutput());
-    const QStringList analysisLines = analysis.split("\r\n");
+    const QStringList analysisLines = analysis.split(QStringLiteral("\r\n"));
     for(int i=0; i<analysisLines.length(); i++)
     {
         QString line = analysisLines.value(i);
-        if(line.contains(" Duration:"))
+        if(line.contains(QStringLiteral(" Duration:")))
         {
-            const QString time = line.split(" ").value(3);
-            if(time == "N/A,")
+            const QString time = line.split(QStringLiteral(" ")).value(3);
+            if(time == QLatin1String("N/A,"))
                 duration = 0;
             else
             {
@@ -80,40 +80,42 @@ void Video::getMetadata(const QString &filename)
                 const int ms = time.midRef(9,2).toInt();
                 duration = h*60*60*1000 + m*60*1000 + s*1000 + ms*10;
             }
-            bitrate = line.split("bitrate: ").value(1).split(" ").value(0).toUInt();
+            bitrate = line.split(QStringLiteral("bitrate: ")).value(1).split(QStringLiteral(" ")).value(0).toUInt();
         }
-        if(line.contains(" Video:") && (line.contains("kb/s") || line.contains(" fps")))
+        if(line.contains(QStringLiteral(" Video:")) &&
+          (line.contains(QStringLiteral("kb/s")) || line.contains(QStringLiteral(" fps"))))
         {
-            line = line.replace(QRegExp("\\([^\\)]+\\)"), "");
-            codec = line.split(" ").value(7).replace(",", "");
-            const QString resolution = line.split(",").value(2);
-            width = static_cast<ushort>(resolution.split("x").value(0).toInt());
-            height = static_cast<ushort>(resolution.split("x").value(1).split(" ").value(0).toInt());
-            const QStringList fields = line.split(",");
+            line = line.replace(QRegExp(QStringLiteral("\\([^\\)]+\\)")), QStringLiteral(""));
+            codec = line.split(QStringLiteral(" ")).value(7).replace(QStringLiteral(","), QStringLiteral(""));
+            const QString resolution = line.split(QStringLiteral(",")).value(2);
+            width = static_cast<ushort>(resolution.split(QStringLiteral("x")).value(0).toInt());
+            height = static_cast<ushort>(resolution.split(QStringLiteral("x")).value(1)
+                                                   .split(QStringLiteral(" ")).value(0).toInt());
+            const QStringList fields = line.split(QStringLiteral(","));
             for(ushort j=0; j<fields.length(); j++)
-                if(fields.at(j).contains("fps"))
+                if(fields.at(j).contains(QStringLiteral("fps")))
                 {
-                    framerate = QString("%1").arg(fields.at(j)).remove("fps").toDouble();
+                    framerate = QStringLiteral("%1").arg(fields.at(j)).remove(QStringLiteral("fps")).toDouble();
                     framerate = round(framerate * 10) / 10;     //round to one decimal point
                 }
         }
-        if(line.contains(" Audio:"))
+        if(line.contains(QStringLiteral(" Audio:")))
         {
-            const QString audioCodec = line.split(" ").value(7);
-            const QString rate = line.split(",").value(1);
-            QString channels = line.split(",").value(2);
-            if(channels == " 1 channels")
-                channels = " mono";
-            else if(channels == " 2 channels")
-                channels = " stereo";
-            audio = QString("%1%2%3").arg(audioCodec, rate, channels);
-            const QString kbps = line.split(",").value(4).split("kb/s").value(0);
-            if(kbps != "" && kbps != " 0 ")
-                audio = QString("%1%2kb/s").arg(audio, kbps);
+            const QString audioCodec = line.split(QStringLiteral(" ")).value(7);
+            const QString rate = line.split(QStringLiteral(",")).value(1);
+            QString channels = line.split(QStringLiteral(",")).value(2);
+            if(channels == QLatin1String(" 1 channels"))
+                channels = QStringLiteral(" mono");
+            else if(channels == QLatin1String(" 2 channels"))
+                channels = QStringLiteral(" stereo");
+            audio = QStringLiteral("%1%2%3").arg(audioCodec, rate, channels);
+            const QString kbps = line.split(QStringLiteral(",")).value(4).split(QStringLiteral("kb/s")).value(0);
+            if(!kbps.isEmpty() && kbps != QStringLiteral(" 0 "))
+                audio = QStringLiteral("%1%2kb/s").arg(audio, kbps);
         }
-        if(line.contains("rotate") && !rotatedOnce)
+        if(line.contains(QStringLiteral("rotate")) && !rotatedOnce)
         {
-            const int rotate = line.split(":").value(1).toInt();
+            const int rotate = line.split(QStringLiteral(":")).value(1).toInt();
             if(rotate == 90 || rotate == 270)
             {
                 const ushort temp = width;
@@ -248,19 +250,19 @@ QString Video::msToHHMMSS(const qint64 &time) const
     const ushort seconds = time / 1000 % 60;
     const ushort msecs   = time % 1000;
 
-    QString paddedHours = QString("%1").arg(hours);
+    QString paddedHours = QStringLiteral("%1").arg(hours);
     if(hours < 10)
-        paddedHours = "0" + paddedHours;
+        paddedHours = QStringLiteral("0%1").arg(paddedHours);
 
-    QString paddedMinutes = QString("%1").arg(minutes);
+    QString paddedMinutes = QStringLiteral("%1").arg(minutes);
     if(minutes < 10)
-        paddedMinutes = "0" + paddedMinutes;
+        paddedMinutes = QStringLiteral("0%1").arg(paddedMinutes);
 
-    QString paddedSeconds = QString("%1").arg(seconds);
+    QString paddedSeconds = QStringLiteral("%1").arg(seconds);
     if(seconds < 10)
-        paddedSeconds = "0" + paddedSeconds;
+        paddedSeconds = QStringLiteral("0%1").arg(paddedSeconds);
 
-    return QString("%1:%2:%3.%4").arg(paddedHours, paddedMinutes, paddedSeconds).arg(msecs);
+    return QStringLiteral("%1:%2:%3.%4").arg(paddedHours, paddedMinutes, paddedSeconds).arg(msecs);
 }
 
 QImage Video::captureAt(const short &percent, const short &ofDuration)
@@ -269,9 +271,9 @@ QImage Video::captureAt(const short &percent, const short &ofDuration)
     if(!tempDir.isValid())
         return QImage();
 
-    const QString screenshot = QString("%1/vidupe%2.bmp").arg(tempDir.path()).arg(percent);
+    const QString screenshot = QStringLiteral("%1/vidupe%2.bmp").arg(tempDir.path()).arg(percent);
     QProcess ffmpeg;
-    const QString ffmpegCommand = QString("ffmpeg -ss %1 -i \"%2\" -an -frames:v 1 -pix_fmt rgb24 %3")
+    const QString ffmpegCommand = QStringLiteral("ffmpeg -ss %1 -i \"%2\" -an -frames:v 1 -pix_fmt rgb24 %3")
                                   .arg(msToHHMMSS(duration * (percent * ofDuration) / (100 * 100)),
                                   QDir::toNativeSeparators(filename), QDir::toNativeSeparators(screenshot));
     ffmpeg.start(ffmpegCommand);
