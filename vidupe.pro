@@ -4,6 +4,10 @@ TEMPLATE = app
 QT += core gui widgets sql
 
 QMAKE_LFLAGS += -Wl,--large-address-aware
+QMAKE_CXXFLAGS_RELEASE -= -O
+QMAKE_CXXFLAGS_RELEASE -= -O1
+QMAKE_CXXFLAGS_RELEASE -= -O2
+QMAKE_CXXFLAGS_RELEASE *= -O3
 
 HEADERS += \
     mainwindow.h \
