@@ -33,11 +33,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
                                     QStringLiteral("8"), QStringLiteral("16") } );
     ui->blocksizeCombo->setCurrentIndex(3);
     Thumbnail thumb;
-    for(ushort i=0; i<thumb.countModes(); i++)
+    for(int i=0; i<thumb.countModes(); i++)
         ui->selectThumbnails->addItem(thumb.modeName(i));
     ui->selectThumbnails->setCurrentIndex(3);
 
-    for(ushort i=0; i<=9; i++)
+    for(int i=0; i<=9; i++)
     {
         ui->differentDurationCombo->addItem(QStringLiteral("%1").arg(i));
         ui->sameDurationCombo->addItem(QStringLiteral("%1").arg(i));
@@ -130,7 +130,7 @@ void MainWindow::calculateThreshold(const int &value)
                 "Smaller: less strict, can match different videos (false positive)\n"
                 "Larger:  more strict, can miss identical videos (false negative)").arg(percentage).arg(differentBits);
     ui->thresholdSlider->setToolTip(thresholdMessage);
-    _prefs._thresholdPhash = static_cast<short>(differentBits);
+    _prefs._thresholdPhash = differentBits;
     _prefs._thresholdSSIM = value / 64.0;
 }
 
@@ -243,7 +243,7 @@ void MainWindow::findVideos(QDir &dir, QStringList &everyVideo) const
 
 void MainWindow::processVideos(const QStringList &everyVideo)
 {
-    const ushort thumbnails = _prefs._thumbnails;
+    const int thumbnails = _prefs._thumbnails;
     const int numberOfVideos = everyVideo.count();
     if(numberOfVideos > 0)
     {

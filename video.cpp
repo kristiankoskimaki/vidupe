@@ -6,10 +6,10 @@
 #include <QPainter>
 #include <QBuffer>
 
-ushort Video::_thumbnailMode = thumb4;
-ushort Video::_jpegQuality = _okJpegQuality;
+int Video::_thumbnailMode = thumb4;
+int Video::_jpegQuality = _okJpegQuality;
 
-Video::Video(const QWidget &parent, const QString &userFilename, const int &numberOfVideos, const ushort &userThumbnails)
+Video::Video(const QWidget &parent, const QString &userFilename, const int &numberOfVideos, const int &userThumbnails)
 {
     filename = userFilename;
     _thumbnailMode = userThumbnails;
@@ -42,7 +42,7 @@ void Video::run()
         return;
     }
 
-    const ushort ret = takeScreenCaptures(cache);
+    const int ret = takeScreenCaptures(cache);
     if(ret == _failure)
         emit rejectVideo(this);
     else if(hash == 0)                 //all screen captures black
@@ -76,7 +76,7 @@ void Video::getMetadata(const QString &filename)
                 const int ms = time.midRef(9,2).toInt();
                 duration = h*60*60*1000 + m*60*1000 + s*1000 + ms*10;
             }
-            bitrate = line.split(QStringLiteral("bitrate: ")).value(1).split(QStringLiteral(" ")).value(0).toUInt();
+            bitrate = line.split(QStringLiteral("bitrate: ")).value(1).split(QStringLiteral(" ")).value(0).toInt();
         }
         if(line.contains(QStringLiteral(" Video:")) &&
           (line.contains(QStringLiteral("kb/s")) || line.contains(QStringLiteral(" fps"))))
@@ -84,9 +84,8 @@ void Video::getMetadata(const QString &filename)
             line.replace(QRegExp(QStringLiteral("\\([^\\)]+\\)")), QStringLiteral(""));
             codec = line.split(QStringLiteral(" ")).value(7).replace(QStringLiteral(","), QStringLiteral(""));
             const QString resolution = line.split(QStringLiteral(",")).value(2);
-            width = static_cast<ushort>(resolution.split(QStringLiteral("x")).value(0).toInt());
-            height = static_cast<ushort>(resolution.split(QStringLiteral("x")).value(1)
-                                                   .split(QStringLiteral(" ")).value(0).toInt());
+            width = static_cast<short>(resolution.split(QStringLiteral("x")).value(0).toInt());
+            height = static_cast<short>(resolution.split(QStringLiteral("x")).value(1).split(QStringLiteral(" ")).value(0).toInt());
             const QStringList fields = line.split(QStringLiteral(","));
             for(const auto &field : fields)
                 if(field.contains(QStringLiteral("fps")))
@@ -114,7 +113,7 @@ void Video::getMetadata(const QString &filename)
             const int rotate = line.split(QStringLiteral(":")).value(1).toInt();
             if(rotate == 90 || rotate == 270)
             {
-                const ushort temp = width;
+                const short temp = width;
                 width = height;
                 height = temp;
             }
@@ -127,13 +126,13 @@ void Video::getMetadata(const QString &filename)
     modified = videoFile.lastModified();
 }
 
-ushort Video::takeScreenCaptures(const Db &cache)
+int Video::takeScreenCaptures(const Db &cache)
 {
     Thumbnail thumb(_thumbnailMode);
     QImage thumbnail(thumb.cols() * width, thumb.rows() * height, QImage::Format_RGB888);
-    const QVector<short> percentages = thumb.percentages();
+    const QVector<int> percentages = thumb.percentages();
     int capture = percentages.count();
-    short ofDuration = 100;
+    int ofDuration = 100;
 
     while(--capture >= 0)           //screen captures are taken in reverse order so errors are found early
     {
@@ -239,12 +238,12 @@ QImage Video::minimizeImage(const QImage &image) const
     return image;
 }
 
-QString Video::msToHHMMSS(const qint64 &time) const
+QString Video::msToHHMMSS(const int64_t &time) const
 {
-    const ushort hours   = time / (1000*60*60) % 24;
-    const ushort minutes = time / (1000*60) % 60;
-    const ushort seconds = time / 1000 % 60;
-    const ushort msecs   = time % 1000;
+    const int hours   = time / (1000*60*60) % 24;
+    const int minutes = time / (1000*60) % 60;
+    const int seconds = time / 1000 % 60;
+    const int msecs   = time % 1000;
 
     QString paddedHours = QStringLiteral("%1").arg(hours);
     if(hours < 10)
@@ -261,7 +260,7 @@ QString Video::msToHHMMSS(const qint64 &time) const
     return QStringLiteral("%1:%2:%3.%4").arg(paddedHours, paddedMinutes, paddedSeconds).arg(msecs);
 }
 
-QImage Video::captureAt(const short &percent, const short &ofDuration) const
+QImage Video::captureAt(const int &percent, const int &ofDuration) const
 {
     const QTemporaryDir tempDir;
     if(!tempDir.isValid())

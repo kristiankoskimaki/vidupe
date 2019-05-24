@@ -15,7 +15,7 @@ Comparison::Comparison(const QVector<Video *> &userVideos, const Prefs &userPref
     ui->setupUi(this);
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
     connect(this, SIGNAL(sendStatusMessage(const QString &)), &parent, SLOT(addStatusMessage(const QString &)));
-    connect(this, SIGNAL(switchComparisonMode(const short &)), &parent, SLOT(setComparisonMode(const short &)));
+    connect(this, SIGNAL(switchComparisonMode(const int &)), &parent, SLOT(setComparisonMode(const int &)));
     connect(this, SIGNAL(adjustThresholdSlider(const int &)), &parent, SLOT(on_thresholdSlider_valueChanged(const int &)));
 
     if(_prefs._ComparisonMode == _prefs._SSIM)
@@ -38,7 +38,7 @@ Comparison::~Comparison()
 void Comparison::reportMatchingVideos()
 {
     QVector<int> knownMatches;
-    qint64 combinedFilesize = 0;
+    int64_t combinedFilesize = 0;
     const int numberOfVideos = _videos.count();
     for(int left=0; left<numberOfVideos; left++)
     {
@@ -158,7 +158,7 @@ bool Comparison::bothVideosMatch(const Video *left, const Video *right)
             return true;
         return false;
     }                           //ssim comparison takes long time, only do it if pHash somewhat matches
-    else if(_phashSimilarity <= qMax(_prefs._thresholdPhash, static_cast<short>(20)))
+    else if(_phashSimilarity <= qMax(_prefs._thresholdPhash, 20))
     {
         _ssimSimilarity = ssim(left->grayThumb, right->grayThumb, _prefs._ssimBlockSize);
         _ssimSimilarity = _ssimSimilarity + _durationModifier / 64.0;
@@ -168,9 +168,9 @@ bool Comparison::bothVideosMatch(const Video *left, const Video *right)
     return false;
 }
 
-short Comparison::phashSimilarity(const Video *left, const Video *right)
+int Comparison::phashSimilarity(const Video *left, const Video *right)
 {
-    short distance = 0;
+    int distance = 0;
     uint64_t differentBits = left->hash ^ right->hash;    //XOR to value (only ones for differing bits)
     while(differentBits != 0)
     {
@@ -184,7 +184,7 @@ short Comparison::phashSimilarity(const Video *left, const Video *right)
         _durationModifier = 0 + _prefs._differentDurationModifier;          //raise distance if both durations differ 1s
 
     distance = distance + _durationModifier;
-    return distance > 0? distance : 0;  //negative value would wrap into huge value because return value is short
+    return distance > 0? distance : 0;  //negative value would wrap into huge value because return value is int
 }
 
 void Comparison::showVideo(const QString &side) const
@@ -239,14 +239,14 @@ void Comparison::showVideo(const QString &side) const
     Audio->setText(_videos[thisVideo]->audio);
 }
 
-QString Comparison::readableDuration(const qint64 &milliseconds) const
+QString Comparison::readableDuration(const int64_t &milliseconds) const
 {
     if(milliseconds == 0)
         return QStringLiteral("");
 
-    const ushort hours   = ((milliseconds / (1000*60*60)) % 24);
-    const ushort minutes = ((milliseconds / (1000*60)) % 60);
-    const ushort seconds = (milliseconds / 1000) % 60;
+    const int hours   = ((milliseconds / (1000*60*60)) % 24);
+    const int minutes = ((milliseconds / (1000*60)) % 60);
+    const int seconds = (milliseconds / 1000) % 60;
 
     QString readableDuration;
     if(hours > 0)
@@ -259,7 +259,7 @@ QString Comparison::readableDuration(const qint64 &milliseconds) const
     return readableDuration;
 }
 
-QString Comparison::readableFileSize(const qint64 &filesize) const
+QString Comparison::readableFileSize(const int64_t &filesize) const
 {
     if(filesize < 1024 * 1024)
         return(QStringLiteral("%1 kB").arg(QString::number(filesize / 1024.0, 'i', 0))); //even kBs
@@ -618,7 +618,7 @@ void Comparison::on_thresholdSlider_valueChanged(const int &value)
 
     if(differentBits != _prefs._thresholdPhash)    //function also called when constructor sets slider
     {
-        _prefs._thresholdPhash = static_cast<short>(64 - value);
+        _prefs._thresholdPhash = 64 - value;
         _prefs._thresholdSSIM = value / 64.0;
     }
 

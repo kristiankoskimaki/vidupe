@@ -26,12 +26,12 @@ private:
     Prefs _prefs;
     int _leftVideo = 0;
     int _rightVideo = 0;
-    uint _videosDeleted = 0;
-    qint64 _spaceSaved = 0;
+    int _videosDeleted = 0;
+    int64_t _spaceSaved = 0;
     bool _seekForwards = true;
 
-    short _durationModifier = 0;
-    short _phashSimilarity = 0;
+    int _durationModifier = 0;
+    int _phashSimilarity = 0;
     double _ssimSimilarity = 0.0;
 
     int _zoomLevel = 0;
@@ -46,11 +46,11 @@ private slots:
     void on_prevVideo_clicked();
     void on_nextVideo_clicked();
     bool bothVideosMatch(const Video *left, const Video *right);
-    short phashSimilarity(const Video *left, const Video *right);
+    int phashSimilarity(const Video *left, const Video *right);
 
     void showVideo(const QString &side) const;
-    QString readableDuration(const qint64 &milliseconds) const;
-    QString readableFileSize(const qint64 &filesize) const;
+    QString readableDuration(const int64_t &milliseconds) const;
+    QString readableFileSize(const int64_t &filesize) const;
     QString readableBitRate(const double &kbps) const;
     void highlightBetterProperties() const;
     void updateUI();
@@ -80,7 +80,7 @@ private slots:
 
 signals:
     void sendStatusMessage(const QString &message) const;
-    void switchComparisonMode(const short &mode) const;
+    void switchComparisonMode(const int &mode) const;
     void adjustThresholdSlider(const int &value) const;
 };
 

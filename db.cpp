@@ -57,12 +57,12 @@ bool Db::readMetadata(Video &video) const
         video.modified = _modified;
         video.size = query.value(1).toLongLong();
         video.duration = query.value(2).toLongLong();
-        video.bitrate = query.value(3).toUInt();
+        video.bitrate = query.value(3).toInt();
         video.framerate = query.value(4).toDouble();
         video.codec = query.value(5).toString();
         video.audio = query.value(6).toString();
-        video.width = static_cast<ushort>(query.value(7).toUInt());
-        video.height = static_cast<ushort>(query.value(8).toUInt());
+        video.width = static_cast<short>(query.value(7).toInt());
+        video.height = static_cast<short>(query.value(8).toInt());
         return true;
     }
     return false;
