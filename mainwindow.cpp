@@ -131,7 +131,7 @@ void MainWindow::calculateThreshold(const int &value)
                 "Larger:  more strict, can miss identical videos (false negative)").arg(percentage).arg(differentBits);
     ui->thresholdSlider->setToolTip(thresholdMessage);
     _prefs._thresholdPhash = static_cast<short>(differentBits);
-    _prefs._thresholdSSIM = static_cast<double>(value) / 64;
+    _prefs._thresholdSSIM = value / 64.0;
 }
 
 void MainWindow::on_browseFolders_clicked()

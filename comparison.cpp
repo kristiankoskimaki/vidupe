@@ -161,7 +161,7 @@ bool Comparison::bothVideosMatch(const Video *left, const Video *right)
     else if(_phashSimilarity <= qMax(_prefs._thresholdPhash, static_cast<short>(20)))
     {
         _ssimSimilarity = ssim(left->grayThumb, right->grayThumb, _prefs._ssimBlockSize);
-        _ssimSimilarity = static_cast<double>(_ssimSimilarity + _durationModifier / 64);
+        _ssimSimilarity = _ssimSimilarity + _durationModifier / 64.0;
         if(_ssimSimilarity > _prefs._thresholdSSIM)
             return true;
     }
@@ -262,11 +262,11 @@ QString Comparison::readableDuration(const qint64 &milliseconds) const
 QString Comparison::readableFileSize(const qint64 &filesize) const
 {
     if(filesize < 1024 * 1024)
-        return(QStringLiteral("%1 kB").arg(QString::number(static_cast<double>(filesize) / 1024, 'i', 0))); //even kBs
+        return(QStringLiteral("%1 kB").arg(QString::number(filesize / 1024.0, 'i', 0))); //even kBs
     else if(filesize < 1024 * 1024 * 1024)                          //larger files have one decimal point
-        return QStringLiteral("%1 MB").arg(QString::number(static_cast<double>(filesize) / (1024 * 1024), 'f', 1));
+        return QStringLiteral("%1 MB").arg(QString::number(filesize / (1024.0 * 1024.0), 'f', 1));
     else
-        return QStringLiteral("%1 GB").arg(QString::number(static_cast<double>(filesize) / (1024 * 1024 * 1024), 'f', 1));
+        return QStringLiteral("%1 GB").arg(QString::number(filesize / (1024.0 * 1024.0 * 1024.0), 'f', 1));
 }
 
 QString Comparison::readableBitRate(const double &kbps) const
@@ -613,13 +613,13 @@ void Comparison::on_thresholdSlider_valueChanged(const int &value)
     const QString thresholdMessage = QStringLiteral("pHash threshold: %1% (%2/64 bits may differ),"
                                                     " was originally %3%\nSSIM threshold: %4").
             arg(percentage).arg(differentBits).arg(100 * (64 - _prefs._thresholdPhashOriginal) / 64).
-            arg(static_cast<double>(value) / 64);
+            arg(value / 64.0);
     ui->thresholdSlider->setToolTip(thresholdMessage);
 
     if(differentBits != _prefs._thresholdPhash)    //function also called when constructor sets slider
     {
         _prefs._thresholdPhash = static_cast<short>(64 - value);
-        _prefs._thresholdSSIM = static_cast<double>(value) / 64;
+        _prefs._thresholdSSIM = value / 64.0;
     }
 
     emit adjustThresholdSlider(64 - _prefs._thresholdPhash);
