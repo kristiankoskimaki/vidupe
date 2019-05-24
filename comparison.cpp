@@ -85,8 +85,7 @@ void Comparison::on_prevVideo_clicked()
                 }
             }
         }
-        if(_leftVideo % 100 == 0)
-            ui->progressBar->setValue(comparisonsSoFar());
+        ui->progressBar->setValue(comparisonsSoFar());
         _rightVideo = lastVideo;
     }
 
@@ -117,8 +116,7 @@ void Comparison::on_nextVideo_clicked()
                 }
             }
         }
-        if(_leftVideo % 100 == 0)
-            ui->progressBar->setValue(comparisonsSoFar());
+        ui->progressBar->setValue(comparisonsSoFar());
         _rightVideo = _leftVideo + 1;
     }
 
