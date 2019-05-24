@@ -8,6 +8,7 @@
 #include <QTemporaryDir>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgcodecs/imgcodecs.hpp>
+#include "prefs.h"
 #include "thumbnail.h"
 #include "db.h"
 
@@ -16,7 +17,7 @@ class Video : public QObject, public QRunnable
     Q_OBJECT
 
 public:
-    Video(const QWidget &parent, const QString &userFilename, const int &numberOfVideos, const int &userThumbnails);
+    Video(const Prefs &prefsParam, const QString &filenameParam);
     void run();
 
     QString filename;
@@ -49,7 +50,7 @@ signals:
     void rejectVideo(Video *deleteMe) const;
 
 private:
-    static int _thumbnailMode;
+    static Prefs _prefs;
     static int _jpegQuality;
 
     enum _returnValues { _success, _failure };

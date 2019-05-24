@@ -241,11 +241,11 @@ void MainWindow::findVideos(QDir &dir)
 
 void MainWindow::processVideos()
 {
-    const int thumbnails = _prefs._thumbnails;
     _prefs._numberOfVideos = _everyVideo.count();
     ui->statusBox->append(QStringLiteral("Found %1 video file(s):").arg(_prefs._numberOfVideos));
     if(_prefs._numberOfVideos > 0)
     {
+        ui->selectThumbnails->setDisabled(true);
         ui->processedFiles->setVisible(true);
         ui->processedFiles->setText(QStringLiteral("0/%1").arg(_prefs._numberOfVideos));
         ui->statusBar->clearMessage();
@@ -271,7 +271,7 @@ void MainWindow::processVideos()
             continue;
         }
 
-        auto *videoTask = new Video(*this, _everyVideo[i], _prefs._numberOfVideos, thumbnails);
+        auto *videoTask = new Video(_prefs, _everyVideo[i]);
         videoTask->setAutoDelete(false);
         threadPool.start(videoTask);
         _videoList << videoTask;
@@ -279,6 +279,7 @@ void MainWindow::processVideos()
     threadPool.waitForDone();
     QApplication::processEvents();              //process signals from last threads
 
+    ui->selectThumbnails->setDisabled(false);
     _prefs._numberOfVideos = _videoList.count();    //minus rejected ones now
     videoSummary();
 }

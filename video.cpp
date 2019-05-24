@@ -6,19 +6,18 @@
 #include <QPainter>
 #include <QBuffer>
 
-int Video::_thumbnailMode = thumb4;
+Prefs Video::_prefs;
 int Video::_jpegQuality = _okJpegQuality;
 
-Video::Video(const QWidget &parent, const QString &userFilename, const int &numberOfVideos, const int &userThumbnails)
+Video::Video(const Prefs &prefsParam, const QString &filenameParam)
 {
-    filename = userFilename;
-    _thumbnailMode = userThumbnails;
-
-    if(numberOfVideos > _hugeAmountVideos)       //save memory to avoid crash due to 32 bit limit
+    filename = filenameParam;
+    _prefs = prefsParam;
+    if(_prefs._numberOfVideos > _hugeAmountVideos)       //save memory to avoid crash due to 32 bit limit
         _jpegQuality = _lowJpegQuality;
 
-    QObject::connect(this, SIGNAL(rejectVideo(Video *)), &parent, SLOT(removeVideo(Video *)));
-    QObject::connect(this, SIGNAL(acceptVideo(const QString &)), &parent, SLOT(addVideo(const QString &)));
+    QObject::connect(this, SIGNAL(rejectVideo(Video *)), _prefs._mainwPtr, SLOT(removeVideo(Video *)));
+    QObject::connect(this, SIGNAL(acceptVideo(const QString &)), _prefs._mainwPtr, SLOT(addVideo(const QString &)));
 }
 
 void Video::run()
@@ -128,7 +127,7 @@ void Video::getMetadata(const QString &filename)
 
 int Video::takeScreenCaptures(const Db &cache)
 {
-    Thumbnail thumb(_thumbnailMode);
+    Thumbnail thumb(_prefs._thumbnails);
     QImage thumbnail(thumb.cols() * width, thumb.rows() * height, QImage::Format_RGB888);
     const QVector<int> percentages = thumb.percentages();
     int capture = percentages.count();
