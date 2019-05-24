@@ -45,8 +45,8 @@ private:
 private slots:
     void on_prevVideo_clicked();
     void on_nextVideo_clicked();
-    bool bothVideosMatch(const int &left, const int &right);
-    short phashSimilarity(const int &left, const int &right);
+    bool bothVideosMatch(const Video *left, const Video *right);
+    short phashSimilarity(const Video *left, const Video *right);
 
     void showVideo(const QString &side) const;
     QString readableDuration(const qint64 &milliseconds) const;

@@ -43,7 +43,7 @@ void Comparison::reportMatchingVideos()
     for(int left=0; left<numberOfVideos; left++)
     {
         for(int right=left+1; right<numberOfVideos; right++)
-            if(bothVideosMatch(left, right))
+            if(bothVideosMatch(_videos[left], _videos[right]))
             {
                 bool alreadyFound = false;
                 for(const auto &match : knownMatches)
@@ -54,7 +54,7 @@ void Comparison::reportMatchingVideos()
                     combinedFilesize += std::min(_videos[left]->size , _videos[right]->size);
                     knownMatches.append(right);
                 }
-            right = numberOfVideos;
+            break;
             }
     }
 
@@ -72,7 +72,7 @@ void Comparison::on_prevVideo_clicked()
     {
         for(; _rightVideo>_leftVideo; _rightVideo--)
         {
-            if(bothVideosMatch(_leftVideo, _rightVideo))
+            if(bothVideosMatch(_videos[_leftVideo], _videos[_rightVideo]))
             {
                 if(QFileInfo::exists(_videos[_leftVideo]->filename) &&
                    QFileInfo::exists(_videos[_rightVideo]->filename))
@@ -104,7 +104,7 @@ void Comparison::on_nextVideo_clicked()
     {
         for(_rightVideo++; _rightVideo<numberOfVideos; _rightVideo++)
         {
-            if(bothVideosMatch(_leftVideo, _rightVideo))
+            if(bothVideosMatch(_videos[_leftVideo], _videos[_rightVideo]))
             {
                 if(QFileInfo::exists(_videos[_leftVideo]->filename) &&
                    QFileInfo::exists(_videos[_rightVideo]->filename))
@@ -151,7 +151,7 @@ void Comparison::on_nextVideo_clicked()
     }
 }
 
-bool Comparison::bothVideosMatch(const int &left, const int &right)
+bool Comparison::bothVideosMatch(const Video *left, const Video *right)
 {
     _phashSimilarity = phashSimilarity(left, right);
     if(_prefs._ComparisonMode == _prefs._PHASH)
@@ -159,10 +159,10 @@ bool Comparison::bothVideosMatch(const int &left, const int &right)
         if(_phashSimilarity <= _prefs._thresholdPhash)
             return true;
         return false;
-    }
+    }                           //ssim comparison takes long time, only do it if pHash somewhat matches
     else if(_phashSimilarity <= qMax(_prefs._thresholdPhash, static_cast<short>(20)))
-    {   //ssim comparison takes long time, only do it if pHash somewhat matches
-        _ssimSimilarity = ssim(_videos[left]->grayThumb, _videos[right]->grayThumb, _prefs._ssimBlockSize);
+    {
+        _ssimSimilarity = ssim(left->grayThumb, right->grayThumb, _prefs._ssimBlockSize);
         _ssimSimilarity = static_cast<double>(_ssimSimilarity + _durationModifier / 64);
         if(_ssimSimilarity > _prefs._thresholdSSIM)
             return true;
@@ -170,17 +170,17 @@ bool Comparison::bothVideosMatch(const int &left, const int &right)
     return false;
 }
 
-short Comparison::phashSimilarity(const int &left, const int &right)
+short Comparison::phashSimilarity(const Video *left, const Video *right)
 {
     short distance = 0;
-    uint64_t differentBits = _videos[left]->hash ^ _videos[right]->hash;    //XOR to value (only ones for differing bits)
+    uint64_t differentBits = left->hash ^ right->hash;    //XOR to value (only ones for differing bits)
     while(differentBits != 0)
     {
         differentBits &= differentBits - 1;     //count number of bits of value
         distance++;
     }
 
-    if( qAbs(_videos[left]->duration - _videos[right]->duration) <= 1000 )
+    if( qAbs(left->duration - right->duration) <= 1000 )
         _durationModifier = 0 - _prefs._sameDurationModifier;               //lower distance if both durations within 1s
     else
         _durationModifier = 0 + _prefs._differentDurationModifier;          //raise distance if both durations differ 1s
