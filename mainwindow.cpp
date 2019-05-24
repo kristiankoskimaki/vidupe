@@ -242,23 +242,22 @@ void MainWindow::findVideos(QDir &dir)
 void MainWindow::processVideos()
 {
     const int thumbnails = _prefs._thumbnails;
-    const int numberOfVideos = _everyVideo.count();
-
-    ui->statusBox->append(QStringLiteral("Found %1 video file(s):").arg(numberOfVideos));
-    if(numberOfVideos > 0)
+    _prefs._numberOfVideos = _everyVideo.count();
+    ui->statusBox->append(QStringLiteral("Found %1 video file(s):").arg(_prefs._numberOfVideos));
+    if(_prefs._numberOfVideos > 0)
     {
         ui->processedFiles->setVisible(true);
-        ui->processedFiles->setText(QStringLiteral("0/%1").arg(numberOfVideos));
+        ui->processedFiles->setText(QStringLiteral("0/%1").arg(_prefs._numberOfVideos));
         ui->statusBar->clearMessage();
         ui->progressBar->setVisible(true);
         ui->progressBar->setValue(0);
-        ui->progressBar->setMaximum(numberOfVideos);
+        ui->progressBar->setMaximum(_prefs._numberOfVideos);
         _everyVideo.sort();
     }
     else return;
 
     QThreadPool threadPool;
-    for(int i=0; i<numberOfVideos; i++)
+    for(int i=0; i<_prefs._numberOfVideos; i++)
     {
         if(_userPressedStop)
         {
@@ -272,7 +271,7 @@ void MainWindow::processVideos()
             continue;
         }
 
-        auto *videoTask = new Video(*this, _everyVideo[i], numberOfVideos, thumbnails);
+        auto *videoTask = new Video(*this, _everyVideo[i], _prefs._numberOfVideos, thumbnails);
         videoTask->setAutoDelete(false);
         threadPool.start(videoTask);
         _videoList << videoTask;
@@ -280,16 +279,17 @@ void MainWindow::processVideos()
     threadPool.waitForDone();
     QApplication::processEvents();              //process signals from last threads
 
+    _prefs._numberOfVideos = _videoList.count();    //minus rejected ones now
     videoSummary();
 }
 
 void MainWindow::videoSummary()
 {
     if(_rejectedVideos.empty())
-        addStatusMessage(QStringLiteral("%1 intact video(s) were found").arg(_everyVideo.count()));
+        addStatusMessage(QStringLiteral("%1 intact video(s) were found").arg(_prefs._numberOfVideos));
     else
     {
-        addStatusMessage(QStringLiteral("%1 intact video(s) out of %2 total").arg(_videoList.count())
+        addStatusMessage(QStringLiteral("%1 intact video(s) out of %2 total").arg(_prefs._numberOfVideos)
                                                                              .arg(_everyVideo.count()));
         addStatusMessage(QStringLiteral("\nThe following %1 video(s) could not be added due to errors:")
                          .arg(_rejectedVideos.count()));

@@ -13,7 +13,7 @@ public:
 
     int _comparisonMode = _PHASH;
     int _thumbnails = thumb4;
-
+    int _numberOfVideos = 0;
     int _ssimBlockSize = 16;
 
     double _thresholdSSIM = 0.89;
