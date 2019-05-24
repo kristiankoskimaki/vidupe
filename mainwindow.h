@@ -22,8 +22,10 @@ private:
     Ui::MainWindow *ui;
 
     QVector<Video *> _videoList;
+    QStringList _everyVideo;
     QStringList _rejectedVideos;
     QStringList _extensionList;
+
     Prefs _prefs;
     bool _userPressedStop = false;
     QString _previousRunFolders = QStringLiteral("");
@@ -49,8 +51,8 @@ private slots:
     void on_browseFolders_clicked() const;
     void on_directoryBox_returnPressed() { on_findDuplicates_clicked(); }
     void on_findDuplicates_clicked();
-    void findVideos(QDir &dir, QStringList &everyVideo) const;
-    void processVideos(const QStringList &everyVideo);
+    void findVideos(QDir &dir);
+    void processVideos();
 
     void addStatusMessage(const QString &message) const;
     void addVideo(const QString &filename) const;

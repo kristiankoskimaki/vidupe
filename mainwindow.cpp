@@ -179,22 +179,19 @@ void MainWindow::on_findDuplicates_clicked()
         QStringList directories = foldersToSearch.split(QStringLiteral(";"));
 
         //add all video files from entered paths to list
-        QStringList everyVideo;
         for(int i=0; i<directories.length(); i++)
         {
             if(!directories.value(i).isEmpty())
             {
                 QDir dir = directories.value(i).remove(QStringLiteral("\""));
                 if(dir.exists())
-                    findVideos(dir, everyVideo);
+                    findVideos(dir);
                 else
                     addStatusMessage(QStringLiteral("Cannot find directory: %1").arg(QDir::toNativeSeparators(dir.path())));
             }
         }
 
-        ui->statusBox->append(QStringLiteral("Found %1 video file(s):").arg(everyVideo.count()));
-        everyVideo.sort();
-        processVideos(everyVideo);
+        processVideos();
     }
 
     if(_videoList.count() > 1)      //very last thing to do in this file: start the comparison
@@ -214,7 +211,7 @@ void MainWindow::on_findDuplicates_clicked()
     ui->findDuplicates->setText(QStringLiteral("Find duplicates"));
 }
 
-void MainWindow::findVideos(QDir &dir, QStringList &everyVideo) const
+void MainWindow::findVideos(QDir &dir)
 {
     dir.setNameFilters(_extensionList);
     QDirIterator iter(dir, QDirIterator::Subdirectories);
@@ -226,24 +223,26 @@ void MainWindow::findVideos(QDir &dir, QStringList &everyVideo) const
         const QString filename = file.fileName();
 
         bool duplicate = false;                 //don't want duplicates of same file
-        for(const auto &alreadyAddedFile : everyVideo)
+        for(const auto &alreadyAddedFile : _everyVideo)
             if(filename.toLower() == alreadyAddedFile.toLower())
             {
                 duplicate = true;
                 break;
             }
         if(!duplicate)
-            everyVideo << filename;
+            _everyVideo << filename;
 
         ui->statusBar->showMessage(QStringLiteral("%1").arg(QDir::toNativeSeparators(filename)), 10);
         QApplication::processEvents();
     }
 }
 
-void MainWindow::processVideos(const QStringList &everyVideo)
+void MainWindow::processVideos()
 {
     const int thumbnails = _prefs._thumbnails;
-    const int numberOfVideos = everyVideo.count();
+    const int numberOfVideos = _everyVideo.count();
+
+    ui->statusBox->append(QStringLiteral("Found %1 video file(s):").arg(numberOfVideos));
     if(numberOfVideos > 0)
     {
         ui->processedFiles->setVisible(true);
@@ -251,7 +250,8 @@ void MainWindow::processVideos(const QStringList &everyVideo)
         ui->statusBar->clearMessage();
         ui->progressBar->setVisible(true);
         ui->progressBar->setValue(0);
-        ui->progressBar->setMaximum(everyVideo.count());
+        ui->progressBar->setMaximum(numberOfVideos);
+        _everyVideo.sort();
     }
     else return;
 
@@ -270,7 +270,7 @@ void MainWindow::processVideos(const QStringList &everyVideo)
             continue;
         }
 
-        auto *videoTask = new Video(*this, everyVideo[i], numberOfVideos, thumbnails);
+        auto *videoTask = new Video(*this, _everyVideo[i], numberOfVideos, thumbnails);
         videoTask->setAutoDelete(false);
         threadPool.start(videoTask);
         _videoList << videoTask;
@@ -279,11 +279,11 @@ void MainWindow::processVideos(const QStringList &everyVideo)
     QApplication::processEvents();    //process signals from last threads
 
     if(_rejectedVideos.empty())
-        addStatusMessage(QStringLiteral("%1 intact video(s) were found").arg(everyVideo.count()));
+        addStatusMessage(QStringLiteral("%1 intact video(s) were found").arg(_everyVideo.count()));
     else
     {
         addStatusMessage(QStringLiteral("%1 intact video(s) out of %2 total").arg(_videoList.count())
-                                                                             .arg(everyVideo.count()));
+                                                                             .arg(_everyVideo.count()));
         addStatusMessage(QStringLiteral("\nThe following %1 video(s) could not be added due to errors:")
                          .arg(_rejectedVideos.count()));
         for(const auto &filename : _rejectedVideos)
