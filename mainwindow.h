@@ -40,8 +40,8 @@ private slots:
 
     void setComparisonMode(const int &mode) { if(mode == _prefs._PHASH) ui->selectPhash->click(); else ui->selectSSIM->click(); ui->directoryBox->setFocus(); }
     void on_selectThumbnails_activated(const int &index) { _prefs._thumbnails = index; ui->directoryBox->setFocus(); }
-    void on_selectPhash_clicked(const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._PHASH; ui->directoryBox->setFocus(); }
-    void on_selectSSIM_clicked(const bool &checked) { if(checked) _prefs._ComparisonMode = _prefs._SSIM; ui->directoryBox->setFocus(); }
+    void on_selectPhash_clicked(const bool &checked) { if(checked) _prefs._comparisonMode = _prefs._PHASH; ui->directoryBox->setFocus(); }
+    void on_selectSSIM_clicked(const bool &checked) { if(checked) _prefs._comparisonMode = _prefs._SSIM; ui->directoryBox->setFocus(); }
     void on_blocksizeCombo_activated(const int &index) { _prefs._ssimBlockSize = static_cast<int>(pow(2, index+1)); ui->directoryBox->setFocus(); }
     void on_differentDurationCombo_activated(const int &index) { _prefs._differentDurationModifier = index; ui->directoryBox->setFocus(); }
     void on_sameDurationCombo_activated(const int &index) { _prefs._sameDurationModifier = index; ui->directoryBox->setFocus(); }

@@ -11,7 +11,7 @@ public:
 
     QWidget *_mainwPtr = nullptr;               //pointer to MainWindow, for connecting signals to it's slots
 
-    int _ComparisonMode = _PHASH;
+    int _comparisonMode = _PHASH;
     int _thumbnails = thumb4;
 
     int _ssimBlockSize = 16;
