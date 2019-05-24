@@ -200,12 +200,16 @@ void MainWindow::on_findDuplicates_clicked()
 
     if(_videoList.count() > 1)      //very last thing to do in this file: start the comparison
     {
-        Comparison comparisonWnd(_videoList, _prefs, *this);
-        QtConcurrent::run(&comparisonWnd, &Comparison::reportMatchingVideos);
-        comparisonWnd.exec();
+        Comparison comparison(_videoList, _prefs, *this);
+        QFuture<void> future = QtConcurrent::run(&comparison, &Comparison::reportMatchingVideos);   //run in background
+        comparison.exec();          //open dialog, but if it is closed while reportMatchingVideos() still running...
 
-        _previousRunFolders = foldersToSearch;
-        _previousRunThumbnails = _prefs._thumbnails;
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        future.waitForFinished();   //...must wait until finished (crash when going out of scope destroys instance)
+        QApplication::restoreOverrideCursor();
+
+        _previousRunFolders = foldersToSearch;                  //videos are still held in memory until
+        _previousRunThumbnails = _prefs._thumbnails;            //folders to search or thumbnail mode are changed
     }
 
     ui->findDuplicates->setText(QStringLiteral("Find duplicates"));
