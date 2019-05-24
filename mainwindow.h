@@ -53,6 +53,7 @@ private slots:
     void on_findDuplicates_clicked();
     void findVideos(QDir &dir);
     void processVideos();
+    void videoSummary();
 
     void addStatusMessage(const QString &message) const;
     void addVideo(const QString &filename) const;

@@ -276,8 +276,13 @@ void MainWindow::processVideos()
         _videoList << videoTask;
     }
     threadPool.waitForDone();
-    QApplication::processEvents();    //process signals from last threads
+    QApplication::processEvents();              //process signals from last threads
 
+    videoSummary();
+}
+
+void MainWindow::videoSummary()
+{
     if(_rejectedVideos.empty())
         addStatusMessage(QStringLiteral("%1 intact video(s) were found").arg(_everyVideo.count()));
     else
@@ -288,7 +293,6 @@ void MainWindow::processVideos()
                          .arg(_rejectedVideos.count()));
         for(const auto &filename : _rejectedVideos)
             addStatusMessage(filename);
-
     }
     _rejectedVideos.clear();
 }
