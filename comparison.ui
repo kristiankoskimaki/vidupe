@@ -78,7 +78,7 @@
         <number>1</number>
        </property>
        <property name="maximum">
-        <number>64</number>
+        <number>100</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -920,7 +920,6 @@
  <customwidgets>
   <customwidget>
    <class>ClickableLabel</class>
-   <extends>QWidget</extends>
   </customwidget>
  </customwidgets>
  <resources/>

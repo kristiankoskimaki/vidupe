@@ -20,8 +20,7 @@ Comparison::Comparison(const QVector<Video *> &userVideos, const Prefs &userPref
 
     if(_prefs._ComparisonMode == _prefs._SSIM)
         ui->selectSSIM->setChecked(true);
-    _prefs._thresholdPhashOriginal = _prefs._thresholdPhash;
-    ui->thresholdSlider->setValue(64 - _prefs._thresholdPhash);
+    ui->thresholdSlider->setValue(QVariant(_prefs._thresholdSSIM * 100).toInt());
     ui->progressBar->setMaximum(_videos.count() * (_videos.count() - 1) / 2);
 
     on_nextVideo_clicked();
@@ -154,14 +153,14 @@ bool Comparison::bothVideosMatch(const Video *left, const Video *right)
     _phashSimilarity = phashSimilarity(left, right);
     if(_prefs._ComparisonMode == _prefs._PHASH)
     {
-        if(_phashSimilarity <= _prefs._thresholdPhash)
+        if(_phashSimilarity >= _prefs._thresholdPhash)
             return true;
         return false;
-    }                           //ssim comparison takes long time, only do it if pHash somewhat matches
-    else if(_phashSimilarity <= qMax(_prefs._thresholdPhash, 20))
+    }                           //ssim comparison takes long time, only do it if pHash differs at most 20 bits of 64
+    else if(_phashSimilarity >= qMax(_prefs._thresholdPhash, 64 - 20))
     {
         _ssimSimilarity = ssim(left->grayThumb, right->grayThumb, _prefs._ssimBlockSize);
-        _ssimSimilarity = _ssimSimilarity + _durationModifier / 64.0;
+        _ssimSimilarity = _ssimSimilarity + _durationModifier / 64.0;   // b/64 bits (phash) <=> p/100 % (ssim)
         if(_ssimSimilarity > _prefs._thresholdSSIM)
             return true;
     }
@@ -170,21 +169,21 @@ bool Comparison::bothVideosMatch(const Video *left, const Video *right)
 
 int Comparison::phashSimilarity(const Video *left, const Video *right)
 {
-    int distance = 0;
-    uint64_t differentBits = left->hash ^ right->hash;    //XOR to value (only ones for differing bits)
+    int distance = 64;
+    uint64_t differentBits = left->hash ^ right->hash;      //XOR to value (only ones for differing bits)
     while(differentBits != 0)
     {
-        differentBits &= differentBits - 1;     //count number of bits of value
-        distance++;
+        differentBits &= differentBits - 1;                 //count number of bits of value
+        distance--;
     }
 
     if( qAbs(left->duration - right->duration) <= 1000 )
-        _durationModifier = 0 - _prefs._sameDurationModifier;               //lower distance if both durations within 1s
+        _durationModifier = 0 + _prefs._sameDurationModifier;               //lower distance if both durations within 1s
     else
-        _durationModifier = 0 + _prefs._differentDurationModifier;          //raise distance if both durations differ 1s
+        _durationModifier = 0 - _prefs._differentDurationModifier;          //raise distance if both durations differ 1s
 
     distance = distance + _durationModifier;
-    return distance > 0? distance : 0;  //negative value would wrap into huge value because return value is int
+    return distance > 64? 64 : distance;
 }
 
 void Comparison::showVideo(const QString &side) const
@@ -369,10 +368,9 @@ void Comparison::updateUI()
     }
 
     if(_prefs._ComparisonMode == _prefs._PHASH)
-        ui->identicalBits->setText(QStringLiteral("%1/64 different bits").arg(_phashSimilarity));
+        ui->identicalBits->setText(QStringLiteral("%1/64 same bits").arg(_phashSimilarity));
     if(_prefs._ComparisonMode == _prefs._SSIM)
-        ui->identicalBits->setText(QStringLiteral("%1 SSIM index").arg(QString::number(_ssimSimilarity, 'f', 3)));
-
+        ui->identicalBits->setText(QStringLiteral("%1 SSIM index").arg(QString::number(qMin(_ssimSimilarity, 1.0), 'f', 3)));
     _zoomLevel = 0;
     ui->progressBar->setValue(comparisonsSoFar());
 }
@@ -607,22 +605,17 @@ void Comparison::on_swapFilenames_clicked() const
 
 void Comparison::on_thresholdSlider_valueChanged(const int &value)
 {
-    const int differentBits = 64 - value;
-    const int percentage = 100 * value / 64;
+    _prefs._thresholdSSIM = value / 100.0;
+    const int matchingBitsOf64 = static_cast<int>(round(64 * _prefs._thresholdSSIM));
+    _prefs._thresholdPhash = matchingBitsOf64;
 
-    const QString thresholdMessage = QStringLiteral("pHash threshold: %1% (%2/64 bits may differ),"
-                                                    " was originally %3%\nSSIM threshold: %4").
-            arg(percentage).arg(differentBits).arg(100 * (64 - _prefs._thresholdPhashOriginal) / 64).
-            arg(value / 64.0);
+    const QString thresholdMessage = QStringLiteral(
+                "Threshold: %1% (%2/64 bits = match)   Default: 89%\n"
+                "Smaller: less strict, can match different videos (false positive)\n"
+                "Larger: more strict, can miss identical videos (false negative)").arg(value).arg(matchingBitsOf64);
     ui->thresholdSlider->setToolTip(thresholdMessage);
 
-    if(differentBits != _prefs._thresholdPhash)    //function also called when constructor sets slider
-    {
-        _prefs._thresholdPhash = 64 - value;
-        _prefs._thresholdSSIM = value / 64.0;
-    }
-
-    emit adjustThresholdSlider(64 - _prefs._thresholdPhash);
+    emit adjustThresholdSlider(ui->thresholdSlider->value());
 }
 
 void Comparison::resizeEvent(QResizeEvent *event)

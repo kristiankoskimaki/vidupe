@@ -10,11 +10,10 @@ public:
     int _ComparisonMode = _PHASH;
     int _thumbnails = thumb4;
 
-    int _thresholdPhash = 7;
-    int _thresholdPhashOriginal = 7;
-
-    double _thresholdSSIM = 0.90;
     int _ssimBlockSize = 16;
+
+    double _thresholdSSIM = 0.89;
+    int _thresholdPhash = 57;
 
     int _differentDurationModifier = 4;
     int _sameDurationModifier = 1;

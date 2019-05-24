@@ -251,13 +251,13 @@
              <number>1</number>
             </property>
             <property name="maximum">
-             <number>64</number>
+             <number>100</number>
             </property>
             <property name="pageStep">
              <number>8</number>
             </property>
             <property name="value">
-             <number>57</number>
+             <number>89</number>
             </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>

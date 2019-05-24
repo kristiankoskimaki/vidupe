@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->selectThumbnails->addItem(thumb.modeName(i));
     ui->selectThumbnails->setCurrentIndex(3);
 
-    for(int i=0; i<=9; i++)
+    for(int i=0; i<=5; i++)
     {
         ui->differentDurationCombo->addItem(QStringLiteral("%1").arg(i));
         ui->sameDurationCombo->addItem(QStringLiteral("%1").arg(i));
@@ -122,16 +122,15 @@ bool MainWindow::detectffmpeg() const
 
 void MainWindow::calculateThreshold(const int &value)
 {
-    const int differentBits = 64 - value;           //two video's hashes may only differ this many bits
-    const int percentage = 100 * value / 64;        //to be considered having the the same content
+    _prefs._thresholdSSIM = value / 100.0;
+    const int matchingBitsOf64 = static_cast<int>(round(64 * _prefs._thresholdSSIM));
+    _prefs._thresholdPhash = matchingBitsOf64;
+
     const QString thresholdMessage = QStringLiteral(
-                "Threshold: %1% (%2/64 bits may differ)\n"
-                "Default is:  89% (7/64 bits may differ)\n"
+                "Threshold: %1% (%2/64 bits = match)   Default: 89%\n"
                 "Smaller: less strict, can match different videos (false positive)\n"
-                "Larger:  more strict, can miss identical videos (false negative)").arg(percentage).arg(differentBits);
+                "Larger: more strict, can miss identical videos (false negative)").arg(value).arg(matchingBitsOf64);
     ui->thresholdSlider->setToolTip(thresholdMessage);
-    _prefs._thresholdPhash = differentBits;
-    _prefs._thresholdSSIM = value / 64.0;
 }
 
 void MainWindow::on_browseFolders_clicked() const
