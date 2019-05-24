@@ -6,7 +6,7 @@
 #include <QMessageBox>
 #include <QWheelEvent>
 
-Comparison::Comparison(QVector<Video *> &userVideos, Prefs &userPrefs, QWidget &parent)
+Comparison::Comparison(const QVector<Video *> &userVideos, const Prefs &userPrefs, QWidget &parent)
     : QDialog(&parent), ui(new Ui::Comparison)
 {
     _videos = userVideos;

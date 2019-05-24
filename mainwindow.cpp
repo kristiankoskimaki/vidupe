@@ -134,9 +134,9 @@ void MainWindow::calculateThreshold(const int &value)
     _prefs._thresholdSSIM = value / 64.0;
 }
 
-void MainWindow::on_browseFolders_clicked()
+void MainWindow::on_browseFolders_clicked() const
 {
-    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), QStringLiteral("/home"),
+    QString dir = QFileDialog::getExistingDirectory(nullptr, tr("Open Directory"), QStringLiteral("/home"),
                                                     QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if(dir.isEmpty())
         return;

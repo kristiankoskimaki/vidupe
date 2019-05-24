@@ -9,7 +9,7 @@
 ushort Video::_thumbnailMode = thumb4;
 ushort Video::_jpegQuality = _okJpegQuality;
 
-Video::Video(QWidget &parent, const QString &userFilename, const int &numberOfVideos, const ushort &userThumbnails)
+Video::Video(const QWidget &parent, const QString &userFilename, const int &numberOfVideos, const ushort &userThumbnails)
 {
     filename = userFilename;
     _thumbnailMode = userThumbnails;
@@ -261,7 +261,7 @@ QString Video::msToHHMMSS(const qint64 &time) const
     return QStringLiteral("%1:%2:%3.%4").arg(paddedHours, paddedMinutes, paddedSeconds).arg(msecs);
 }
 
-QImage Video::captureAt(const short &percent, const short &ofDuration)
+QImage Video::captureAt(const short &percent, const short &ofDuration) const
 {
     const QTemporaryDir tempDir;
     if(!tempDir.isValid())

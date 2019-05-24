@@ -46,7 +46,7 @@ private slots:
     void on_thresholdSlider_valueChanged(const int &value) { ui->thresholdSlider->setValue(value); calculateThreshold(value); ui->directoryBox->setFocus(); }
     void calculateThreshold(const int &value);
 
-    void on_browseFolders_clicked();
+    void on_browseFolders_clicked() const;
     void on_directoryBox_returnPressed() { on_findDuplicates_clicked(); }
     void on_findDuplicates_clicked();
     void findVideos(QDir &dir, QStringList &everyVideo) const;

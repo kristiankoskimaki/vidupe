@@ -16,8 +16,8 @@ class Video : public QObject, public QRunnable
     Q_OBJECT
 
 public:
-    Video(QWidget &parent, const QString &userFilename, const int &numberOfVideos, const ushort &userThumbnails=2*2);
-    void run() override;
+    Video(const QWidget &parent, const QString &userFilename, const int &numberOfVideos, const ushort &userThumbnails);
+    void run();
 
     QString filename;
     qint64 size = 0;
@@ -42,7 +42,7 @@ private slots:
     QString msToHHMMSS(const qint64 &time) const;
 
 public slots:
-    QImage captureAt(const short &percent, const short &ofDuration=100);
+    QImage captureAt(const short &percent, const short &ofDuration=100) const;
 
 signals:
     void acceptVideo(const QString &filename) const;
