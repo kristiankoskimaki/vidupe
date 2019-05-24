@@ -6,17 +6,17 @@
 #include <QMessageBox>
 #include <QWheelEvent>
 
-Comparison::Comparison(const QVector<Video *> &userVideos, const Prefs &userPrefs, QWidget &parent)
-    : QDialog(&parent), ui(new Ui::Comparison)
+Comparison::Comparison(const QVector<Video *> &videosParam, const Prefs &prefsParam)
+    : QDialog(prefsParam._mainwPtr), ui(new Ui::Comparison)
 {
-    _videos = userVideos;
-    _prefs = userPrefs;
+    _videos = videosParam;
+    _prefs = prefsParam;
 
     ui->setupUi(this);
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
-    connect(this, SIGNAL(sendStatusMessage(const QString &)), &parent, SLOT(addStatusMessage(const QString &)));
-    connect(this, SIGNAL(switchComparisonMode(const int &)), &parent, SLOT(setComparisonMode(const int &)));
-    connect(this, SIGNAL(adjustThresholdSlider(const int &)), &parent, SLOT(on_thresholdSlider_valueChanged(const int &)));
+    connect(this, SIGNAL(sendStatusMessage(const QString &)), _prefs._mainwPtr, SLOT(addStatusMessage(const QString &)));
+    connect(this, SIGNAL(switchComparisonMode(const int &)),  _prefs._mainwPtr, SLOT(setComparisonMode(const int &)));
+    connect(this, SIGNAL(adjustThresholdSlider(const int &)), _prefs._mainwPtr, SLOT(on_thresholdSlider_valueChanged(const int &)));
 
     if(_prefs._ComparisonMode == _prefs._SSIM)
         ui->selectSSIM->setChecked(true);

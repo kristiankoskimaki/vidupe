@@ -15,7 +15,7 @@ class Comparison : public QDialog
     Q_OBJECT
 
 public:
-    Comparison(const QVector<Video *> &userVideos, const Prefs &userPrefs, QWidget &parent);
+    Comparison(const QVector<Video *> &videosParam, const Prefs &prefsParam);
     ~Comparison();
     void reportMatchingVideos();
 

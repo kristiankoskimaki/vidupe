@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
     ui->setupUi(this);
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
+    _prefs._mainwPtr = this;
+
     ui->statusBox->append(QStringLiteral("%1 %2").arg(APP_NAME, APP_VERSION));
     ui->statusBox->append(QStringLiteral("%1").arg(APP_COPYRIGHT).replace("\xEF\xBF\xBD ", QStringLiteral("© "))
                                                                  .replace("\xEF\xBF\xBD",  QStringLiteral("ä")));
@@ -196,7 +198,7 @@ void MainWindow::on_findDuplicates_clicked()
 
     if(_videoList.count() > 1)      //very last thing to do in this file: start the comparison
     {
-        Comparison comparison(_videoList, _prefs, *this);
+        Comparison comparison(_videoList, _prefs);
         QFuture<void> future = QtConcurrent::run(&comparison, &Comparison::reportMatchingVideos);   //run in background
         comparison.exec();          //open dialog, but if it is closed while reportMatchingVideos() still running...
 

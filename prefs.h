@@ -1,12 +1,16 @@
 #ifndef PREFS_H
 #define PREFS_H
 
+#include <QWidget>
 #include "thumbnail.h"
 
 class Prefs
 {
 public:
     enum _modes { _PHASH, _SSIM };
+
+    QWidget *_mainwPtr = nullptr;               //pointer to MainWindow, for connecting signals to it's slots
+
     int _ComparisonMode = _PHASH;
     int _thumbnails = thumb4;
 
