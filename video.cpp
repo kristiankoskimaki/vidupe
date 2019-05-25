@@ -167,9 +167,9 @@ int Video::takeScreenCaptures(const Db &cache)
 
         if(writeToCache)
         {
-            frame = minimizeImage(frame);                                               //shrink image = smaller cache
-            frame.save(&captureBuffer, QByteArrayLiteral("JPG"), _okJpegQuality);       //blurry jpg may actually increase
-            cache.writeCapture(percentages[capture], cachedImage);                      //comparison accuracy (less strict)
+            frame = minimizeImage(frame);
+            frame.save(&captureBuffer, QByteArrayLiteral("JPG"), _okJpegQuality);
+            cache.writeCapture(percentages[capture], cachedImage);
         }
     }
     processThumbnail(thumbnail);
@@ -178,15 +178,16 @@ int Video::takeScreenCaptures(const Db &cache)
 
 void Video::processThumbnail(QImage &image)
 {
+    cv::Mat mat = cv::Mat(image.height(), image.width(), CV_8UC3, image.bits(), static_cast<uint>(image.bytesPerLine()));
+    hash = computePhash(mat);                      //pHash first, from full sized thumbnail
+
+    resize(mat, mat, cv::Size(_ssimSize, _ssimSize), 0, 0, cv::INTER_AREA);
+    cvtColor(mat, grayThumb, cv::COLOR_BGR2GRAY);
+    grayThumb.convertTo(grayThumb, CV_32F);         //ssim
+
     image = minimizeImage(image);
     QBuffer buffer(&thumbnail);
     image.save(&buffer, QByteArrayLiteral("JPG"), _jpegQuality);    //save GUI thumbnail as tiny JPEG to conserve memory
-
-    cv::Mat mat = cv::Mat(image.height(), image.width(), CV_8UC3, image.bits(), static_cast<uint>(image.bytesPerLine()));
-    resize(mat, mat, cv::Size(_ssimSize, _ssimSize), 0, 0, cv::INTER_AREA);
-    cvtColor(mat, grayThumb, cv::COLOR_BGR2GRAY);
-    grayThumb.convertTo(grayThumb, CV_32F);
-    hash = computePhash(mat);
 }
 
 uint64_t Video::computePhash(const cv::Mat &input)
