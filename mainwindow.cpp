@@ -15,10 +15,9 @@ int main(int argc, char *argv[])
     return a.exec();
 }
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow() : ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
     _prefs._mainwPtr = this;
 
     ui->statusBox->append(QStringLiteral("%1 %2").arg(APP_NAME, APP_VERSION));
@@ -44,13 +43,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
         ui->differentDurationCombo->addItem(QStringLiteral("%1").arg(i));
         ui->sameDurationCombo->addItem(QStringLiteral("%1").arg(i));
     }
-
     ui->differentDurationCombo->setCurrentIndex(4);
     ui->sameDurationCombo->setCurrentIndex(1);
 
     ui->directoryBox->setFocus();
     ui->browseFolders->setIcon(ui->browseFolders->style()->standardIcon(QStyle::SP_DirOpenIcon));
-
     ui->processedFiles->setVisible(false);
     ui->progressBar->setVisible(false);
     ui->mainToolBar->setVisible(false);
