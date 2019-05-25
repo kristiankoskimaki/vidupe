@@ -193,7 +193,7 @@ void Comparison::showVideo(const QString &side) const
     auto *Image = this->findChild<ClickableLabel *>(side + QStringLiteral("Image"));
     QBuffer pixels(&_videos[thisVideo]->thumbnail);
     QImage image;
-    image.load(&pixels, "JPG");
+    image.load(&pixels, QByteArrayLiteral("JPG"));
     Image->setPixmap(QPixmap::fromImage(image).scaled(Image->width(), Image->height(), Qt::KeepAspectRatio));
 
     auto *FileName = this->findChild<ClickableLabel *>(side + QStringLiteral("FileName"));
@@ -366,9 +366,9 @@ void Comparison::updateUI()
     }
 
     if(_prefs._comparisonMode == _prefs._PHASH)
-        ui->identicalBits->setText(QStringLiteral("%1/64 same bits").arg(_phashSimilarity));
+        ui->identicalBits->setText(QString("%1/64 same bits").arg(_phashSimilarity));
     if(_prefs._comparisonMode == _prefs._SSIM)
-        ui->identicalBits->setText(QStringLiteral("%1 SSIM index").arg(QString::number(qMin(_ssimSimilarity, 1.0), 'f', 3)));
+        ui->identicalBits->setText(QString("%1 SSIM index").arg(QString::number(qMin(_ssimSimilarity, 1.0), 'f', 3)));
     _zoomLevel = 0;
     ui->progressBar->setValue(comparisonsSoFar());
 }
@@ -451,7 +451,7 @@ void Comparison::on_leftDelete_clicked()
             _videosDeleted++;
             _spaceSaved = _spaceSaved + _videos[_leftVideo]->size;
             cache.removeVideo(id);
-            emit sendStatusMessage(QStringLiteral("Deleted %1").arg(QDir::toNativeSeparators(_videos[_leftVideo]->filename)));
+            emit sendStatusMessage(QString("Deleted %1").arg(QDir::toNativeSeparators(_videos[_leftVideo]->filename)));
 
             _leftVideo++;
             _rightVideo = _leftVideo;
@@ -490,7 +490,7 @@ void Comparison::on_rightDelete_clicked()
             _videosDeleted++;
             _spaceSaved = _spaceSaved + _videos[_rightVideo]->size;
             cache.removeVideo(id);
-            emit sendStatusMessage(QStringLiteral("Deleted %1").arg(QDir::toNativeSeparators(_videos[_rightVideo]->filename)));
+            emit sendStatusMessage(QString("Deleted %1").arg(QDir::toNativeSeparators(_videos[_rightVideo]->filename)));
             _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
         }
     }
@@ -620,16 +620,16 @@ void Comparison::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
 
-    if(ui->leftFileName->text() == "" || _leftVideo >= _videos.count() || _rightVideo >= _videos.count())
+    if(ui->leftFileName->text().isEmpty() || _leftVideo >= _videos.count() || _rightVideo >= _videos.count())
         return;     //automatic initial resize event can happen before closing when values went over limit
 
     QImage image;
     QBuffer leftPixels(&_videos[_leftVideo]->thumbnail);
-    image.load(&leftPixels, "JPG");
+    image.load(&leftPixels, QByteArrayLiteral("JPG"));
     ui->leftImage->setPixmap(QPixmap::fromImage(image).scaled(
                              ui->leftImage->width(), ui->leftImage->height(), Qt::KeepAspectRatio));
     QBuffer rightPixels(&_videos[_rightVideo]->thumbnail);
-    image.load(&rightPixels, "JPG");
+    image.load(&rightPixels, QByteArrayLiteral("JPG"));
     ui->rightImage->setPixmap(QPixmap::fromImage(image).scaled(
                               ui->rightImage->width(), ui->rightImage->height(), Qt::KeepAspectRatio));
 }
@@ -638,9 +638,9 @@ void Comparison::wheelEvent(QWheelEvent *event)
 {
     const QPoint pos = QCursor::pos();
     ClickableLabel *imagePtr;
-    if(QApplication::widgetAt(pos)->objectName() == QStringLiteral("leftImage"))
+    if(QApplication::widgetAt(pos)->objectName() == QLatin1String("leftImage"))
         imagePtr = ui->leftImage;
-    else if(QApplication::widgetAt(pos)->objectName() == QStringLiteral("rightImage"))
+    else if(QApplication::widgetAt(pos)->objectName() == QLatin1String("rightImage"))
         imagePtr = ui->rightImage;
     else
         return;

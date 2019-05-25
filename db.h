@@ -21,7 +21,7 @@ private:
 
 public:
     //return md5 hash of parameter's file, or (as convinience) md5 hash of the file given to constructor
-    QString uniqueId(const QString &filename="") const;
+    QString uniqueId(const QString &filename=QStringLiteral("")) const;
 
     //constructor creates a database file if there is none already
     void createTables() const;

@@ -141,7 +141,7 @@ int Video::takeScreenCaptures(const Db &cache)
 
         if(!cachedImage.isNull())   //image was already in cache
         {
-            frame.load(&captureBuffer, "JPG");              //was saved in cache as small size, resize to original
+            frame.load(&captureBuffer, QByteArrayLiteral("JPG"));   //was saved in cache as small size, resize to original
             frame = frame.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
         else
@@ -167,9 +167,9 @@ int Video::takeScreenCaptures(const Db &cache)
 
         if(writeToCache)
         {
-            frame = minimizeImage(frame);                               //shrink image = smaller cache
-            frame.save(&captureBuffer, "JPG", _okJpegQuality);          //blurry jpg may actually increase
-            cache.writeCapture(percentages[capture], cachedImage);      //comparison accuracy (less strict)
+            frame = minimizeImage(frame);                                               //shrink image = smaller cache
+            frame.save(&captureBuffer, QByteArrayLiteral("JPG"), _okJpegQuality);       //blurry jpg may actually increase
+            cache.writeCapture(percentages[capture], cachedImage);                      //comparison accuracy (less strict)
         }
     }
     processThumbnail(thumbnail);
@@ -180,7 +180,7 @@ void Video::processThumbnail(QImage &image)
 {
     image = minimizeImage(image);
     QBuffer buffer(&thumbnail);
-    image.save(&buffer, "JPG", _jpegQuality);    //save GUI thumbnail as tiny JPEG to conserve memory
+    image.save(&buffer, QByteArrayLiteral("JPG"), _jpegQuality);    //save GUI thumbnail as tiny JPEG to conserve memory
 
     cv::Mat mat = cv::Mat(image.height(), image.width(), CV_8UC3, image.bits(), static_cast<uint>(image.bytesPerLine()));
     resize(mat, mat, cv::Size(_ssimSize, _ssimSize), 0, 0, cv::INTER_AREA);
