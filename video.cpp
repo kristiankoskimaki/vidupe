@@ -192,8 +192,7 @@ void Video::processThumbnail(QImage &image)
 uint64_t Video::computePhash(const cv::Mat &input)
 {
     cv::Mat resizeImg, grayImg, grayFImg, dctImg, topLeftDCT;
-
-    cv::resize(input, resizeImg, cv::Size(_pHashSize, _pHashSize), 0, 0, cv::INTER_LINEAR_EXACT);
+    cv::resize(input, resizeImg, cv::Size(_pHashSize, _pHashSize), 0, 0, cv::INTER_AREA);
     cv::cvtColor(resizeImg, grayImg, cv::COLOR_BGR2GRAY);           //resize image to 32x32 grayscale
 
     int shadesOfGray = 0;
