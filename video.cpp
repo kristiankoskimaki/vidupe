@@ -9,9 +9,8 @@
 Prefs Video::_prefs;
 int Video::_jpegQuality = _okJpegQuality;
 
-Video::Video(const Prefs &prefsParam, const QString &filenameParam)
+Video::Video(const Prefs &prefsParam, const QString &filenameParam) : filename(filenameParam)
 {
-    filename = filenameParam;
     _prefs = prefsParam;
     if(_prefs._numberOfVideos > _hugeAmountVideos)       //save memory to avoid crash due to 32 bit limit
         _jpegQuality = _lowJpegQuality;
