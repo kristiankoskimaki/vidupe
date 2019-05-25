@@ -6,11 +6,11 @@
 #include <QMessageBox>
 #include <QWheelEvent>
 
-Comparison::Comparison(const QVector<Video *> &videosParam, const Prefs &prefsParam) : _videos(videosParam), _prefs(prefsParam)
+Comparison::Comparison(const QVector<Video *> &videosParam, const Prefs &prefsParam) :
+    QDialog(prefsParam._mainwPtr, Qt::Window), _videos(videosParam), _prefs(prefsParam)
 {
     ui = new Ui::Comparison;
     ui->setupUi(this);
-    setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
 
     connect(this, SIGNAL(sendStatusMessage(const QString &)), _prefs._mainwPtr, SLOT(addStatusMessage(const QString &)));
     connect(this, SIGNAL(switchComparisonMode(const int &)),  _prefs._mainwPtr, SLOT(setComparisonMode(const int &)));
