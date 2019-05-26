@@ -158,6 +158,7 @@ void MainWindow::on_findDuplicates_clicked()
         for(const auto &video : _videoList)     //new search: delete videos from previous search
             delete video;
         _videoList.clear();
+        _everyVideo.clear();
 
         ui->statusBox->append(QStringLiteral("\nSearching for videos..."));
         ui->processedFiles->setVisible(false);
