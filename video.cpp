@@ -174,11 +174,11 @@ int Video::takeScreenCaptures(const Db &cache)
 void Video::processThumbnail(QImage &image)
 {
     cv::Mat mat = cv::Mat(image.height(), image.width(), CV_8UC3, image.bits(), static_cast<uint>(image.bytesPerLine()));
-    hash = computePhash(mat);                      //pHash first, from full sized thumbnail
+    hash = computePhash(mat);                               //pHash first, from full sized thumbnail
 
-    resize(mat, mat, cv::Size(_ssimSize, _ssimSize), 0, 0, cv::INTER_AREA);
-    cvtColor(mat, grayThumb, cv::COLOR_BGR2GRAY);
-    grayThumb.convertTo(grayThumb, CV_32F);         //ssim
+    cv::resize(mat, mat, cv::Size(_ssimSize, _ssimSize), 0, 0, cv::INTER_AREA);
+    cv::cvtColor(mat, grayThumb, cv::COLOR_BGR2GRAY);
+    grayThumb.cv::Mat::convertTo(grayThumb, CV_32F);        //ssim
 
     image = minimizeImage(image);
     QBuffer buffer(&thumbnail);
