@@ -378,36 +378,17 @@ int Comparison::comparisonsSoFar() const
     return maxComparisons - remaining + _rightVideo - _leftVideo;
 }
 
-//clicking on filename opens folder with file selected
-void Comparison::on_leftFileName_clicked() const
+void Comparison::openFileManager(const int &side) const
 {
     QString exploreVideo;
     #if defined(Q_OS_WIN)
-        exploreVideo = QStringLiteral("explorer /select, \"%1\"")
-                                      .arg(QDir::toNativeSeparators(_videos[_leftVideo]->filename));
+        exploreVideo = QString("explorer /select, \"%1\"").arg(QDir::toNativeSeparators(_videos[side]->filename));
     #endif
     #if defined(Q_OS_MACX)
-        exploreVideo = QStringLiteral("open -R \"%1\"").arg(_videos[_leftVideo]->filename);
+        exploreVideo = QString("open -R \"%1\"").arg(_videos[side]->filename);
     #endif
     #if defined(Q_OS_X11)
-        const QFileInfo videoFile(_videos[_leftVideo]->filename);
-        exploreVideo = QStringLiteral("xdg-open \"%1\"").arg(videoFile.absolutePath());
-    #endif
-
-    QProcess::startDetached(exploreVideo);
-}
-void Comparison::on_rightFileName_clicked() const
-{
-    QString exploreVideo;
-    #if defined(Q_OS_WIN)
-        exploreVideo = QStringLiteral("explorer /select, \"%1\"")
-                                      .arg(QDir::toNativeSeparators(_videos[_rightVideo]->filename));
-    #endif
-    #if defined(Q_OS_MACX)
-        exploreVideo = QStringLiteral("open -R \"%1\"").arg(_videos[_rightVideo]->filename);
-    #endif
-    #if defined(Q_OS_X11)
-        const QFileInfo videoFile(_videos[_rightVideo]->filename);
+        const QFileInfo videoFile(_videos[side]->filename);
         exploreVideo = QString("xdg-open \"%1\"").arg(videoFile.absolutePath());
     #endif
 

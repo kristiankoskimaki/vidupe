@@ -59,10 +59,14 @@ private slots:
                                                          emit switchComparisonMode(_prefs._comparisonMode); }
     void on_selectSSIM_clicked ( const bool &checked) { if(checked) _prefs._comparisonMode = _prefs._SSIM;
                                                         emit switchComparisonMode(_prefs._comparisonMode); }
+
     void on_leftImage_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(_videos[_leftVideo]->filename)); }
     void on_rightImage_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(_videos[_rightVideo]->filename)); }
-    void on_leftFileName_clicked() const;
-    void on_rightFileName_clicked() const;
+
+    void on_leftFileName_clicked() { openFileManager(_leftVideo); }
+    void on_rightFileName_clicked() { openFileManager(_rightVideo); }
+    void openFileManager(const int &side) const;
+
     void on_leftDelete_clicked();
     void on_rightDelete_clicked();
     void on_leftMove_clicked();
