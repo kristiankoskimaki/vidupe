@@ -251,27 +251,23 @@ void MainWindow::processVideos()
     else return;
 
     QThreadPool threadPool;
-    for(int i=0; i<_prefs._numberOfVideos; i++)
+    for(const auto &filename : _everyVideo)
     {
         if(_userPressedStop)
         {
             threadPool.clear();
             break;
         }
-        if(threadPool.activeThreadCount() == threadPool.maxThreadCount())
-        {
-            QApplication::processEvents();      //avoid blocking signals in event loop
-            i--;
-            continue;
-        }
+        while(threadPool.activeThreadCount() == threadPool.maxThreadCount())
+            QApplication::processEvents();          //avoid blocking signals in event loop
 
-        auto *videoTask = new Video(_prefs, _everyVideo[i]);
+        auto *videoTask = new Video(_prefs, filename);
         videoTask->setAutoDelete(false);
         threadPool.start(videoTask);
         _videoList << videoTask;
     }
     threadPool.waitForDone();
-    QApplication::processEvents();              //process signals from last threads
+    QApplication::processEvents();                  //process signals from last threads
 
     ui->selectThumbnails->setDisabled(false);
     _prefs._numberOfVideos = _videoList.count();    //minus rejected ones now
