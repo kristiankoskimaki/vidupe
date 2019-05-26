@@ -141,8 +141,8 @@ void MainWindow::on_findDuplicates_clicked()
         return;
 
     if(ui->findDuplicates->text() == QLatin1String("Stop"))     //pressing "find duplicates" button will morph into a
-    {                                           //stop button. a lengthy search can thus be stopped and
-        _userPressedStop = true;                //those videos already processed are compared w/each other
+    {                                                           //stop button. a lengthy search can thus be stopped and
+        _userPressedStop = true;                                //those videos already processed are compared w/each other
         return;
     }
     else
@@ -155,34 +155,30 @@ void MainWindow::on_findDuplicates_clicked()
     const QString foldersToSearch = ui->directoryBox->text();
     if(foldersToSearch != _previousRunFolders || _prefs._thumbnails != _previousRunThumbnails)
     {
-        for(const auto &video : _videoList)     //new search: delete videos from previous search
+        for(const auto &video : _videoList)                     //new search: delete videos from previous search
             delete video;
         _videoList.clear();
         _everyVideo.clear();
 
         ui->statusBox->append(QStringLiteral("\nSearching for videos..."));
-        ui->processedFiles->setVisible(false);
-        ui->progressBar->setVisible(false);
+        ui->statusBar->setVisible(true);
 
-        QStringList directories = foldersToSearch.split(QStringLiteral(";"));
-
-        //add all video files from entered paths to list
-        for(int i=0; i<directories.length(); i++)
+        const QStringList directories = foldersToSearch.split(QStringLiteral(";"));
+        for(int i=0; i<directories.length(); i++)               //add all video files from entered paths to list
         {
-            if(!directories.value(i).isEmpty())
-            {
-                QDir dir = directories.value(i).remove(QStringLiteral("\""));
-                if(dir.exists())
-                    findVideos(dir);
-                else
-                    addStatusMessage(QStringLiteral("Cannot find directory: %1").arg(QDir::toNativeSeparators(dir.path())));
-            }
+            if(directories.value(i).isEmpty())
+                continue;
+            QDir dir = directories.value(i).remove(QStringLiteral("\""));
+            if(dir.exists())
+                findVideos(dir);
+            else
+                addStatusMessage(QStringLiteral("Cannot find directory: %1").arg(QDir::toNativeSeparators(dir.path())));
         }
 
         processVideos();
     }
 
-    if(_videoList.count() > 1)      //very last thing to do in this file: start the comparison
+    if(_videoList.count() > 1)
     {
         Comparison comparison(_videoList, _prefs);
         QFuture<void> future = QtConcurrent::run(&comparison, &Comparison::reportMatchingVideos);   //run in background
@@ -234,7 +230,7 @@ void MainWindow::processVideos()
         ui->selectThumbnails->setDisabled(true);
         ui->processedFiles->setVisible(true);
         ui->processedFiles->setText(QStringLiteral("0/%1").arg(_prefs._numberOfVideos));
-        ui->statusBar->clearMessage();
+        ui->statusBar->setVisible(false);
         ui->progressBar->setVisible(true);
         ui->progressBar->setValue(0);
         ui->progressBar->setMaximum(_prefs._numberOfVideos);
@@ -262,6 +258,8 @@ void MainWindow::processVideos()
     QApplication::processEvents();                  //process signals from last threads
 
     ui->selectThumbnails->setDisabled(false);
+    ui->processedFiles->setVisible(false);
+    ui->progressBar->setVisible(false);
     _prefs._numberOfVideos = _videoList.count();    //minus rejected ones now
     videoSummary();
 }
@@ -269,7 +267,7 @@ void MainWindow::processVideos()
 void MainWindow::videoSummary()
 {
     if(_rejectedVideos.empty())
-        addStatusMessage(QStringLiteral("%1 intact video(s) were found").arg(_prefs._numberOfVideos));
+        addStatusMessage(QStringLiteral("%1 intact video(s) found").arg(_prefs._numberOfVideos));
     else
     {
         addStatusMessage(QStringLiteral("%1 intact video(s) out of %2 total").arg(_prefs._numberOfVideos)
