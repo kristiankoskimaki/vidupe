@@ -122,12 +122,12 @@ void MainWindow::calculateThreshold(const int &value)
 
 void MainWindow::on_browseFolders_clicked() const
 {
-    QString dir = QFileDialog::getExistingDirectory(nullptr, tr("Open Directory"), QStringLiteral("/home"),
-                                                    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    const QString dir = QFileDialog::getExistingDirectory(nullptr, QByteArrayLiteral("Open folder"), QStringLiteral("/"),
+                        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if(dir.isEmpty())
         return;
-    dir = QStringLiteral(";%1").arg(QDir::toNativeSeparators(dir));
-    ui->directoryBox->setText(ui->directoryBox->text().append(dir));
+    ui->directoryBox->insert(QStringLiteral(";%1").arg(QDir::toNativeSeparators(dir)));
+    ui->directoryBox->setFocus();
 }
 
 void MainWindow::on_findDuplicates_clicked()
