@@ -267,7 +267,7 @@ QImage Video::captureAt(const int &percent, const int &ofDuration) const
     ffmpeg.start(ffmpegCommand);
     ffmpeg.waitForFinished(10000);
 
-    QImage img(screenshot, "BMP");
+    const QImage img(screenshot, "BMP");
     QFile::remove(screenshot);
     return img;
 }
