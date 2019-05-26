@@ -165,7 +165,7 @@ int Comparison::phashSimilarity(const Video *left, const Video *right)
 {
     int distance = 64;
     uint64_t differentBits = left->hash ^ right->hash;      //XOR to value (only ones for differing bits)
-    while(differentBits != 0)
+    while(differentBits)
     {
         differentBits &= differentBits - 1;                 //count number of bits of value
         distance--;
