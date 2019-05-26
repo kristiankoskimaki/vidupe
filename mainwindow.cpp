@@ -1,11 +1,8 @@
-#include "mainwindow.h"
-#include "comparison.h"
 #include <QFileDialog>
-#include <QDirIterator>
-#include <QProcess>
-#include <QThreadPool>
 #include <QtConcurrent/QtConcurrent>
 #include <QScrollBar>
+#include "mainwindow.h"
+#include "comparison.h"
 
 int main(int argc, char *argv[])
 {

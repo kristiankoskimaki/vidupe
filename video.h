@@ -1,15 +1,13 @@
 #ifndef VIDEO_H
 #define VIDEO_H
 
-#include <QDebug>
+#include <QDebug>               //generic includes go here as video.h is used by many files
 #include <QRunnable>
-#include <QDateTime>
-#include <QImage>
+#include <QProcess>
+#include <QBuffer>
 #include <QTemporaryDir>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/imgcodecs/imgcodecs.hpp>
 #include "prefs.h"
-#include "thumbnail.h"
 #include "db.h"
 
 class Video : public QObject, public QRunnable

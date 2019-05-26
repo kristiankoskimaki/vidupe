@@ -1,10 +1,7 @@
-#include "comparison.h"
-#include "db.h"
-#include "ui_comparison.h"
-#include <QBuffer>
-#include <QProcess>
 #include <QMessageBox>
 #include <QWheelEvent>
+#include "comparison.h"
+#include "ui_comparison.h"
 
 Comparison::Comparison(const QVector<Video *> &videosParam, const Prefs &prefsParam) :
     QDialog(prefsParam._mainwPtr, Qt::Window), _videos(videosParam), _prefs(prefsParam)

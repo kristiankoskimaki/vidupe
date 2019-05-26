@@ -1,12 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
 #include <QDragEnterEvent>
 #include <QMimeData>
 #include "ui_mainwindow.h"
 #include "video.h"
-#include "prefs.h"
 
 namespace Ui { class MainWindow; }
 

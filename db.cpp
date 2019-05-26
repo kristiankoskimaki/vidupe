@@ -1,8 +1,8 @@
-#include "db.h"
-#include "video.h"
 #include <QApplication>
 #include <QCryptographicHash>
 #include <QSqlQuery>
+#include "db.h"
+#include "video.h"
 
 Db::Db(const QString &filename)
 {

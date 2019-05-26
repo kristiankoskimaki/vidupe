@@ -6,7 +6,6 @@
 #include <QUrl>
 #include <QLabel>
 #include "video.h"
-#include "prefs.h"
 
 namespace Ui { class Comparison; }
 

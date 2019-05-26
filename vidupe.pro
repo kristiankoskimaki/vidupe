@@ -54,7 +54,8 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
     #Compiling OpenCV with MingW can be hard, so download binaries from https://github.com/huihut/OpenCV-MinGW-Build
     #put OpenCV \bin folder in source folder (only libopencv_core and libopencv_imgproc dll files are needed)
     #put OpenCV \opencv2 folder in source folder (contains the header files)
-    #add path to \bin folder (Projects -> Build Environment -> Details -> Path) (crash on start without this)
+    #add path to \bin folder: Projects -> Build Environment -> Details -> Path -> C:\the_full_Qt_path\vidupe\bin
+    #Vidupe will crash on start if the path to \bin was not set or the OpenCV DLL files are not in \bin
 
     #FFmpeg 4.xx (https://ffmpeg.org/)
     #ffmpeg.exe must be in same folder where Vidupe.exe is generated (or any folder in %PATH%)

@@ -1,10 +1,5 @@
-#include "video.h"
-#include "thumbnail.h"
-#include "db.h"
-#include <QTextEdit>
-#include <QProcess>
 #include <QPainter>
-#include <QBuffer>
+#include "video.h"
 
 Prefs Video::_prefs;
 int Video::_jpegQuality = _okJpegQuality;
