@@ -117,7 +117,6 @@ void Comparison::on_nextVideo_clicked()
     _leftVideo = oldLeft;       //went over limit, go back
     _rightVideo = oldRight;
 
-    this->show();
     int confirm = QMessageBox::Yes;
     if(!ui->leftFileName->text().isEmpty())
     {
