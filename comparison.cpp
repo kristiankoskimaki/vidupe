@@ -237,9 +237,9 @@ QString Comparison::readableDuration(const int64_t &milliseconds) const
     if(milliseconds == 0)
         return QStringLiteral("");
 
-    const int hours   = ((milliseconds / (1000*60*60)) % 24);
-    const int minutes = ((milliseconds / (1000*60)) % 60);
-    const int seconds = (milliseconds / 1000) % 60;
+    const int hours   = milliseconds / (1000*60*60) % 24;
+    const int minutes = milliseconds / (1000*60) % 60;
+    const int seconds = milliseconds / 1000 % 60;
 
     QString readableDuration;
     if(hours > 0)
