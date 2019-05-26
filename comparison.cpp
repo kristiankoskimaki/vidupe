@@ -395,79 +395,29 @@ void Comparison::openFileManager(const int &side) const
     QProcess::startDetached(exploreVideo);
 }
 
-void Comparison::on_leftDelete_clicked()
+void Comparison::deleteVideo(const int &side)
 {
-    //left side video was already manually deleted, skip to next
-    if(!QFileInfo::exists(_videos[_leftVideo]->filename))
-    {
-        _leftVideo++;
-        _rightVideo = _leftVideo;
-        _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
-        return;
-    }
+    const QString filename = _videos[side]->filename;
+    const QString onlyFilename = filename.right(filename.length() - filename.lastIndexOf("/") - 1);
+    const Db cache(filename);                       //generate unique id before file has been deleted
+    const QString id = cache.uniqueId();
 
-    Db cache(_videos[_leftVideo]->filename);    //generate unique id before file has been deleted
-    QString id = cache.uniqueId();
-
-    const QString askDelete = QStringLiteral("Are you sure you want to delete this file?\n\n%1")
-                                             .arg(ui->leftFileName->text());
-    QMessageBox::StandardButton confirm;
-    confirm = QMessageBox::question(this, QStringLiteral("Delete file"), askDelete, QMessageBox::Yes|QMessageBox::No);
-
-    if(confirm == QMessageBox::Yes)
-    {
-        QFile file(_videos[_leftVideo]->filename);
-        if(!file.remove())
-        {
-            QMessageBox msgBox;
-            msgBox.setText(QStringLiteral("Could not delete file. Check file permissions."));
-            msgBox.exec();
-        }
-        else
-        {
-            _videosDeleted++;
-            _spaceSaved = _spaceSaved + _videos[_leftVideo]->size;
-            cache.removeVideo(id);
-            emit sendStatusMessage(QString("Deleted %1").arg(QDir::toNativeSeparators(_videos[_leftVideo]->filename)));
-
-            _leftVideo++;
-            _rightVideo = _leftVideo;
-            _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
-        }
-    }
-}
-
-void Comparison::on_rightDelete_clicked()
-{
-    //right side video was already manually deleted, skip to next
-    if(!QFileInfo::exists(_videos[_rightVideo]->filename))
+    if(!QFileInfo::exists(filename))                //video was already manually deleted, skip to next
     {
         _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
         return;
     }
-
-    Db cache(_videos[_rightVideo]->filename);
-    QString id = cache.uniqueId();
-
-    const QString askDelete = QStringLiteral("Are you sure you want to delete this file?\n\n%1")
-                                             .arg(ui->rightFileName->text());
-    QMessageBox::StandardButton confirm;
-    confirm = QMessageBox::question(this, QStringLiteral("Delete file"), askDelete, QMessageBox::Yes|QMessageBox::No);
-    if(confirm == QMessageBox::Yes)
+    if(QMessageBox::question(this, "Delete file", QString("Are you sure you want to delete this file?\n\n%1")
+                             .arg(onlyFilename), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
     {
-        QFile file(_videos[_rightVideo]->filename);
-        if(!file.remove())
-        {
-            QMessageBox msgBox;
-            msgBox.setText(QStringLiteral("Could not delete file. Check file permissions."));
-            msgBox.exec();
-        }
+        if(!QFile::remove(filename))
+            QMessageBox::information(this, "", "Could not delete file. Check file permissions.");
         else
         {
             _videosDeleted++;
-            _spaceSaved = _spaceSaved + _videos[_rightVideo]->size;
+            _spaceSaved = _spaceSaved + _videos[side]->size;
             cache.removeVideo(id);
-            emit sendStatusMessage(QString("Deleted %1").arg(QDir::toNativeSeparators(_videos[_rightVideo]->filename)));
+            emit sendStatusMessage(QString("Deleted %1").arg(QDir::toNativeSeparators(filename)));
             _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
         }
     }

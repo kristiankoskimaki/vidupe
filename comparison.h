@@ -67,8 +67,10 @@ private slots:
     void on_rightFileName_clicked() { openFileManager(_rightVideo); }
     void openFileManager(const int &side) const;
 
-    void on_leftDelete_clicked();
-    void on_rightDelete_clicked();
+    void on_leftDelete_clicked() { deleteVideo(_leftVideo); }
+    void on_rightDelete_clicked() { deleteVideo(_rightVideo); }
+    void deleteVideo(const int &side);
+
     void on_leftMove_clicked();
     void on_rightMove_clicked();
     void on_swapFilenames_clicked() const;
