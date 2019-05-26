@@ -44,7 +44,7 @@ public slots:
     QImage captureAt(const int &percent, const int &ofDuration=100) const;
 
 signals:
-    void acceptVideo(const QString &filename) const;
+    void acceptVideo(Video *addMe) const;
     void rejectVideo(Video *deleteMe) const;
 
 private:

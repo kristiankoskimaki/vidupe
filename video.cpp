@@ -11,7 +11,7 @@ Video::Video(const Prefs &prefsParam, const QString &filenameParam) : filename(f
         _jpegQuality = _lowJpegQuality;
 
     QObject::connect(this, SIGNAL(rejectVideo(Video *)), _prefs._mainwPtr, SLOT(removeVideo(Video *)));
-    QObject::connect(this, SIGNAL(acceptVideo(const QString &)), _prefs._mainwPtr, SLOT(addVideo(const QString &)));
+    QObject::connect(this, SIGNAL(acceptVideo(Video *)), _prefs._mainwPtr, SLOT(addVideo(Video *)));
 }
 
 void Video::run()
@@ -41,7 +41,7 @@ void Video::run()
     else if(hash == 0)                 //all screen captures black
         emit rejectVideo(this);
     else
-        emit acceptVideo(QStringLiteral("[%1] %2").arg(QTime::currentTime().toString(), QDir::toNativeSeparators(filename)));
+        emit acceptVideo(this);
 }
 
 void Video::getMetadata(const QString &filename)

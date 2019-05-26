@@ -252,7 +252,6 @@ void MainWindow::processVideos()
         auto *videoTask = new Video(_prefs, filename);
         videoTask->setAutoDelete(false);
         threadPool.start(videoTask);
-        _videoList << videoTask;
     }
     threadPool.waitForDone();
     QApplication::processEvents();                  //process signals from last threads
@@ -287,11 +286,13 @@ void MainWindow::addStatusMessage(const QString &message) const
     ui->statusBox->verticalScrollBar()->triggerAction(QScrollBar::SliderToMaximum);
 }
 
-void MainWindow::addVideo(const QString &filename) const
+void MainWindow::addVideo(Video *addMe)
 {
-    addStatusMessage(filename);
+    addStatusMessage(QStringLiteral("[%1] %2").arg(QTime::currentTime().toString(),
+                                                   QDir::toNativeSeparators(addMe->filename)));
     ui->progressBar->setValue(ui->progressBar->value() + 1);
     ui->processedFiles->setText(QStringLiteral("%1/%2").arg(ui->progressBar->value()).arg(ui->progressBar->maximum()));
+    _videoList << addMe;
 }
 
 void MainWindow::removeVideo(Video *deleteMe)
@@ -301,6 +302,5 @@ void MainWindow::removeVideo(Video *deleteMe)
     ui->progressBar->setValue(ui->progressBar->value() + 1);
     ui->processedFiles->setText(QStringLiteral("%1/%2").arg(ui->progressBar->value()).arg(ui->progressBar->maximum()));
     _rejectedVideos << QDir::toNativeSeparators(deleteMe->filename);
-    _videoList.removeAll(deleteMe);
     delete deleteMe;
 }

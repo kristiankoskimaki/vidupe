@@ -54,7 +54,7 @@ private slots:
     void videoSummary();
 
     void addStatusMessage(const QString &message) const;
-    void addVideo(const QString &filename) const;
+    void addVideo(Video *addMe);
     void removeVideo(Video *deleteMe);
 };
 
