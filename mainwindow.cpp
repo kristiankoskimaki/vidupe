@@ -74,31 +74,22 @@ void MainWindow::dropEvent(QDropEvent *event)
 void MainWindow::loadExtensions()
 {
     QFile file(QStringLiteral("%1/extensions.ini").arg(QApplication::applicationDirPath()));
-    if(file.open(QIODevice::ReadOnly))
+    if(!file.open(QIODevice::ReadOnly))
     {
-        addStatusMessage(QStringLiteral("Supported file extensions:"));
-        QTextStream text(&file);
-        while(!text.atEnd())
-        {
-            const QString line = text.readLine();
-            if(line.startsWith(QStringLiteral(";")))
-                continue;
-            else if(!line.isEmpty())
-            {
-                const QStringList extensions = line.split(QStringLiteral(" "));
-                QString foundTheseExtensions;
-                for(auto ext : extensions)
-                {
-                    _extensionList << ext;
-                    foundTheseExtensions.append(ext.remove(QStringLiteral("*")) + QStringLiteral(" "));
-                }
-                addStatusMessage(foundTheseExtensions);
-            }
-        }
-        file.close();
-    }
-    else
         addStatusMessage(QStringLiteral("Error: extensions.ini not found. No video file will be searched."));
+        return;
+    }
+    addStatusMessage(QStringLiteral("Supported file extensions:"));
+    QTextStream text(&file);
+    while(!text.atEnd())
+    {
+        QString line = text.readLine();
+        if(line.startsWith(QStringLiteral(";")) || line.isEmpty())
+            continue;
+        _extensionList << line.replace(QRegExp("\\*?\\."), "*.").split(QStringLiteral(" "));
+        addStatusMessage(line.remove(QStringLiteral("*")));
+    }
+    file.close();
 }
 
 bool MainWindow::detectffmpeg() const
