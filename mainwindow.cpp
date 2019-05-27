@@ -234,7 +234,6 @@ void MainWindow::processVideos()
         ui->progressBar->setVisible(true);
         ui->progressBar->setValue(0);
         ui->progressBar->setMaximum(_prefs._numberOfVideos);
-        _everyVideo.sort();
     }
     else return;
 
