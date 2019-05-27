@@ -216,7 +216,7 @@ void MainWindow::findVideos(QDir &dir)
         if(!duplicate)
             _everyVideo << filename;
 
-        ui->statusBar->showMessage(QStringLiteral("%1").arg(QDir::toNativeSeparators(filename)), 10);
+        ui->statusBar->showMessage(QDir::toNativeSeparators(filename), 10);
         QApplication::processEvents();
     }
 }
