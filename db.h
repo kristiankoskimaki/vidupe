@@ -10,7 +10,7 @@ class Db
 {
 
 public:
-    Db(const QString &filename);
+    explicit Db(const QString &filename);
     ~Db() { _db.close(); _db = QSqlDatabase(); _db.removeDatabase(_connection); }
 
 private:

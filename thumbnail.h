@@ -8,7 +8,7 @@ enum modes { thumb1, thumb2, thumb3, thumb4, thumb6, thumb9, thumb12 };
 class Thumbnail
 {
 public:
-    Thumbnail(const int &mode = thumb4) { m_mode = mode; }
+    explicit Thumbnail(const int &mode = thumb4) { m_mode = mode; }
 
 private:
     int m_mode = thumb4;
