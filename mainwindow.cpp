@@ -132,14 +132,6 @@ void MainWindow::on_browseFolders_clicked() const
 
 void MainWindow::on_findDuplicates_clicked()
 {
-    if(_extensionList.isEmpty())
-    {
-        addStatusMessage(QStringLiteral("Error: No extensions found in extensions.ini. No video file will be searched."));
-        return;
-    }
-    if(!detectffmpeg())
-        return;
-
     if(ui->findDuplicates->text() == QLatin1String("Stop"))     //pressing "find duplicates" button will morph into a
     {                                                           //stop button. a lengthy search can thus be stopped and
         _userPressedStop = true;                                //those videos already processed are compared w/each other
@@ -150,9 +142,17 @@ void MainWindow::on_findDuplicates_clicked()
         ui->findDuplicates->setText(QStringLiteral("Stop"));
         _userPressedStop = false;
     }
+    if(_extensionList.isEmpty())
+    {
+        addStatusMessage(QStringLiteral("Error: No extensions found in extensions.ini. No video file will be searched."));
+        return;
+    }
+    if(!detectffmpeg())
+        return;
 
-    //search for new videos only if folder or thumbnail settings have changed
-    const QString foldersToSearch = ui->directoryBox->text();
+    ui->statusBox->append(QStringLiteral("\nSearching for videos..."));
+    ui->statusBar->setVisible(true);
+    const QString foldersToSearch = ui->directoryBox->text();   //search only if folder or thumbnail settings have changed
     if(foldersToSearch != _previousRunFolders || _prefs._thumbnails != _previousRunThumbnails)
     {
         for(const auto &video : _videoList)                     //new search: delete videos from previous search
@@ -160,15 +160,12 @@ void MainWindow::on_findDuplicates_clicked()
         _videoList.clear();
         _everyVideo.clear();
 
-        ui->statusBox->append(QStringLiteral("\nSearching for videos..."));
-        ui->statusBar->setVisible(true);
-
         const QStringList directories = foldersToSearch.split(QStringLiteral(";"));
-        for(int i=0; i<directories.length(); i++)               //add all video files from entered paths to list
+        for(auto directory : directories)               //add all video files from entered paths to list
         {
-            if(directories.value(i).isEmpty())
+            if(directory.isEmpty())
                 continue;
-            QDir dir = directories.value(i).remove(QStringLiteral("\""));
+            QDir dir = directory.remove(QStringLiteral("\""));
             if(dir.exists())
                 findVideos(dir);
             else
