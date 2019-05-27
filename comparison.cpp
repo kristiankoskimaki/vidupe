@@ -378,21 +378,17 @@ int Comparison::comparisonsSoFar() const
     return maxComparisons - remaining + _rightVideo - _leftVideo;
 }
 
-void Comparison::openFileManager(const int &side) const
+void Comparison::openFileManager(const QString &filename) const
 {
-    QString exploreVideo;
     #if defined(Q_OS_WIN)
-        exploreVideo = QString("explorer /select, \"%1\"").arg(QDir::toNativeSeparators(_videos[side]->filename));
+        QProcess::startDetached(QStringLiteral("explorer /select, \"%1\"").arg(QDir::toNativeSeparators(filename)));
     #endif
     #if defined(Q_OS_MACX)
-        exploreVideo = QString("open -R \"%1\"").arg(_videos[side]->filename);
+        QProcess::startDetached(QStringLiteral("open -R \"%1\"").arg(filename));
     #endif
     #if defined(Q_OS_X11)
-        const QFileInfo videoFile(_videos[side]->filename);
-        exploreVideo = QString("xdg-open \"%1\"").arg(videoFile.absolutePath());
+        QProcess::startDetached(QStringLiteral("xdg-open \"%1\"").arg(filename.left(filename.lastIndexOf("/"))));
     #endif
-
-    QProcess::startDetached(exploreVideo);
 }
 
 void Comparison::deleteVideo(const int &side)

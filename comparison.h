@@ -63,9 +63,9 @@ private slots:
     void on_leftImage_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(_videos[_leftVideo]->filename)); }
     void on_rightImage_clicked() { QDesktopServices::openUrl(QUrl::fromLocalFile(_videos[_rightVideo]->filename)); }
 
-    void on_leftFileName_clicked() { openFileManager(_leftVideo); }
-    void on_rightFileName_clicked() { openFileManager(_rightVideo); }
-    void openFileManager(const int &side) const;
+    void on_leftFileName_clicked() { openFileManager(_videos[_leftVideo]->filename); }
+    void on_rightFileName_clicked() { openFileManager(_videos[_rightVideo]->filename); }
+    void openFileManager(const QString &filename) const;
 
     void on_leftDelete_clicked() { deleteVideo(_leftVideo); }
     void on_rightDelete_clicked() { deleteVideo(_rightVideo); }
