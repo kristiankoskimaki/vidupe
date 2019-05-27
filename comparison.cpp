@@ -423,69 +423,26 @@ void Comparison::deleteVideo(const int &side)
     }
 }
 
-void Comparison::on_leftMove_clicked()
+void Comparison::moveVideo(const QString &from, const QString &to)
 {
-    //left side video was already manually deleted, skip to next
-    if(!QFileInfo::exists(_videos[_leftVideo]->filename))
-    {
-        _leftVideo++;
-        _rightVideo = _leftVideo;
-        _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
-        return;
-    }
-
-    const QString askMove = QStringLiteral("Are you sure you want to move this file?\n\nFrom: %1\nTo:     %2")
-                                           .arg(ui->leftPathName->text(), ui->rightPathName->text());
-    QMessageBox::StandardButton confirm;
-    confirm = QMessageBox::question(this, QStringLiteral("Move file"), askMove, QMessageBox::Yes|QMessageBox::No);
-    if(confirm == QMessageBox::Yes)
-    {
-        const QString renameTo = QStringLiteral("%1/%2").arg(ui->rightPathName->text(), ui->leftFileName->text());
-        QFile file(_videos[_leftVideo]->filename);
-        if(!file.rename(renameTo))
-        {
-            QMessageBox msgBox;
-            msgBox.setText(QStringLiteral("Could not move file. Check file permissions and available disk space."));
-            msgBox.exec();
-        }
-        else
-        {
-            emit sendStatusMessage(QStringLiteral("Moved %1 to %2")
-                 .arg(QDir::toNativeSeparators(_videos[_leftVideo]->filename), ui->rightPathName->text()));
-            _leftVideo++;
-            _rightVideo = _leftVideo;
-            _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
-        }
-    }
-}
-
-void Comparison::on_rightMove_clicked()
-{
-    //right side video was already manually deleted, skip to next
-    if(!QFileInfo::exists(_videos[_rightVideo]->filename))
+    if(!QFileInfo::exists(from))
     {
         _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
         return;
     }
 
-    const QString askMove = QStringLiteral("Are you sure you want to move this file?\n\nFrom: %1\nTo:     %2")
-                                           .arg(ui->rightPathName->text(), ui->leftPathName->text());
-    QMessageBox::StandardButton confirm;
-    confirm = QMessageBox::question(this, QStringLiteral("Move file"), askMove, QMessageBox::Yes|QMessageBox::No);
-    if(confirm == QMessageBox::Yes)
+    const QString fromPath = from.left(from.lastIndexOf("/"));
+    const QString toPath   = to.left(to.lastIndexOf("/"));
+    const QString question = QString("Are you sure you want to move this file?\n\nFrom: %1\nTo:     %2")
+                             .arg(QDir::toNativeSeparators(fromPath), QDir::toNativeSeparators(toPath));
+    if(QMessageBox::question(this, "Move", question, QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes)
     {
-        const QString renameTo = QStringLiteral("%1/%2").arg(ui->leftPathName->text(), ui->rightFileName->text());
-        QFile file(_videos[_rightVideo]->filename);
-        if(!file.rename(renameTo))
-        {
-            QMessageBox msgBox;
-            msgBox.setText(QStringLiteral("Could not move file. Check file permissions and available disk space."));
-            msgBox.exec();
-        }
+        QFile moveThisFile(from);
+        if(!moveThisFile.rename(QString("%1/%2").arg(toPath, from.right(from.length() - from.lastIndexOf("/") - 1))))
+            QMessageBox::information(this, "", "Could not move file. Check file permissions and available disk space.");
         else
         {
-            emit sendStatusMessage(QStringLiteral("Moved %1 to %2")
-                 .arg(QDir::toNativeSeparators(_videos[_rightVideo]->filename), ui->leftPathName->text()));
+            emit sendStatusMessage(QString("Moved %1 to %2").arg(QDir::toNativeSeparators(from), toPath));
             _seekForwards? on_nextVideo_clicked() : on_prevVideo_clicked();
         }
     }

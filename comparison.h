@@ -71,8 +71,9 @@ private slots:
     void on_rightDelete_clicked() { deleteVideo(_rightVideo); }
     void deleteVideo(const int &side);
 
-    void on_leftMove_clicked();
-    void on_rightMove_clicked();
+    void on_leftMove_clicked() { moveVideo(_videos[_leftVideo]->filename, _videos[_rightVideo]->filename); }
+    void on_rightMove_clicked() { moveVideo(_videos[_rightVideo]->filename, _videos[_leftVideo]->filename); }
+    void moveVideo(const QString &from, const QString &to);
     void on_swapFilenames_clicked() const;
 
     void on_thresholdSlider_valueChanged(const int &value);
