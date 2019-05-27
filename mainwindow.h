@@ -31,6 +31,7 @@ private:
 
 private slots:
     void deleteTemporaryFiles() const;
+    void closeEvent(QCloseEvent *event) { Q_UNUSED (event); _userPressedStop = true; }
     void dragEnterEvent(QDragEnterEvent *event) { if(event->mimeData()->hasUrls()) event->acceptProposedAction(); }
     void dropEvent(QDropEvent *event);
     void loadExtensions();
