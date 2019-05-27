@@ -34,7 +34,7 @@ LIBS += \
 
 RC_ICONS = vidupe16.ico
 
-VERSION = 1.1
+VERSION = 1.2
 QMAKE_TARGET_PRODUCT = "Vidupe"
 QMAKE_TARGET_DESCRIPTION = "Vidupe"
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2018-2019 Kristian Koskim\\344ki"

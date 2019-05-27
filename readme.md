@@ -1,4 +1,4 @@
-Vidupe 1.1
+Vidupe 1.2
 ----------
 
 Source code: https://github.com/kristiankoskimaki/vidupe  
@@ -21,7 +21,13 @@ Features:
  - Employs two powerful image comparison methods: pHash (perceptual hashing) and SSIM (structural similarity).
  - Cross-platform development: source code available for compiling on Windows/Linux/macOS.
 
- 
+
+Vidupe 1.2 (released 2019-05-27) changelog:
+ - Disk cache for screen captures, >10x faster loading once cached
+ - Much faster comparison. Comparison window opens faster
+ - Threshold modifiers for same/different video durations now work
+ - More accurate interpolation
+ - Much old C-style code rewritten
 
 Vidupe 1.1 (released 2019-05-05) changelog:
  - Partial disk cache (video metadata only)
@@ -30,8 +36,8 @@ Vidupe 1.1 (released 2019-05-05) changelog:
  - Videos kept in memory if comparison window accidentally closed
  - Improved zoom
 
- 
 
+<!---
 Usage:  
 After starting Vidupe you must enter which folders to scan for video files. Folders can be added by typing them in,
 dragging and dropping a folder onto the window or using the folder browser button next to the input box.
@@ -57,6 +63,14 @@ Lower threshold: (meaning very likely that they match even if the computer algor
 
 
 
+Disk cache:  
+Searching for videos the first time using Vidupe will be slow. All screen captures are taken one by one with FFmpeg and are saved in the file
+cache.db in Vidupe's folder. When you search for videos again, those screen captures are already taken and Vidupe loads them much faster.
+Different thumbnail modes share some of the screen captures, so searching in 3x4 mode will be faster if you have already done so using 2x2 mode.
+A cache.db made with an older version of Vidupe is not guaranteed to to be compatible with newer versions.
+
+
+
 Comparison window:  
 If matching videos are found, they will be displayed in a separate window side by side, with the thumbnail on top and file properties on bottom.  
 Clicking on the thumbnail will launch the video in the default video player installed.  
@@ -76,12 +90,12 @@ Swap filenames: Change filenames between videos.
 
 Beware that a poor quality video can be encoded to seem better than a good quality video.  
 Trust your eyes, watch both videos in a video player before deleting.
+-->
 
 
+![](http://i68.tinypic.com/ei8jza.jpg)
+![](http://i64.tinypic.com/fy1ycw.jpg)
 
 Vidupe Copyright (C) 2018-2019 Kristian Koskimäki  
 Vidupe is a free software distributed under the GNU GPL.  
 Read LICENSE.txt for more information.
-
-![](http://i68.tinypic.com/ei8jza.jpg)
-![](http://i64.tinypic.com/fy1ycw.jpg)
