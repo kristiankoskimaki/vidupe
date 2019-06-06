@@ -161,6 +161,7 @@ void MainWindow::on_findDuplicates_clicked()
         _everyVideo.clear();
 
         const QStringList directories = foldersToSearch.split(QStringLiteral(";"));
+        QString notFound;
         for(auto directory : directories)               //add all video files from entered paths to list
         {
             if(directory.isEmpty())
@@ -169,8 +170,10 @@ void MainWindow::on_findDuplicates_clicked()
             if(dir.exists())
                 findVideos(dir);
             else
-                addStatusMessage(QStringLiteral("Cannot find directory: %1").arg(QDir::toNativeSeparators(dir.path())));
+                notFound += QStringLiteral("%1 ").arg(QDir::toNativeSeparators(dir.path()));
         }
+        if(!notFound.isEmpty())
+            ui->statusBar->showMessage(QStringLiteral("Cannot find folder: %1").arg(notFound));
 
         processVideos();
     }
@@ -227,7 +230,8 @@ void MainWindow::processVideos()
         ui->selectThumbnails->setDisabled(true);
         ui->processedFiles->setVisible(true);
         ui->processedFiles->setText(QStringLiteral("0/%1").arg(_prefs._numberOfVideos));
-        ui->statusBar->setVisible(false);
+        if(ui->statusBar->currentMessage().indexOf(QStringLiteral("Cannot find folder")) == -1)
+            ui->statusBar->setVisible(false);
         ui->progressBar->setVisible(true);
         ui->progressBar->setValue(0);
         ui->progressBar->setMaximum(_prefs._numberOfVideos);
@@ -256,6 +260,7 @@ void MainWindow::processVideos()
     ui->selectThumbnails->setDisabled(false);
     ui->processedFiles->setVisible(false);
     ui->progressBar->setVisible(false);
+    ui->statusBar->setVisible(false);
     _prefs._numberOfVideos = _videoList.count();    //minus rejected ones now
     videoSummary();
 }
