@@ -16,7 +16,7 @@ Comparison::Comparison(const QVector<Video *> &videosParam, const Prefs &prefsPa
     if(_prefs._comparisonMode == _prefs._SSIM)
         ui->selectSSIM->setChecked(true);
     ui->thresholdSlider->setValue(QVariant(_prefs._thresholdSSIM * 100).toInt());
-    ui->progressBar->setMaximum(_videos.count() * (_videos.count() - 1) / 2);
+    ui->progressBar->setMaximum(_prefs._numberOfVideos * (_prefs._numberOfVideos - 1) / 2);
 
     on_nextVideo_clicked();
 }
@@ -65,7 +65,7 @@ void Comparison::on_prevVideo_clicked()
                 return;
             }
         ui->progressBar->setValue(comparisonsSoFar());
-        _rightVideo = _videos.count() - 1;
+        _rightVideo = _prefs._numberOfVideos - 1;
     }
 
     on_nextVideo_clicked();     //went over limit, go forwards until first match
@@ -350,7 +350,7 @@ void Comparison::updateUI()
 
 int Comparison::comparisonsSoFar() const
 {
-    const int cmpFirst = _videos.count();                           //comparisons done for first video
+    const int cmpFirst = _prefs._numberOfVideos;                    //comparisons done for first video
     const int cmpThis = cmpFirst - _leftVideo;                      //comparisons done for current video
     const int remaining = cmpThis * (cmpThis - 1) / 2;              //comparisons for remaining videos
     const int maxComparisons = cmpFirst * (cmpFirst - 1) / 2;       //comparing all videos with each other
@@ -479,7 +479,7 @@ void Comparison::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
 
-    if(ui->leftFileName->text().isEmpty() || _leftVideo >= _videos.count() || _rightVideo >= _videos.count())
+    if(ui->leftFileName->text().isEmpty() || _leftVideo >= _prefs._numberOfVideos || _rightVideo >= _prefs._numberOfVideos)
         return;     //automatic initial resize event can happen before closing when values went over limit
 
     QImage image;
