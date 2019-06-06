@@ -34,8 +34,8 @@ void Comparison::reportMatchingVideos()
     int64_t combinedFilesize = 0;
     int foundMatches = 0;
 
-    QVector<Video*>::const_iterator left, right, end = _videos.end();
-    for(left=_videos.begin(); left<end; left++)
+    QVector<Video*>::const_iterator left, right, end = _videos.cend();
+    for(left=_videos.cbegin(); left<end; left++)
         for(right=left+1; right<end; right++)
             if(bothVideosMatch(*left, *right))
             {   //smaller of two matching videos is likely the one to be deleted
@@ -52,7 +52,7 @@ void Comparison::reportMatchingVideos()
 void Comparison::on_prevVideo_clicked()
 {
     _seekForwards = false;
-    QVector<Video*>::const_iterator left, right, begin = _videos.begin();
+    QVector<Video*>::const_iterator left, right, begin = _videos.cbegin();
     for(_rightVideo--, left=begin+_leftVideo; left>=begin; left--, _leftVideo--)
     {
         for(right=begin+_rightVideo; right>left; right--, _rightVideo--)
@@ -77,7 +77,7 @@ void Comparison::on_nextVideo_clicked()
     const int oldLeft = _leftVideo;
     const int oldRight = _rightVideo;
 
-    QVector<Video*>::const_iterator left, right, begin = _videos.begin(), end = _videos.end();
+    QVector<Video*>::const_iterator left, right, begin = _videos.cbegin(), end = _videos.cend();
     for(left=begin+_leftVideo; left<end; left++, _leftVideo++)
     {
         for(_rightVideo++, right=begin+_rightVideo; right<end; right++, _rightVideo++)
