@@ -31,56 +31,41 @@ Comparison::~Comparison()
 
 void Comparison::reportMatchingVideos()
 {
-    QVector<int> knownMatches;
     int64_t combinedFilesize = 0;
-    const int numberOfVideos = _videos.count();
-    for(int left=0; left<numberOfVideos; left++)
-    {
-        for(int right=left+1; right<numberOfVideos; right++)
-            if(bothVideosMatch(_videos[left], _videos[right]))
-            {
-                bool alreadyFound = false;
-                for(const auto &match : knownMatches)
-                    if(right == match)   //this video has already been matched with another
-                        alreadyFound = true;
-                if(!alreadyFound)
-                {   //smaller of two matching videos is likely the one to be deleted
-                    combinedFilesize += std::min(_videos[left]->size , _videos[right]->size);
-                    knownMatches.append(right);
-                }
-            break;
-            }
-    }
+    int foundMatches = 0;
 
-    if(knownMatches.length())
-        emit sendStatusMessage(QStringLiteral("\n[%1] Found at least %2 video(s) (%3) with matches").
-                               arg(QTime::currentTime().toString()).arg(knownMatches.count()).
-                               arg(readableFileSize(combinedFilesize)));
+    QVector<Video*>::const_iterator left, right, end = _videos.end();
+    for(left=_videos.begin(); left<end; left++)
+        for(right=left+1; right<end; right++)
+            if(bothVideosMatch(*left, *right))
+            {   //smaller of two matching videos is likely the one to be deleted
+                combinedFilesize += std::min((*left)->size , (*right)->size);
+                foundMatches++;
+                break;
+            }
+
+    if(foundMatches)
+        emit sendStatusMessage(QStringLiteral("\n[%1] Found at least %2 video(s) (%3) with matches")
+             .arg(QTime::currentTime().toString()).arg(foundMatches).arg(readableFileSize(combinedFilesize)));
 }
 
 void Comparison::on_prevVideo_clicked()
 {
     _seekForwards = false;
-    const int lastVideo = _videos.count() - 1;
-    for(_rightVideo--; _leftVideo>=0; _leftVideo--)     //rightVideo subtracted = start with previous video
+    QVector<Video*>::const_iterator left, right, begin = _videos.begin();
+    for(_rightVideo--, left=begin+_leftVideo; left>=begin; left--, _leftVideo--)
     {
-        for(; _rightVideo>_leftVideo; _rightVideo--)
-        {
-            if(bothVideosMatch(_videos[_leftVideo], _videos[_rightVideo]))
+        for(right=begin+_rightVideo; right>left; right--, _rightVideo--)
+            if(bothVideosMatch(*left, *right) && QFileInfo::exists((*left)->filename) && QFileInfo::exists((*right)->filename))
             {
-                if(QFileInfo::exists(_videos[_leftVideo]->filename) &&
-                   QFileInfo::exists(_videos[_rightVideo]->filename))
-                {
-                    showVideo(QStringLiteral("left"));
-                    showVideo(QStringLiteral("right"));
-                    highlightBetterProperties();
-                    updateUI();
-                    return;
-                }
+                showVideo(QStringLiteral("left"));
+                showVideo(QStringLiteral("right"));
+                highlightBetterProperties();
+                updateUI();
+                return;
             }
-        }
         ui->progressBar->setValue(comparisonsSoFar());
-        _rightVideo = lastVideo;
+        _rightVideo = _videos.count() - 1;
     }
 
     on_nextVideo_clicked();     //went over limit, go forwards until first match
@@ -92,29 +77,23 @@ void Comparison::on_nextVideo_clicked()
     const int oldLeft = _leftVideo;
     const int oldRight = _rightVideo;
 
-    const int numberOfVideos = _videos.count();
-    for(; _leftVideo<=numberOfVideos; _leftVideo++)
+    QVector<Video*>::const_iterator left, right, begin = _videos.begin(), end = _videos.end();
+    for(left=begin+_leftVideo; left<end; left++, _leftVideo++)
     {
-        for(_rightVideo++; _rightVideo<numberOfVideos; _rightVideo++)
-        {
-            if(bothVideosMatch(_videos[_leftVideo], _videos[_rightVideo]))
+        for(_rightVideo++, right=begin+_rightVideo; right<end; right++, _rightVideo++)
+            if(bothVideosMatch(*left, *right) && QFileInfo::exists((*left)->filename) && QFileInfo::exists((*right)->filename))
             {
-                if(QFileInfo::exists(_videos[_leftVideo]->filename) &&
-                   QFileInfo::exists(_videos[_rightVideo]->filename))
-                {
-                    showVideo(QStringLiteral("left"));
-                    showVideo(QStringLiteral("right"));
-                    highlightBetterProperties();
-                    updateUI();
-                    return;
-                }
+                showVideo(QStringLiteral("left"));
+                showVideo(QStringLiteral("right"));
+                highlightBetterProperties();
+                updateUI();
+                return;
             }
-        }
         ui->progressBar->setValue(comparisonsSoFar());
         _rightVideo = _leftVideo + 1;
     }
 
-    _leftVideo = oldLeft;       //went over limit, go back
+    _leftVideo = oldLeft;       //went over limit, go to last matching pair
     _rightVideo = oldRight;
 
     int confirm = QMessageBox::Yes;
