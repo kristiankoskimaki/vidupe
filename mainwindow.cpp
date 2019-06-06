@@ -231,6 +231,7 @@ void MainWindow::processVideos()
         ui->progressBar->setVisible(true);
         ui->progressBar->setValue(0);
         ui->progressBar->setMaximum(_prefs._numberOfVideos);
+        ui->statusBox->verticalScrollBar()->triggerAction(QScrollBar::SliderToMaximum);
     }
     else return;
 
@@ -279,7 +280,6 @@ void MainWindow::addStatusMessage(const QString &message) const
 {
     ui->statusBox->append(message);
     ui->statusBox->repaint();
-    ui->statusBox->verticalScrollBar()->triggerAction(QScrollBar::SliderToMaximum);
 }
 
 void MainWindow::addVideo(Video *addMe)
