@@ -150,11 +150,12 @@ void MainWindow::on_findDuplicates_clicked()
     if(!detectffmpeg())
         return;
 
-    ui->statusBox->append(QStringLiteral("\nSearching for videos..."));
-    ui->statusBar->setVisible(true);
     const QString foldersToSearch = ui->directoryBox->text();   //search only if folder or thumbnail settings have changed
     if(foldersToSearch != _previousRunFolders || _prefs._thumbnails != _previousRunThumbnails)
     {
+        ui->statusBox->append(QStringLiteral("\nSearching for videos..."));
+        ui->statusBar->setVisible(true);
+
         for(const auto &video : _videoList)                     //new search: delete videos from previous search
             delete video;
         _videoList.clear();
@@ -181,12 +182,16 @@ void MainWindow::on_findDuplicates_clicked()
     if(_videoList.count() > 1)
     {
         Comparison comparison(_videoList, _prefs);
-        QFuture<void> future = QtConcurrent::run(&comparison, &Comparison::reportMatchingVideos);   //run in background
-        comparison.exec();          //open dialog, but if it is closed while reportMatchingVideos() still running...
-
-        QApplication::setOverrideCursor(Qt::WaitCursor);
-        future.waitForFinished();   //...must wait until finished (crash when going out of scope destroys instance)
-        QApplication::restoreOverrideCursor();
+        if(foldersToSearch != _previousRunFolders || _prefs._thumbnails != _previousRunThumbnails)
+        {
+            QFuture<void> future = QtConcurrent::run(&comparison, &Comparison::reportMatchingVideos);   //run in background
+            comparison.exec();          //open dialog, but if it is closed while reportMatchingVideos() still running...
+            QApplication::setOverrideCursor(Qt::WaitCursor);
+            future.waitForFinished();   //...must wait until finished (crash when going out of scope destroys instance)
+            QApplication::restoreOverrideCursor();
+        }
+        else
+            comparison.exec();
 
         _previousRunFolders = foldersToSearch;                  //videos are still held in memory until
         _previousRunThumbnails = _prefs._thumbnails;            //folders to search or thumbnail mode are changed
