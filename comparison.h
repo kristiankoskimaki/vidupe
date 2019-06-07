@@ -16,7 +16,6 @@ class Comparison : public QDialog
 public:
     Comparison(const QVector<Video *> &videosParam, const Prefs &prefsParam);
     ~Comparison();
-    void reportMatchingVideos();
 
 private:
     Ui::Comparison *ui;
@@ -41,7 +40,11 @@ private:
     int _rightW = 0;
     int _rightH = 0;
 
+public slots:
+    void reportMatchingVideos();
+
 private slots:
+    void confirmToExit();
     void on_prevVideo_clicked();
     void on_nextVideo_clicked();
     bool bothVideosMatch(const Video *left, const Video *right);

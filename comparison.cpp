@@ -23,9 +23,6 @@ Comparison::Comparison(const QVector<Video *> &videosParam, const Prefs &prefsPa
 
 Comparison::~Comparison()
 {
-    if(_videosDeleted)
-        emit sendStatusMessage(QStringLiteral("\n%1 file(s) deleted, %2 freed").
-                               arg(_videosDeleted).arg(readableFileSize(_spaceSaved)));
     delete ui;
 }
 
@@ -47,6 +44,36 @@ void Comparison::reportMatchingVideos()
     if(foundMatches)
         emit sendStatusMessage(QStringLiteral("\n[%1] Found at least %2 video(s) (%3) with matches")
              .arg(QTime::currentTime().toString()).arg(foundMatches).arg(readableFileSize(combinedFilesize)));
+}
+
+void Comparison::confirmToExit()
+{
+    int confirm = QMessageBox::Yes;
+    if(!ui->leftFileName->text().isEmpty())
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(QStringLiteral("Out of videos to compare"));
+        msgBox.setText(QStringLiteral("Close window?                  "));
+        msgBox.setIcon(QMessageBox::QMessageBox::Question);
+        msgBox.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        confirm = msgBox.exec();
+    }
+    if(confirm == QMessageBox::Yes)
+    {
+        if(_videosDeleted)
+            emit sendStatusMessage(QStringLiteral("\n%1 file(s) deleted, %2 freed")
+                                   .arg(_videosDeleted).arg(readableFileSize(_spaceSaved)));
+        if(!ui->leftFileName->text().isEmpty())
+            emit sendStatusMessage(QStringLiteral("\nPressing Find duplicates button opens comparison window "
+                                                 "again if thumbnail mode and directories remain the same"));
+        else
+            emit sendStatusMessage(QStringLiteral("\nComparison window closed because no matching videos found "
+                                                 "(a lower threshold may help to find more matches)"));
+
+        QKeyEvent *closeEvent = new QKeyEvent(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
+        QApplication::postEvent(this, closeEvent);  //"pressing" ESC closes dialog
+    }
 }
 
 void Comparison::on_prevVideo_clicked()
@@ -95,30 +122,7 @@ void Comparison::on_nextVideo_clicked()
 
     _leftVideo = oldLeft;       //went over limit, go to last matching pair
     _rightVideo = oldRight;
-
-    int confirm = QMessageBox::Yes;
-    if(!ui->leftFileName->text().isEmpty())
-    {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(QStringLiteral("Out of videos to compare"));
-        msgBox.setText(QStringLiteral("Close window?                  "));
-        msgBox.setIcon(QMessageBox::QMessageBox::Question);
-        msgBox.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
-        msgBox.setDefaultButton(QMessageBox::No);
-        confirm = msgBox.exec();
-    }
-    if(confirm == QMessageBox::Yes)
-    {
-        if(!ui->leftFileName->text().isEmpty())
-            emit sendStatusMessage(QStringLiteral("\nPressing Find duplicates button opens comparison window "
-                                                 "again if thumbnail mode and directories remain the same"));
-        else
-            emit sendStatusMessage(QStringLiteral("\nComparison window closed because no matching videos found "
-                                                 "(a lower threshold may help to find more matches)"));
-
-        QKeyEvent *closeEvent = new QKeyEvent(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
-        QApplication::postEvent(this, closeEvent);  //"pressing" ESC closes dialog
-    }
+    confirmToExit();
 }
 
 bool Comparison::bothVideosMatch(const Video *left, const Video *right)
