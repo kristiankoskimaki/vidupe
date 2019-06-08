@@ -171,7 +171,10 @@ void MainWindow::on_findDuplicates_clicked()
             if(dir.exists())
                 findVideos(dir);
             else
+            {
+                addStatusMessage(QStringLiteral("Cannot find folder: %1").arg(QDir::toNativeSeparators(dir.path())));
                 notFound += QStringLiteral("%1 ").arg(QDir::toNativeSeparators(dir.path()));
+            }
         }
         if(!notFound.isEmpty())
             ui->statusBar->showMessage(QStringLiteral("Cannot find folder: %1").arg(notFound));
