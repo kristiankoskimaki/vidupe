@@ -29,14 +29,14 @@ public:
     short width = 0;
     short height = 0;
     QByteArray thumbnail;
-    cv::Mat grayThumb;
-    uint64_t hash = 0;
+    cv::Mat grayThumb [2];
+    uint64_t hash [2] = { 0, 0 };
 
 private slots:
     void getMetadata(const QString &filename);
     int takeScreenCaptures(const Db &cache);
-    void processThumbnail(QImage &image);
-    uint64_t computePhash(const cv::Mat &input);
+    void processThumbnail(QImage &thumbnail, const int &hashes);
+    uint64_t computePhash(const cv::Mat &input) const;
     QImage minimizeImage(const QImage &image) const;
     QString msToHHMMSS(const int64_t &time) const;
 

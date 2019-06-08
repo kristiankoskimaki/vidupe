@@ -38,7 +38,7 @@ void Video::run()
     const int ret = takeScreenCaptures(cache);
     if(ret == _failure)
         emit rejectVideo(this);
-    else if(hash == 0)                 //all screen captures black
+    else if(hash[0] == 0 || (hash[1] == 0 && _prefs._thumbnails == cutEnds))  //all screen captures black
         emit rejectVideo(this);
     else
         emit acceptVideo(this);
@@ -167,25 +167,34 @@ int Video::takeScreenCaptures(const Db &cache)
             cache.writeCapture(percentages[capture], cachedImage);
         }
     }
-    processThumbnail(thumbnail);
+
+    const int hashes = _prefs._thumbnails == cutEnds? 2 : 1;    //if cutEnds mode: separate hash for beginning and end
+    processThumbnail(thumbnail, hashes);
     return _success;
 }
 
-void Video::processThumbnail(QImage &image)
+void Video::processThumbnail(QImage &thumbnail, const int &hashes)
 {
-    cv::Mat mat = cv::Mat(image.height(), image.width(), CV_8UC3, image.bits(), static_cast<uint>(image.bytesPerLine()));
-    hash = computePhash(mat);                               //pHash first, from full sized thumbnail
+    for(int hash=0; hash<hashes; hash++)
+    {
+        QImage image = thumbnail;
+        if(_prefs._thumbnails == cutEnds)           //if cutEnds mode: separate thumbnail into first and last frames
+            image = thumbnail.copy(hash*thumbnail.width()/2, 0, thumbnail.width()/2, thumbnail.height());
 
-    cv::resize(mat, mat, cv::Size(_ssimSize, _ssimSize), 0, 0, cv::INTER_AREA);
-    cv::cvtColor(mat, grayThumb, cv::COLOR_BGR2GRAY);
-    grayThumb.cv::Mat::convertTo(grayThumb, CV_32F);        //ssim
+        cv::Mat mat = cv::Mat(image.height(), image.width(), CV_8UC3, image.bits(), static_cast<uint>(image.bytesPerLine()));
+        this->hash[hash] = computePhash(mat);                           //pHash
 
-    image = minimizeImage(image);
-    QBuffer buffer(&thumbnail);
-    image.save(&buffer, QByteArrayLiteral("JPG"), _jpegQuality);    //save GUI thumbnail as tiny JPEG to conserve memory
+        cv::resize(mat, mat, cv::Size(_ssimSize, _ssimSize), 0, 0, cv::INTER_AREA);
+        cv::cvtColor(mat, grayThumb[hash], cv::COLOR_BGR2GRAY);
+        grayThumb[hash].cv::Mat::convertTo(grayThumb[hash], CV_32F);    //ssim
+    }
+
+    thumbnail = minimizeImage(thumbnail);
+    QBuffer buffer(&this->thumbnail);
+    thumbnail.save(&buffer, QByteArrayLiteral("JPG"), _jpegQuality);    //save GUI thumbnail as tiny JPEG
 }
 
-uint64_t Video::computePhash(const cv::Mat &input)
+uint64_t Video::computePhash(const cv::Mat &input) const
 {
     cv::Mat resizeImg, grayImg, grayFImg, dctImg, topLeftDCT;
     cv::resize(input, resizeImg, cv::Size(_pHashSize, _pHashSize), 0, 0, cv::INTER_AREA);

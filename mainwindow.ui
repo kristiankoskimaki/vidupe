@@ -69,7 +69,7 @@
           </property>
           <property name="toolTip">
            <string>&lt;nobr&gt;2x2 is usually enough to find identical videos, but&lt;/nobr&gt;
-&lt;br&gt;&lt;nobr&gt;every mode will have slightly different results. More = slower&lt;/nobr&gt;</string>
+&lt;br&gt;&lt;nobr&gt;every mode will have slightly different results. More = slower&lt;/nobr&gt;&lt;br&gt;&lt;nobr&gt;CutEnds finds videos where beginning or end is cut off&lt;/nobr&gt;</string>
           </property>
          </widget>
         </item>

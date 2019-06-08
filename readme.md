@@ -52,7 +52,8 @@ Note: some videos may be too broken for FFmpeg to read and will be rejected.
 Settings:  
 The default settings have been chosen to get best results with a minimum amount of false positives.  
 Thumbnails:      How many image captures are taken from each video. The larger the number of thumbnails, the slower the scanning of video files is.
-                 After deleting all duplicate videos, some additional matching ones may still be found by scanning again with a different thumbnail size.  
+                 After deleting all duplicate videos, some additional matching ones may still be found by scanning again with a different thumbnail size.
+                 CutEnds compares the beginning and end of videos separately, trying to find matching videos of different length. This is twice as slow.  
 pHash:           A fast and accurate algorithm for finding duplicate videos.  
 SSIM:            Even better at finding matches (less false positives especially, not necessarily more matches). Noticeably slower than pHash.  
 SSIM block size: A smaller value means that the thumbnail is analyzed as smaller, separate images. Note: selecting the value 2 will be quite slow.  

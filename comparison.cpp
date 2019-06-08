@@ -127,27 +127,35 @@ void Comparison::on_nextVideo_clicked()
 
 bool Comparison::bothVideosMatch(const Video *left, const Video *right)
 {
-    _phashSimilarity = phashSimilarity(left, right);
-    if(_prefs._comparisonMode == _prefs._PHASH)
-    {
-        if(_phashSimilarity >= _prefs._thresholdPhash)
-            return true;
-        return false;
-    }                           //ssim comparison takes long time, only do it if pHash differs at most 20 bits of 64
-    else if(_phashSimilarity >= qMax(_prefs._thresholdPhash, 64 - 20))
-    {
-        _ssimSimilarity = ssim(left->grayThumb, right->grayThumb, _prefs._ssimBlockSize);
-        _ssimSimilarity = _ssimSimilarity + _durationModifier / 64.0;   // b/64 bits (phash) <=> p/100 % (ssim)
-        if(_ssimSimilarity > _prefs._thresholdSSIM)
-            return true;
+    bool theyMatch = false;
+    _phashSimilarity = 0;
+
+    const int hashes = _prefs._thumbnails == cutEnds? 2 : 1;
+    for(int hash=0; hash<hashes; hash++)
+    {                               //if cutEnds mode: similarity is always the best one of both comparisons
+        _phashSimilarity = qMax( _phashSimilarity, phashSimilarity(left, right, hash));
+        if(_prefs._comparisonMode == _prefs._PHASH)
+        {
+            if(_phashSimilarity >= _prefs._thresholdPhash)
+                theyMatch = true;
+        }                           //ssim comparison is slow, only do it if pHash differs at most 20 bits of 64
+        else if(_phashSimilarity >= qMax(_prefs._thresholdPhash, 44))
+        {
+            _ssimSimilarity = ssim(left->grayThumb[hash], right->grayThumb[hash], _prefs._ssimBlockSize);
+            _ssimSimilarity = _ssimSimilarity + _durationModifier / 64.0;   // b/64 bits (phash) <=> p/100 % (ssim)
+            if(_ssimSimilarity > _prefs._thresholdSSIM)
+                theyMatch = true;
+        }
+        if(theyMatch)               //if cutEnds mode: first comparison matched already, skip second
+            break;
     }
-    return false;
+    return theyMatch;
 }
 
-int Comparison::phashSimilarity(const Video *left, const Video *right)
+int Comparison::phashSimilarity(const Video *left, const Video *right, const int &nthHash)
 {
     int distance = 64;
-    uint64_t differentBits = left->hash ^ right->hash;      //XOR to value (only ones for differing bits)
+    uint64_t differentBits = left->hash[nthHash] ^ right->hash[nthHash];    //XOR to value (only ones for differing bits)
     while(differentBits)
     {
         differentBits &= differentBits - 1;                 //count number of bits of value
