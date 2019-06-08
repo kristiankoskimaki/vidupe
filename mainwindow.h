@@ -38,7 +38,8 @@ private slots:
     bool detectffmpeg() const;
 
     void setComparisonMode(const int &mode) { if(mode == _prefs._PHASH) ui->selectPhash->click(); else ui->selectSSIM->click(); ui->directoryBox->setFocus(); }
-    void on_selectThumbnails_activated(const int &index) { _prefs._thumbnails = index; ui->directoryBox->setFocus(); }
+    void on_selectThumbnails_activated(const int &index) { ui->directoryBox->setFocus(); _prefs._thumbnails = index;
+                                                           if(_prefs._thumbnails == cutEnds) ui->differentDurationCombo->setCurrentIndex(0); }
     void on_selectPhash_clicked(const bool &checked) { if(checked) _prefs._comparisonMode = _prefs._PHASH; ui->directoryBox->setFocus(); }
     void on_selectSSIM_clicked(const bool &checked) { if(checked) _prefs._comparisonMode = _prefs._SSIM; ui->directoryBox->setFocus(); }
     void on_blocksizeCombo_activated(const int &index) { _prefs._ssimBlockSize = static_cast<int>(pow(2, index+1)); ui->directoryBox->setFocus(); }
