@@ -37,7 +37,8 @@ void Video::run()
     const int ret = takeScreenCaptures(cache);
     if(ret == _failure)
         emit rejectVideo(this);
-    else if(hash[0] == 0 || (hash[1] == 0 && _prefs._thumbnails == cutEnds))  //all screen captures black
+    else if((_prefs._thumbnails != cutEnds && hash[0] == 0 ) ||
+            (_prefs._thumbnails == cutEnds && hash[0] == 0 && hash[1] == 0))   //all screen captures black
         emit rejectVideo(this);
     else
         emit acceptVideo(this);

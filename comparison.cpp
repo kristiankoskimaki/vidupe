@@ -154,6 +154,9 @@ bool Comparison::bothVideosMatch(const Video *left, const Video *right)
 
 int Comparison::phashSimilarity(const Video *left, const Video *right, const int &nthHash)
 {
+    if(left->hash[nthHash] == 0 && right->hash[nthHash] == 0)
+        return 0;
+
     int distance = 64;
     uint64_t differentBits = left->hash[nthHash] ^ right->hash[nthHash];    //XOR to value (only ones for differing bits)
     while(differentBits)
