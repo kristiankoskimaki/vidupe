@@ -28,7 +28,6 @@ void Video::run()
         getMetadata(filename);          //if not, read them with ffmpeg
         cache.writeMetadata(*this);
     }
-
     if(width == 0 || height == 0 || duration == 0)
     {
         emit rejectVideo(this);
@@ -72,7 +71,7 @@ void Video::getMetadata(const QString &filename)
             bitrate = line.split(QStringLiteral("bitrate: ")).value(1).split(QStringLiteral(" ")).value(0).toInt();
         }
         if(line.contains(QStringLiteral(" Video:")) &&
-          (line.contains(QStringLiteral("kb/s")) || line.contains(QStringLiteral(" fps"))))
+          (line.contains(QStringLiteral("kb/s")) || line.contains(QStringLiteral(" fps")) || analysis.count(" Video:") == 1))
         {
             line.replace(QRegExp(QStringLiteral("\\([^\\)]+\\)")), QStringLiteral(""));
             codec = line.split(QStringLiteral(" ")).value(7).replace(QStringLiteral(","), QStringLiteral(""));
