@@ -71,7 +71,7 @@ bool Db::readMetadata(Video &video) const
 void Db::writeMetadata(const Video &video) const
 {
     QSqlQuery query(_db);
-    query.exec(QStringLiteral("INSERT INTO metadata VALUES('%1',%2,%3,%4,%5,'%6','%7',%8,%9);")
+    query.exec(QStringLiteral("INSERT OR REPLACE INTO metadata VALUES('%1',%2,%3,%4,%5,'%6','%7',%8,%9);")
                .arg(_id).arg(video.size).arg(video.duration).arg(video.bitrate).arg(video.framerate)
                .arg(video.codec).arg(video.audio).arg(video.width).arg(video.height));
 }
