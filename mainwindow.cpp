@@ -33,7 +33,7 @@ MainWindow::MainWindow() : ui(new Ui::MainWindow)
     Thumbnail thumb;
     for(int i=0; i<thumb.countModes(); i++)
         ui->selectThumbnails->addItem(thumb.modeName(i));
-    ui->selectThumbnails->setCurrentIndex(3);
+    ui->selectThumbnails->setCurrentIndex(7);
 
     for(int i=0; i<=5; i++)
     {
