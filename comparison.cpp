@@ -492,7 +492,7 @@ void Comparison::on_thresholdSlider_valueChanged(const int &value)
 
 void Comparison::resizeEvent(QResizeEvent *event)
 {
-    Q_UNUSED(event);
+    Q_UNUSED(event)
 
     if(ui->leftFileName->text().isEmpty() || _leftVideo >= _prefs._numberOfVideos || _rightVideo >= _prefs._numberOfVideos)
         return;     //automatic initial resize event can happen before closing when values went over limit
