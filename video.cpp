@@ -144,9 +144,9 @@ int Video::takeScreenCaptures(const Db &cache)
             frame = captureAt(percentages[capture], ofDuration);
             if(frame.isNull())                                  //taking screen capture may fail if video is broken
             {
+                ofDuration = ofDuration - _goBackwardsPercent;
                 if(ofDuration >= _videoStillUsable)             //retry a few times, always closer to beginning
                 {
-                    ofDuration = ofDuration - _goBackwardsPercent;
                     capture = percentages.count();
                     continue;
                 }

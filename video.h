@@ -56,8 +56,8 @@ private:
     static constexpr int _okJpegQuality      = 60;
     static constexpr int _lowJpegQuality     = 25;
     static constexpr int _hugeAmountVideos   = 200000;
-    static constexpr int _goBackwardsPercent = 7;       //if capture fails, retry but omit this much from end
-    static constexpr int _videoStillUsable   = 86;      //86% of video duration is considered usable
+    static constexpr int _goBackwardsPercent = 6;       //if capture fails, retry but omit this much from end
+    static constexpr int _videoStillUsable   = 90;      //90% of video duration is considered usable
     static constexpr int _thumbnailMaxWidth  = 448;     //small size to save memory and cache space
     static constexpr int _thumbnailMaxHeight = 336;
     static constexpr int _pHashSize          = 32;      //phash generated from 32x32 image
