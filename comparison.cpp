@@ -38,10 +38,11 @@ void Comparison::reportMatchingVideos()
             {   //smaller of two matching videos is likely the one to be deleted
                 combinedFilesize += std::min((*left)->size , (*right)->size);
                 foundMatches++;
+                break;
             }
 
     if(foundMatches)
-        emit sendStatusMessage(QStringLiteral("\n[%1] Found %2 video(s) (%3) with matches")
+        emit sendStatusMessage(QStringLiteral("\n[%1] Found %2 video(s) (%3) with one or more matches")
              .arg(QTime::currentTime().toString()).arg(foundMatches).arg(readableFileSize(combinedFilesize)));
 }
 
