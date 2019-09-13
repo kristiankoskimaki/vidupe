@@ -1,5 +1,5 @@
-Vidupe 1.2
-----------
+Vidupe 1.21
+-----------
 
 Source code: https://github.com/kristiankoskimaki/vidupe  
 Windows exe: https://github.com/kristiankoskimaki/vidupe/releases
@@ -21,6 +21,12 @@ Features:
  - Employs two powerful image comparison methods: pHash (perceptual hashing) and SSIM (structural similarity).
  - Cross-platform development: source code available for compiling on Windows/Linux/macOS.
 
+
+Vidupe 1.21 (released 2019-09-13) changelog:
+ - New thumbnail mode, CutEnds, for finding videos with modified beginning or end. This is default now.
+ - Faster comparison
+ - Threads won't hang on videos timing out as long as before
+ - Tiny amount of videos wrongly marked as broken
 
 Vidupe 1.2 (released 2019-05-27) changelog:
  - Disk cache for screen captures, >10x faster loading once cached
@@ -94,8 +100,8 @@ Trust your eyes, watch both videos in a video player before deleting.
 -->
 
 
-![](http://i68.tinypic.com/ei8jza.jpg)
-![](http://i64.tinypic.com/fy1ycw.jpg)
+![](https://user-images.githubusercontent.com/46446783/64857475-520d8180-d62d-11e9-9dc6-36889a3e3218.jpg)
+![](https://user-images.githubusercontent.com/46446783/64857483-58036280-d62d-11e9-839c-79e2863adfd8.jpg)
 
 Vidupe Copyright (C) 2018-2019 Kristian Koskimäki  
 Vidupe is a free software distributed under the GNU GPL.  

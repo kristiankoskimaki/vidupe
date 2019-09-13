@@ -29,12 +29,12 @@ FORMS += \
     comparison.ui
 
 LIBS += \
-    $$PWD/bin/libopencv_core345.dll \
-    $$PWD/bin/libopencv_imgproc345.dll
+    $$PWD/bin/libopencv_core347.dll \
+    $$PWD/bin/libopencv_imgproc347.dll
 
 RC_ICONS = vidupe16.ico
 
-VERSION = 1.2
+VERSION = 1.21
 QMAKE_TARGET_PRODUCT = "Vidupe"
 QMAKE_TARGET_DESCRIPTION = "Vidupe"
 QMAKE_TARGET_COPYRIGHT = "Copyright \\251 2018-2019 Kristian Koskim\\344ki"
