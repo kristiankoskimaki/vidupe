@@ -511,6 +511,8 @@ void Comparison::resizeEvent(QResizeEvent *event)
 void Comparison::wheelEvent(QWheelEvent *event)
 {
     const QPoint pos = QCursor::pos();
+    if(!QApplication::widgetAt(pos))
+        return;
     ClickableLabel *imagePtr;
     if(QApplication::widgetAt(pos)->objectName() == QLatin1String("leftImage"))
         imagePtr = ui->leftImage;
