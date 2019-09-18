@@ -1,5 +1,5 @@
-Vidupe 1.21
------------
+Vidupe 1.211
+------------
 
 Source code: https://github.com/kristiankoskimaki/vidupe  
 Windows exe: https://github.com/kristiankoskimaki/vidupe/releases
@@ -21,6 +21,9 @@ Features:
  - Employs two powerful image comparison methods: pHash (perceptual hashing) and SSIM (structural similarity).
  - Cross-platform development: source code available for compiling on Windows/Linux/macOS.
 
+
+Vidupe 1.211 (released 2019-09-18) changelog:
+ - Fix crash when scrolling mouse wheel outside program window
 
 Vidupe 1.21 (released 2019-09-13) changelog:
  - New thumbnail mode, CutEnds, for finding videos with modified beginning or end. This is default now.
