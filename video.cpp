@@ -137,7 +137,7 @@ int Video::takeScreenCaptures(const Db &cache)
         if(!cachedImage.isNull())   //image was already in cache
         {
             frame.load(&captureBuffer, QByteArrayLiteral("JPG"));   //was saved in cache as small size, resize to original
-            frame = frame.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            frame = frame.scaled(width, height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         }
         else
         {
