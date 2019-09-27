@@ -269,8 +269,8 @@ void Comparison::highlightBetterProperties() const
     ui->rightFileSize->setStyleSheet(QStringLiteral(""));       //both filesizes within 100 kb
     if(qAbs(_videos[_leftVideo]->size - _videos[_rightVideo]->size) <= 1024*100)
     {
-        ui->leftFileSize->setStyleSheet(QStringLiteral("QLabel { color : tan; }"));
-        ui->rightFileSize->setStyleSheet(QStringLiteral("QLabel { color : tan; }"));
+        ui->leftFileSize->setStyleSheet(QStringLiteral("QLabel { color : peru; }"));
+        ui->rightFileSize->setStyleSheet(QStringLiteral("QLabel { color : peru; }"));
     }
     else if(_videos[_leftVideo]->size > _videos[_rightVideo]->size)
         ui->leftFileSize->setStyleSheet(QStringLiteral("QLabel { color : green; }"));
@@ -281,8 +281,8 @@ void Comparison::highlightBetterProperties() const
     ui->rightDuration->setStyleSheet(QStringLiteral(""));       //both runtimes within 1 second
     if(qAbs(_videos[_leftVideo]->duration - _videos[_rightVideo]->duration) <= 1000)
     {
-        ui->leftDuration->setStyleSheet(QStringLiteral("QLabel { color : tan; }"));
-        ui->rightDuration->setStyleSheet(QStringLiteral("QLabel { color : tan; }"));
+        ui->leftDuration->setStyleSheet(QStringLiteral("QLabel { color : peru; }"));
+        ui->rightDuration->setStyleSheet(QStringLiteral("QLabel { color : peru; }"));
     }
     else if(_videos[_leftVideo]->duration > _videos[_rightVideo]->duration)
         ui->leftDuration->setStyleSheet(QStringLiteral("QLabel { color : green; }"));
@@ -293,8 +293,8 @@ void Comparison::highlightBetterProperties() const
     ui->rightBitRate->setStyleSheet(QStringLiteral(""));
     if(_videos[_leftVideo]->bitrate == _videos[_rightVideo]->bitrate)
     {
-        ui->leftBitRate->setStyleSheet(QStringLiteral("QLabel { color : tan; }"));
-        ui->rightBitRate->setStyleSheet(QStringLiteral("QLabel { color : tan; }"));
+        ui->leftBitRate->setStyleSheet(QStringLiteral("QLabel { color : peru; }"));
+        ui->rightBitRate->setStyleSheet(QStringLiteral("QLabel { color : peru; }"));
     }
     else if(_videos[_leftVideo]->bitrate > _videos[_rightVideo]->bitrate)
         ui->leftBitRate->setStyleSheet(QStringLiteral("QLabel { color : green; }"));
@@ -305,8 +305,8 @@ void Comparison::highlightBetterProperties() const
     ui->rightFrameRate->setStyleSheet(QStringLiteral(""));      //both framerates within 0.1 fps
     if(qAbs(_videos[_leftVideo]->framerate - _videos[_rightVideo]->framerate) <= 0.1)
     {
-        ui->leftFrameRate->setStyleSheet(QStringLiteral("QLabel { color : tan; }"));
-        ui->rightFrameRate->setStyleSheet(QStringLiteral("QLabel { color : tan; }"));
+        ui->leftFrameRate->setStyleSheet(QStringLiteral("QLabel { color : peru; }"));
+        ui->rightFrameRate->setStyleSheet(QStringLiteral("QLabel { color : peru; }"));
     }
     else if(_videos[_leftVideo]->framerate > _videos[_rightVideo]->framerate)
         ui->leftFrameRate->setStyleSheet(QStringLiteral("QLabel { color : green; }"));
@@ -317,8 +317,8 @@ void Comparison::highlightBetterProperties() const
     ui->rightModified->setStyleSheet(QStringLiteral(""));
     if(_videos[_leftVideo]->modified == _videos[_rightVideo]->modified)
     {
-        ui->leftModified->setStyleSheet(QStringLiteral("QLabel { color : tan; }"));
-        ui->rightModified->setStyleSheet(QStringLiteral("QLabel { color : tan; }"));
+        ui->leftModified->setStyleSheet(QStringLiteral("QLabel { color : peru; }"));
+        ui->rightModified->setStyleSheet(QStringLiteral("QLabel { color : peru; }"));
     }
     else if(_videos[_leftVideo]->modified < _videos[_rightVideo]->modified)
         ui->leftModified->setStyleSheet(QStringLiteral("QLabel { color : green; }"));
@@ -331,8 +331,8 @@ void Comparison::highlightBetterProperties() const
     if(_videos[_leftVideo]->width * _videos[_leftVideo]->height ==
        _videos[_rightVideo]->width * _videos[_rightVideo]->height)
     {
-        ui->leftResolution->setStyleSheet(QStringLiteral("QLabel { color : tan; }"));
-        ui->rightResolution->setStyleSheet(QStringLiteral("QLabel { color : tan; }"));
+        ui->leftResolution->setStyleSheet(QStringLiteral("QLabel { color : peru; }"));
+        ui->rightResolution->setStyleSheet(QStringLiteral("QLabel { color : peru; }"));
     }
     else if(_videos[_leftVideo]->width * _videos[_leftVideo]->height >
        _videos[_rightVideo]->width * _videos[_rightVideo]->height)
