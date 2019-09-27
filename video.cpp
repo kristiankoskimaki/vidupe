@@ -232,10 +232,10 @@ QImage Video::minimizeImage(const QImage &image) const
     if(image.width() > image.height())
     {
         if(image.width() > _thumbnailMaxWidth)
-            return image.scaledToWidth(_thumbnailMaxWidth, Qt::SmoothTransformation);
+            return image.scaledToWidth(_thumbnailMaxWidth, Qt::SmoothTransformation).convertToFormat(QImage::Format_RGB888);
     }
     else if(image.height() > _thumbnailMaxHeight)
-        return image.scaledToHeight(_thumbnailMaxHeight, Qt::SmoothTransformation);
+        return image.scaledToHeight(_thumbnailMaxHeight, Qt::SmoothTransformation).convertToFormat(QImage::Format_RGB888);
 
     return image;
 }
